@@ -55,6 +55,9 @@ const ICONES = {
 	carro: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
 	plat: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 3 2h3Zm0 0v7"/>',
 	seguent: '<path d="m9 18 6-6-6-6"/>',
+	regal: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
+	secret: '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>',
+	enllac: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
 	estrella: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
 };
 const icona = (nom, mida = 18) =>
@@ -169,6 +172,8 @@ const estat = {
 	full: null, // el full de baix obert: {t: 'plat', dia} · {t: 'recepta', id} · {t: 'perfil'}
 	editant: false, // la llista en mode de treure coses
 	ultim: null, // l'última cosa tatxada (fa l'animació)
+	perRegals: null, // de qui són els regals que es miren (si no, els teus)
+	secreta: true, // les idees per a l'altre, d'entrada, que no les vegi
 };
 const desar = () => {
 	guardat.posar('llar-files', estat.files);
@@ -437,6 +442,156 @@ function vistaReceptes() {
 	<p class="buit-cerca" hidden>Cap recepta amb aquest nom.</p>`;
 }
 
+// --- els regals: la llista de cadascú, com la de la compra però del que li faria il·lusió ---
+// Cadascú apunta el que vol (ho veuen tots dos) i també pot apuntar idees secretes per a l'altre (només les veu qui les
+// apunta). Quan algú diu "el compro jo", l'altre no ho veu a la seva llista: és sorpresa, i així no en compreu dos.
+// (Va tot xifrat amb el mateix codi de casa: amagat vol dir que l'app no ho ensenya, no que l'altre no ho pugui desxifrar.)
+const perRegals = () => (PERSONES.includes(estat.perRegals) ? estat.perRegals : estat.qui);
+const articleDe = (q) => (q === 'Núria' ? 'la ' : /^[AEIOU]/.test(q) ? 'l’' : 'el ');
+// una icona per a cada tipus de regal (si no n'hi ha cap, el paquet)
+const ICONES_REGAL = [
+	['sabates, sabatilles, bambes, zapatillas, zapatos, runners', '👟'], ['pala, padel, raqueta, tennis', '🎾'], ['classes, clases, curs, curso', '🎓'],
+	['mobles, muebles, cadira, silla, taula, mesa, sofa, estanteria, lampara, llum', '🛋️'], ['funda, carcassa, tablet, ipad, mobil, movil', '📱'],
+	['gorro, gorra, barret, bufanda', '🧢'], ['caixa d eines, caja de herramientas, eines, herramientas', '🧰'], ['echo, alexa, altaveu, altavoz, homepod', '🔊'],
+	['nanoleaf, bombeta, bombilla, led', '💡'], ['cascos, auriculars, auriculares, headphones, airpods', '🎧'], ['colonia, perfum, perfume', '🌸'],
+	['secador, planxa, plancha, rizador', '💨'], ['ulleres de busseig, ulleres de bucejar, ulleres de buceja, gafas de buceo, aletes, aletas, snorkel, busseig, bucejar, buceo', '🤿'],
+	['ulleres de sol, gafas de sol, ulleres, gafas', '🕶️'], ['serum, kerastase, crema, xampu, champu, mascarilla', '🧴'], ['pinta, peine, raspall, cepillo', '🪮'],
+	['contorno, contorn, make up, maquillatge, maquillaje, eyeliner, polvos, pols, pintallavis, labial, rimel, bronceadores, matizantes', '💄'],
+	['llibre, llibres, libro, libros', '📚'], ['gopro, camera, camara', '📷'], ['dron, drone', '🚁'], ['bolso, bossa, bolsa, motxilla, mochila, gortari', '👜'],
+	['joc, juego, cartes, cartas, puzzle', '🃏'], ['gym, gimnas, gimnasio, velcro, turmelleres, tobilleras, peses, pesas', '🏋️'], ['rellotge, reloj, smartwatch', '⌚'],
+	['samarreta, camiseta, jersei, jersey, jaqueta, chaqueta, abric, abrigo, pantalons, pantalones, vestit, vestido, roba, ropa', '👕'], ['viatge, viaje, escapada, hotel', '✈️'],
+	['sopar, cena, restaurant, restaurante', '🍽️'], ['entrades, entradas, concert, concierto', '🎟️'], ['joia, joya, collaret, collar, arracades, pendientes, anell, anillo, polsera, pulsera', '💍'],
+	['planta, flors, flores', '🪴'], ['consola, play, playstation, switch, xbox, videojoc, videojuego', '🎮'],
+]
+	.flatMap(([ps, ic]) => ps.split(',').map((x) => [normal(x).replace(/['’·]/g, ' '), ic]))
+	.sort((a, b) => b[0].length - a[0].length);
+function iconaRegal(nom) {
+	const n = ` ${normal(nom).replace(/['’·!?.,:()/]/g, ' ')} `;
+	for (const [p, ic] of ICONES_REGAL) if (new RegExp(`[ ]${p}(s|es)?[ ]`).test(n)) return ic;
+	return '🎁';
+}
+// el que es veu de cada llista: la teva, sense les idees secretes de l'altre; la de l'altre, amb les teves
+const regalsDe = (per) =>
+	totes('regal')
+		.filter((g) => g.per === per && !g.donat && (!g.secret || g.qui === estat.qui))
+		.sort((a, b) => (a.quan ?? '').localeCompare(b.quan ?? ''));
+// una línia → {nom, nota}: "Echo Dot: que sigui Matter" i "Caixa d'eines (les eines ja les tinc)" porten nota
+function llegirRegal(linia) {
+	let l = linia.replace(/^[\s\-*•·]+/, '').trim();
+	let nota = '';
+	const dosPunts = l.indexOf(':');
+	const parentesi = l.indexOf(' (');
+	const coma = l.indexOf(', ');
+	const barra = l.indexOf('|');
+	if (barra > 1) [l, nota] = [l.slice(0, barra), l.slice(barra + 1)];
+	else if (dosPunts > 1 && dosPunts < 45) [l, nota] = [l.slice(0, dosPunts), l.slice(dosPunts + 1)];
+	else if (parentesi > 1) [l, nota] = [l.slice(0, parentesi), l.slice(parentesi + 2).replace(/\)[\s.]*$/, '')];
+	else if (l.length > 45 && coma > 8) [l, nota] = [l.slice(0, coma), l.slice(coma + 2)];
+	return {nom: majuscula(l.replace(/!{2,}/g, '!').replace(/[\s.!¡]+$/, '').trim()), nota: nota.replace(/^[\s.]+|[\s.]+$/g, '').trim()};
+}
+// el que s'escriu o s'enganxa: una cosa per línia. Si hi ha "Arnau:" o "Núria:", el que ve a sota va a la llista de cadascú
+function trossosRegals(text, per) {
+	const fora = [];
+	let qui = per;
+	let demanat = false; // sota un "Núria:" és el que ella ha demanat, no una idea secreta
+	let buida = true; // si la línia d'abans era buida
+	for (const linia of String(text ?? '').split(/\r?\n/)) {
+		const l = linia.trim();
+		const ambBuida = buida;
+		buida = !l;
+		if (!l) continue;
+		const capcal = l.match(/^(arnau|n[uú]ria)\s*:?\s*$/i);
+		if (capcal) {
+			qui = PERSONES.find((p) => normal(p) === normal(capcal[1]));
+			demanat = true;
+			continue;
+		}
+		// una línia que comença amb parèntesi completa la d'abans ("llibres!" i a sota quins)
+		if (/^[(…]/.test(l) && fora.length) {
+			const ant = fora[fora.length - 1];
+			ant.nota = [ant.nota, l.replace(/^\(/, '').replace(/[)\s.…]+$/, '').trim()].filter(Boolean).join(' · ');
+			continue;
+		}
+		const g = llegirRegal(l);
+		// una marca sola en majúscules ("KERASTASE") i just a sota el producte: és un regal sol
+		const ant = fora[fora.length - 1];
+		if (!ambBuida && ant && !ant.nota && /^[A-ZÀ-Ü0-9'’ -]{3,20}$/.test(ant.nom) && !/^[A-ZÀ-Ü0-9'’ -]+$/.test(g.nom)) {
+			ant.nom = `${majuscula(ant.nom.toLowerCase())} ${g.nom}`;
+			ant.nota = g.nota;
+			continue;
+		}
+		if (g.nom.length > 1) fora.push({...g, per: qui, demanat});
+	}
+	return fora;
+}
+function afegirRegals(llista, secreta) {
+	const hiSon = new Set(totes('regal').filter((g) => !g.donat).map((g) => `${g.per}|${normal(g.nom)}`));
+	let n = 0;
+	for (const g of llista) {
+		const k = `${g.per}|${normal(g.nom)}`;
+		// "COLONIA!" quan ja hi ha "Colonia buena": és la mateixa (dit amb més ganes)
+		if (hiSon.has(k) || [...hiSon].some((x) => x.startsWith(`${k} `))) continue;
+		hiSon.add(k);
+		// a la llista de l'altre és una idea secreta si el botó ho diu; el que ve d'un "Núria:" enganxat ho ha demanat ella
+		const secret = g.per !== estat.qui && secreta && !g.demanat;
+		tocar(nouId(), {t: 'regal', per: g.per, nom: g.nom, nota: g.nota, enllac: '', secret, qui: estat.qui, quan: ara(), comprat: null, donat: false});
+		n++;
+	}
+	return n;
+}
+function filaRegal(g) {
+	const meu = g.per === estat.qui;
+	const marques = [
+		g.nota ? `<small class="nota">${esc(g.nota)}</small>` : '',
+		g.secret ? `<small class="secret">${icona('secret', 12)} Idea teva: ${articleDe(g.per)}${esc(g.per)} no la veu</small>` : '',
+		!g.secret && g.qui !== g.per && g.qui !== estat.qui ? `<small>L’ha apuntat ${articleDe(g.qui)}${esc(g.qui)}</small>` : '',
+	].join('');
+	const enllac = g.enllac ? `<a class="regal-enllac" href="${esc(g.enllac)}" target="_blank" rel="noopener" aria-label="Obrir l’enllaç">${icona('enllac', 16)}</a>` : '';
+	const compra = meu
+		? ''
+		: g.comprat
+			? g.comprat.qui === estat.qui
+				? `<button type="button" class="regal-compro fet" data-no-compro="${g.id}">${icona('fet', 14)} El compres tu</button>`
+				: `<span class="regal-compro altre">${av(g.comprat.qui)} El compra ${articleDe(g.comprat.qui)}${esc(g.comprat.qui)}</span>`
+			: `<button type="button" class="regal-compro" data-compro="${g.id}">El compro jo</button>`;
+	return `<li class="regal${g.comprat && !meu ? ' comprat' : ''}"><button type="button" class="regal-cos" data-regal="${g.id}"><span class="ic-regal">${iconaRegal(g.nom)}</span><span class="regal-text"><b>${esc(g.nom)}</b>${marques}</span></button>${enllac}${compra}</li>`;
+}
+function vistaRegals() {
+	const per = perRegals();
+	const meu = per === estat.qui;
+	const llista = regalsDe(per);
+	const comprats = llista.filter((g) => g.comprat).length;
+	const aqui = `${articleDe(per)}${per}`;
+	return `<header class="titol"><h1>Regals</h1><p>${meu ? 'El que t’agradaria. Qui te’l compra ho marca i tu no ho veus: així és sorpresa.' : `El que vol ${aqui}, i les teves idees. Marca el que li compres: ${aqui} no ho veurà.`}</p></header>
+	<div class="per-qui">${PERSONES.map((p) => `<button type="button" data-per="${p}" aria-pressed="${p === per}">${av(p)}${p === estat.qui ? 'Els meus' : `Per a ${articleDe(p)}${p}`}</button>`).join('')}</div>
+	<form class="afegir" id="form-regal">
+		<textarea id="text-regal" name="text" rows="1" placeholder="${meu ? 'Què t’agradaria?' : `Una idea per a ${aqui}`}" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>
+		<button type="submit" aria-label="Afegir">${icona('mes', 22)}</button>
+	</form>
+	${meu ? '' : `<button type="button" class="secreta${estat.secreta ? ' actiu' : ''}" data-secreta aria-pressed="${estat.secreta}">${icona('secret', 15)} ${estat.secreta ? `Idea secreta: ${aqui} no la veurà` : `Ho ha demanat ${aqui}: ho veurà`}</button>`}
+	<p class="pista">Pots enganxar una llista sencera, una cosa per línia. Si hi ha «Arnau:» i «Núria:», cada part va a la llista de cadascú.</p>
+	${
+		llista.length
+			? `${!meu && comprats ? `<p class="regals-compte">${comprats} de ${llista.length} ja tenen qui els compri</p>` : ''}<ul class="regals">${llista.map(filaRegal).join('')}</ul>`
+			: `<div class="buit"><div class="buit-dibuix">${icona('regal', 34)}</div><b>${meu ? 'Encara no hi ha res' : `${majuscula(aqui)} encara no hi ha posat res`}</b><p>${meu ? 'Apunta a dalt el que t’agradaria: unes sabates, un llibre, una escapada…' : 'Apunta-hi idees: només les veuràs tu.'}</p></div>`
+	}`;
+}
+function fullRegal(id) {
+	const g = estat.files[id]?.o;
+	if (!g) return '<h2>Aquest regal ja no hi és</h2>';
+	const meu = g.per === estat.qui;
+	return `<h2 class="titol-regal"><span class="ic-regal">${iconaRegal(g.nom)}</span>${meu ? 'El teu regal' : `Per a ${articleDe(g.per)}${esc(g.per)}`}</h2>
+	<form id="form-regal-edit" class="form-recepta" data-id="${id}">
+		<label>Què<input name="nom" value="${esc(g.nom)}" required autocomplete="off"></label>
+		<label>Detalls (talla, color, model…)<textarea name="nota" rows="3" placeholder="Opcional">${esc(g.nota ?? '')}</textarea></label>
+		<label>Enllaç<input name="enllac" type="url" inputmode="url" value="${esc(g.enllac ?? '')}" placeholder="https://… (opcional)" autocomplete="off"></label>
+		<button type="submit" class="boto-gran">Desar</button>
+	</form>
+	<div class="full-botons">${
+		!meu && g.comprat?.qui === estat.qui ? `<button type="button" class="boto-suau" data-donat="${id}">${icona('regal', 16)} Ja l’hi he donat</button>` : '<span></span>'
+	}<button type="button" class="boto-perill" data-esborrar-regal="${id}">${icona('paperera', 16)} Esborrar</button></div>`;
+}
+
 // --- els fulls de baix ---
 function fullPlat(dia) {
 	const rs = receptesOrdenades();
@@ -484,7 +639,7 @@ function vistaEntrar() {
 	return `<main class="entrar">
 		<div class="logo-gran">${logo(56)}</div>
 		<h1>Llar</h1>
-		<p>La llista de la compra, els menús i les receptes de casa. Per a tots dos.</p>
+		<p>La llista de la compra, els menús, les receptes i els regals de casa. Per a tots dos.</p>
 		<form id="form-entrar">
 			<label>El codi de casa<input name="codi" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Per exemple: TORTILLA CONDIS 47" value="${esc(estat.codi ?? '')}"></label>
 			<p class="ajuda">Inventeu-lo junts i escriviu el mateix als dos mòbils. Guardeu-lo bé: és la clau de la vostra llista.</p>
@@ -517,16 +672,17 @@ function pintar() {
 		<button type="button" class="estat-xarxa ${estat.xarxa}" data-perfil title="${ESTAT_XARXA[estat.xarxa]}"><i></i>${perEnviar ? `${perEnviar} per enviar` : estat.xarxa === 'sense' ? 'Sense connexió' : ''}</button>
 		<button type="button" class="qui" data-perfil aria-label="${esc(estat.qui)}">${av(estat.qui)}</button>
 	</header>
-	<main class="pantalla">${{llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes}[estat.vista]()}</main>
+	<main class="pantalla">${{llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals}[estat.vista]()}</main>
 	<nav class="pestanyes">
 		<button type="button" data-vista="llista" aria-pressed="${estat.vista === 'llista'}">${icona('llista', 22)}<span>Llista</span>${n ? `<i>${n}</i>` : ''}</button>
 		<button type="button" data-vista="menu" aria-pressed="${estat.vista === 'menu'}">${icona('menu', 22)}<span>Menú</span></button>
 		<button type="button" data-vista="receptes" aria-pressed="${estat.vista === 'receptes'}">${icona('recepta', 22)}<span>Receptes</span></button>
+		<button type="button" data-vista="regals" aria-pressed="${estat.vista === 'regals'}">${icona('regal', 22)}<span>Regals</span></button>
 	</nav>
 	${
 		full
 			? `<div class="vel${quiet ? ' quiet' : ''}" data-tancar-full></div><section class="full${quiet ? ' quiet' : ''}" data-t="${full.t}" role="dialog" aria-modal="true"><div class="full-nansa"></div><button type="button" class="full-tancar" data-tancar-full aria-label="Tancar">${icona('tancar', 18)}</button>${
-					{plat: () => fullPlat(full.dia), recepta: () => fullRecepta(full.id), perfil: fullPerfil, rapid: fullRapid}[full.t]()
+					{plat: () => fullPlat(full.dia), recepta: () => fullRecepta(full.id), perfil: fullPerfil, rapid: fullRapid, regal: () => fullRegal(full.id)}[full.t]()
 				}</section>`
 			: ''
 	}`;
@@ -609,6 +765,24 @@ document.addEventListener('click', (ev) => {
 		tocar(id, {...f(id), esborrat: true});
 		estat.full = null;
 		avisar(`«${f(id).nom}» esborrada`, () => tocar(id, {...f(id), esborrat: false}));
+	} else if (d.per) estat.perRegals = d.per;
+	else if (d.secreta !== undefined) estat.secreta = !estat.secreta;
+	else if (d.compro) {
+		const id = d.compro;
+		tocar(id, {...f(id), comprat: {qui: estat.qui, quan: ara()}});
+		avisar(`${iconaRegal(f(id).nom)} ${f(id).nom}: el compres tu`, () => tocar(id, {...f(id), comprat: null}));
+	} else if (d.noCompro) tocar(d.noCompro, {...f(d.noCompro), comprat: null});
+	else if (d.regal) estat.full = {t: 'regal', id: d.regal};
+	else if (d.donat) {
+		const id = d.donat;
+		tocar(id, {...f(id), donat: true, donatQuan: ara()});
+		estat.full = null;
+		avisar(`${iconaRegal(f(id).nom)} Regal fet!`, () => tocar(id, {...f(id), donat: false}));
+	} else if (d.esborrarRegal) {
+		const id = d.esborrarRegal;
+		tocar(id, {...f(id), esborrat: true});
+		estat.full = null;
+		avisar(`«${f(id).nom}» esborrat`, () => tocar(id, {...f(id), esborrat: false}));
 	} else if (d.perfil !== undefined) estat.full = {t: 'perfil'};
 	else if (d.tancarFull !== undefined) estat.full = null;
 	else if (d.desferAvis !== undefined) {
@@ -649,13 +823,29 @@ document.addEventListener('submit', async (ev) => {
 		estat.full = null;
 		pintar();
 		avisar(`${nom} al menú`);
+	} else if (form.id === 'form-regal') {
+		const llista = trossosRegals(dades.get('text'), perRegals());
+		if (!llista.length) return;
+		const n = afegirRegals(llista, estat.secreta);
+		const quins = [...new Set(llista.map((g) => g.per))];
+		if (quins.length === 1) estat.perRegals = quins[0];
+		form.querySelector('textarea').value = '';
+		pintar();
+		avisar(!n ? 'Ja hi era' : n > 1 ? `${n} regals apuntats${quins.length > 1 ? ' a les dues llistes' : ''}` : `${iconaRegal(llista[0].nom)} ${llista[0].nom}: apuntat`);
+	} else if (form.id === 'form-regal-edit') {
+		const id = form.dataset.id;
+		const enllac = String(dades.get('enllac') ?? '').trim();
+		tocar(id, {...estat.files[id].o, nom: majuscula(String(dades.get('nom')).trim()), nota: String(dades.get('nota') ?? '').trim(), enllac: /^https?:\/\//.test(enllac) ? enllac : ''});
+		estat.full = null;
+		pintar();
+		avisar('Desat');
 	} else if (form.id === 'form-entrar') {
 		await entrar(dades.get('codi'), dades.get('qui'));
 	}
 });
 // a la casella d'afegir, Intro afegeix (Maj+Intro fa una línia nova, per enganxar llistes)
 document.addEventListener('keydown', (ev) => {
-	if (ev.key === 'Enter' && !ev.shiftKey && ev.target.matches('#form-afegir textarea')) {
+	if (ev.key === 'Enter' && !ev.shiftKey && ev.target.matches('#form-afegir textarea, #form-regal textarea')) {
 		ev.preventDefault();
 		ev.target.form.requestSubmit();
 	}

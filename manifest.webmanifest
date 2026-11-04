@@ -1,7 +1,7 @@
 {
   "name": "Llar",
   "short_name": "Llar",
-  "description": "La llista de la compra, els menús i les receptes de casa.",
+  "description": "La llista de la compra, els menús, les receptes i els regals de casa.",
   "lang": "ca",
   "start_url": "./",
   "scope": "./",

@@ -251,3 +251,37 @@ body.amb-full #avis.veure { transform: translate(-50%, 0); }
 .rapid-cat h3 span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; font-size: 14px; background: color-mix(in srgb, var(--c) 16%, transparent); }
 .full-explica { margin: -8px 0 0; font-size: 14px; color: var(--text-2); }
 .full.quiet, .vel.quiet { animation: none; }
+
+/* --- els regals: de qui és la llista, la casella, i cada regal amb la seva icona i el "el compro jo" --- */
+.per-qui { display: flex; gap: 6px; padding: 4px; border-radius: 16px; background: var(--panell-2); }
+.per-qui button { display: flex; flex: 1; align-items: center; justify-content: center; gap: 7px; min-width: 0; height: 44px; border: 0; border-radius: 12px; font-size: 15px; font-weight: 800; color: var(--text-2); background: none; }
+.per-qui button[aria-pressed='true'] { color: var(--text); background: var(--panell); box-shadow: var(--ombra), inset 0 0 0 1px var(--vora); }
+.per-qui .av { width: 22px; height: 22px; font-size: 10.5px; }
+.secreta { display: flex; align-items: center; gap: 7px; align-self: flex-start; height: 34px; margin-top: -6px; padding: 0 12px; border: 0; border-radius: 999px; font-size: 13.5px; font-weight: 700; color: var(--text-2); background: var(--panell-2); }
+.secreta.actiu { color: var(--nuria); background: color-mix(in srgb, var(--nuria) 13%, transparent); }
+.pista { margin: -6px 4px 0; font-size: 13px; line-height: 1.45; color: var(--text-3); }
+.regals-compte { margin: 0 4px -6px; font-size: 13px; font-weight: 700; color: var(--fet); }
+.regals { display: flex; flex-direction: column; margin: 0; padding: 0; overflow: hidden; list-style: none; border-radius: var(--radi); background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora), var(--ombra); }
+.regals li + li { border-top: 1px solid var(--vora); }
+.regal { display: flex; align-items: center; gap: 4px; padding-right: 10px; }
+.regal-cos { display: flex; flex: 1; align-items: center; gap: 13px; min-width: 0; min-height: 60px; padding: 10px 4px 10px 14px; border: 0; text-align: left; background: none; }
+.regal-cos:active { transform: none; background: var(--panell-2); }
+.ic-regal { display: grid; flex: none; place-items: center; width: 42px; height: 42px; border-radius: 13px; font-size: 23px; line-height: 1; background: color-mix(in srgb, var(--groc) 22%, var(--panell-2)); }
+.regal-text { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.regal-text b { font-size: 16.5px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.regal-text small { display: flex; align-items: center; gap: 4px; font-size: 12.5px; line-height: 1.4; color: var(--text-3); }
+.regal-text small.nota { display: -webkit-box; color: var(--text-2); overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.regal-text small.secret { font-weight: 700; color: var(--nuria); }
+.regal-enllac { display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 11px; color: var(--accent); background: var(--accent-suau); }
+.regal-compro { display: inline-flex; flex: none; align-items: center; gap: 5px; height: 34px; padding: 0 11px; border: 0; border-radius: 11px; font-size: 13px; font-weight: 800; white-space: nowrap; color: var(--accent-fort); background: var(--accent-suau); }
+.regal-compro.fet { color: #fff; background: var(--fet); }
+.regal-compro.altre { gap: 6px; font-weight: 700; color: var(--text-2); background: var(--panell-2); }
+.regal-compro.altre .av { width: 18px; height: 18px; font-size: 9px; }
+.regal.comprat .ic-regal { box-shadow: inset 0 0 0 2px var(--fet); }
+.titol-regal { display: flex; align-items: center; gap: 12px; }
+.titol-regal .ic-regal { width: 46px; height: 46px; font-size: 26px; }
+@media (max-width: 380px) {
+	.regal { flex-wrap: wrap; padding: 0 10px 10px 0; }
+	.regal-cos { flex-basis: 100%; padding-bottom: 6px; }
+	.regal-compro { margin-left: 69px; }
+}
