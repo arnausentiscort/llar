@@ -90,12 +90,12 @@ function categoria(nom) {
 const COLOR_CAT = {fruita: '#43a047', carn: '#e0524f', lactics: '#3d8bd9', embotit: '#d9628f', forn: '#d99a2b', rebost: '#a8743f', begudes: '#1fa9b8', congelats: '#5b9fe0', neteja: '#8c68d6', higiene: '#1e9e8f', altres: '#8a8079'};
 // [tipus, [nom, icona, altres maneres de dir-ho (castellà, singular...)]]
 const PRODUCTES = [
-	['fruita', [['Plàtans', '🍌', 'platan, platano, banana'], ['Pomes', '🍎', 'poma, manzana'], ['Taronges', '🍊', 'taronja, naranja, mandarina'], ['Llimones', '🍋', 'llimona, limon'], ['Maduixes', '🍓', 'maduixa, fresa'], ['Raïm', '🍇', 'uva'], ['Préssecs', '🍑', 'preseg, melocoton'], ['Síndria', '🍉', 'sandia, melo, melon'], ['Tomàquets', '🍅', 'tomaquet, tomate'], ['Enciam', '🥬', 'lechuga, amanida, ensalada, espinacs'], ['Cebes', '🧅', 'ceba, cebolla'], ['Alls', '🧄', 'all, ajo'], ['Patates', '🥔', 'patata'], ['Pastanagues', '🥕', 'pastanaga, zanahoria'], ['Pebrots', '🫑', 'pebrot, pimiento'], ['Cogombre', '🥒', 'pepino, carbasso, calabacin'], ['Bròquil', '🥦', 'brocoli, coliflor'], ['Alvocat', '🥑', 'aguacate'], ['Bolets', '🍄', 'bolet, champinon, xampinyons'], ['Blat de moro', '🌽', 'maiz'], ['Alberginia', '🍆', 'berenjena']]],
-	['carn', [['Pollastre', '🍗', 'pollo, pit de pollastre, pechuga'], ['Carn picada', '🥩', 'carne picada'], ['Bistecs', '🥩', 'vedella, ternera, filet, filete, llom, lomo'], ['Hamburgueses', '🍔', 'hamburguesa'], ['Salsitxes', '🌭', 'salsitxa, salchicha, botifarra'], ['Salmó', '🐟', 'salmon, peix, pescado, lluc, merluza, bacalla'], ['Gambes', '🦐', 'gamba, gambas, llagostins'], ['Calamars', '🦑', 'calamar, sepia']]],
-	['lactics', [['Llet', '🥛', 'leche'], ['Ous', '🥚', 'ou, huevo, huevos'], ['Iogurts', '🍦', 'iogurt, yogur, yogures'], ['Formatge', '🧀', 'queso, formatge ratllat'], ['Mantega', '🧈', 'mantequilla'], ['Nata', '🥛', 'nata per cuinar']]],
-	['embotit', [['Pernil', '🍖', 'jamon, pernil dolç, pernil salat'], ['Fuet', '🥓', 'llonganissa, salchichon, xoriço, chorizo'], ['Gall dindi', '🦃', 'pavo'], ['Bacon', '🥓', 'baco']]],
-	['forn', [['Pa', '🥖', 'pan, barra de pa'], ['Pa de motlle', '🍞', 'pan de molde'], ['Croissants', '🥐', 'croissant'], ['Magdalenes', '🧁', 'magdalena'], ['Torrades', '🍞', 'tostadas']]],
-	['rebost', [['Arròs', '🍚', 'arroz'], ['Pasta', '🍝', 'macarrons, macarrones, espaguetis, fideus'], ['Oli', '🫒', 'aceite, oli d oliva'], ['Tomàquet fregit', '🥫', 'tomate frito'], ['Tonyina', '🐟', 'atun, tonyina en conserva'], ['Llegums', '🫘', 'llenties, lentejas, cigrons, garbanzos, mongetes'], ['Sal', '🧂', ''], ['Sucre', '🍬', 'azucar'], ['Cafè', '☕', 'cafe'], ['Cereals', '🥣', 'cereales, muesli'], ['Galetes', '🍪', 'galleta, galletas'], ['Xocolata', '🍫', 'chocolate, cacau, cola cao'], ['Mel', '🍯', 'miel'], ['Olives', '🫒', 'aceitunas'], ['Patates xips', '🥔', 'patatas fritas']]],
+	['fruita', [['Plàtans', '🍌', 'platan, platano, banana'], ['Pomes', '🍎', 'poma, manzana'], ['Taronges', '🍊', 'taronja, naranja'], ['Mandarines', '🍊', 'mandarina'], ['Llimones', '🍋', 'llimona, limon'], ['Maduixes', '🍓', 'maduixa, fresa'], ['Raïm', '🍇', 'uva'], ['Préssecs', '🍑', 'preseg, melocoton'], ['Síndria', '🍉', 'sandia'], ['Meló', '🍈', 'melo, melon'], ['Tomàquets', '🍅', 'tomaquet, tomate'], ['Enciam', '🥬', 'lechuga'], ['Espinacs', '🥬', 'espinac, espinacas'], ['Cebes', '🧅', 'ceba, cebolla'], ['Alls', '🧄', 'all, ajo, gra d all, dent d all'], ['Patates', '🥔', 'patata'], ['Pastanagues', '🥕', 'pastanaga, zanahoria'], ['Pebrots', '🫑', 'pebrot, pimiento, pebrot vermell, pebrot verd'], ['Cogombre', '🥒', 'pepino'], ['Carbassó', '🥒', 'carbasso, calabacin'], ['Carbassa', '🎃', 'calabaza'], ['Porros', '🥬', 'porro, puerro'], ['Bròquil', '🥦', 'brocoli'], ['Coliflor', '🥦', ''], ['Alvocat', '🥑', 'aguacate'], ['Bolets', '🍄', 'bolet, champinon, champinones, xampinyons'], ['Blat de moro', '🌽', 'maiz'], ['Alberginia', '🍆', 'alberginies, berenjena']]],
+	['carn', [['Pollastre', '🍗', 'pollo, pit de pollastre, pechuga, cuixes de pollastre'], ['Carn picada', '🥩', 'carne picada'], ['Bistecs', '🥩', 'bistec, filet, filete'], ['Llom', '🥩', 'lomo, llom de porc'], ['Hamburgueses', '🍔', 'hamburguesa'], ['Salsitxes', '🌭', 'salsitxa, salchicha'], ['Botifarra', '🌭', 'botifarres, butifarra'], ['Salmó', '🐟', 'salmon'], ['Lluç', '🐟', 'lluc, merluza'], ['Bacallà', '🐟', 'bacalla, bacalao'], ['Gambes', '🦐', 'gamba, gambas, llagostins'], ['Calamars', '🦑', 'calamar, sepia']]],
+	['lactics', [['Llet', '🥛', 'leche'], ['Ous', '🥚', 'ou, huevo, huevos'], ['Iogurts', '🍦', 'iogurt, yogur, yogures'], ['Formatge', '🧀', 'queso'], ['Formatge ratllat', '🧀', 'queso rallado, parmesa, parmesano'], ['Mozzarella', '🧀', 'mozarella'], ['Mantega', '🧈', 'mantequilla'], ['Nata', '🥛', 'nata per cuinar'], ['Beixamel', '🥛', 'bechamel']]],
+	['embotit', [['Pernil salat', '🍖', 'pernil, jamon, jamon serrano'], ['Pernil dolç', '🍖', 'jamon york, jamon cocido'], ['Fuet', '🥓', 'llonganissa, salchichon'], ['Xoriço', '🌭', 'xorico, chorizo'], ['Gall dindi', '🦃', 'pavo'], ['Bacon', '🥓', 'baco, beicon']]],
+	['forn', [['Pa', '🥖', 'pan, barra de pa'], ['Pa de motlle', '🍞', 'pan de molde'], ['Pa d’hamburguesa', '🍔', 'pa d hamburguesa, pan de hamburguesa'], ['Tortites', '🌮', 'tortites de blat, tortillas de trigo, wraps'], ['Croissants', '🥐', 'croissant'], ['Magdalenes', '🧁', 'magdalena'], ['Torrades', '🍞', 'tostadas']]],
+	['rebost', [['Arròs', '🍚', 'arroz'], ['Pasta', '🍝', ''], ['Macarrons', '🍝', 'macarrones'], ['Espaguetis', '🍝', 'spaghetti'], ['Fideus', '🍜', 'fideos'], ['Plaques de lasanya', '🍝', 'lasanya, lasaña'], ['Oli', '🫒', 'aceite, oli d oliva'], ['Tomàquet fregit', '🥫', 'tomate frito'], ['Tomàquet triturat', '🥫', 'tomate triturado'], ['Tonyina', '🐟', 'atun, tonyina en conserva'], ['Llenties', '🫘', 'llentia, lentejas'], ['Cigrons', '🫘', 'garbanzos'], ['Mongetes', '🫘', 'mongeta, alubias, judias, fesols'], ['Brou', '🍲', 'caldo, brou de pollastre'], ['Pesto', '🌿', ''], ['Sal', '🧂', ''], ['Sucre', '🍬', 'azucar'], ['Cafè', '☕', 'cafe'], ['Cereals', '🥣', 'cereales, muesli'], ['Galetes', '🍪', 'galleta, galletas'], ['Xocolata', '🍫', 'chocolate, cacau, cola cao'], ['Mel', '🍯', 'miel'], ['Olives', '🫒', 'aceitunas'], ['Patates xips', '🥔', 'patatas fritas']]],
 	['begudes', [['Aigua', '💧', 'agua'], ['Cervesa', '🍺', 'cerveza'], ['Vi', '🍷', 'vino'], ['Suc', '🧃', 'zumo'], ['Refrescos', '🥤', 'refresc, coca-cola, fanta']]],
 	['congelats', [['Pizza', '🍕', ''], ['Gelat', '🍨', 'helado'], ['Croquetes', '🧆', 'croquetas'], ['Verdura congelada', '🧊', 'congelats']]],
 	['neteja', [['Paper de cuina', '🧻', 'papel de cocina'], ['Paper higiènic', '🧻', 'papel higienico'], ['Detergent', '🫧', 'detergente, suavitzant'], ['Rentaplats', '🍽️', 'lavavajillas, sabo de plats'], ['Bosses d’escombraries', '🗑️', 'bolsas de basura'], ['Esponges', '🧽', 'fregall, estropajo, esponja'], ['Lleixiu', '🧪', 'lejia, netejador']]],
@@ -119,6 +119,12 @@ for (const [cat, ps] of PRODUCTES) for (const [nom, , alt] of ps) for (const p o
 const NOM_DE = {};
 for (const [, ps] of PRODUCTES) for (const [nom, , alt] of ps) for (const p of [nom, ...alt.split(',')].map(normal).filter(Boolean)) NOM_DE[p] ??= normal(nom);
 const canon = (nom) => NOM_DE[normal(nom)] ?? normal(nom);
+// el nom bonic de cada producte ("ou" → "Ous"); si no és al catàleg, tal com s'ha escrit
+const BONIC_DE = {};
+for (const [, ps] of PRODUCTES) for (const [nom, , alt] of ps) for (const p of [nom, ...alt.split(',')].map(normal).filter(Boolean)) BONIC_DE[p] ??= nom;
+// (també en plural o singular: "carbassons" → "Carbassó", "pebrot" → "Pebrots")
+const formesDe = (n) => [n, n.replace(/ons$/, 'o'), n.replace(/es$/, ''), n.replace(/s$/, ''), n.replace(/ns$/, 'n')];
+const nomProducte = (t) => formesDe(normal(t)).map((x) => BONIC_DE[x]).find(Boolean) ?? majuscula(String(t).trim());
 const catDe = (nom) => CAT_DE[normal(nom)] ?? categoria(nom);
 const colorCat = (cat) => COLOR_CAT[cat] ?? COLOR_CAT.altres;
 
@@ -133,6 +139,73 @@ function trossos(text) {
 		.filter((t) => t.length > 1)
 		.map(majuscula);
 }
+
+// --- els ingredients de les receptes: cada un és un producte amb quantitat i unitat, no un text ---
+// Tres menes: el que es gasta sencer (3 ous), el que se'n fa una part però es pot comptar (1 paquet de pasta, 200 g de
+// bacon) i el del rebost, que no es compta i no va a la llista (sal, pebre, oli). Les quantitats són per a tots dos.
+const UNITATS = {u: ['unitat', 'unitats'], g: ['g', 'g'], ml: ['ml', 'ml'], paquet: ['paquet', 'paquets'], pot: ['pot', 'pots'], llauna: ['llauna', 'llaunes'], bossa: ['bossa', 'bosses']};
+const UNITAT_DE = {
+	g: ['g', 1], gr: ['g', 1], grs: ['g', 1], gram: ['g', 1], grams: ['g', 1], gramos: ['g', 1], kg: ['g', 1000], quilo: ['g', 1000], quilos: ['g', 1000], kilo: ['g', 1000], kilos: ['g', 1000],
+	ml: ['ml', 1], cl: ['ml', 10], l: ['ml', 1000], litre: ['ml', 1000], litres: ['ml', 1000], litro: ['ml', 1000], litros: ['ml', 1000], brik: ['ml', 1000],
+	paquet: ['paquet', 1], paquets: ['paquet', 1], paquete: ['paquet', 1], paquetes: ['paquet', 1], pot: ['pot', 1], pots: ['pot', 1], bote: ['pot', 1], botes: ['pot', 1],
+	llauna: ['llauna', 1], llaunes: ['llauna', 1], lata: ['llauna', 1], latas: ['llauna', 1], bossa: ['bossa', 1], bosses: ['bossa', 1], bolsa: ['bossa', 1], bolsas: ['bossa', 1],
+	u: ['u', 1], unitat: ['u', 1], unitats: ['u', 1], unidad: ['u', 1], unidades: ['u', 1],
+};
+const NUMERO_DE = {un: 1, una: 1, uno: 1, dos: 2, dues: 2, tres: 3, quatre: 4, cuatro: 4, cinc: 5, cinco: 5, sis: 6, seis: 6, mig: 0.5, mitja: 0.5, mitjà: 0.5, medio: 0.5, media: 0.5, '½': 0.5, '¼': 0.25};
+// el que hi ha sempre a casa: no va a la llista sol (si s'acaba, s'apunta a mà)
+const DEL_REBOST = new Set(
+	'sal, sal grossa, olives, aceitunas, pebre, pebre negre, pebre vermell, pimienta, pimenton, oli, oli d oliva, aceite, vinagre, sucre, azucar, farina, harina, orenga, oregano, comi, comino, curri, curry, canyella, nou moscada, llorer, laurel, julivert, perejil, alfabrega, albahaca, herbes, herbes provençals, especies, espècies per a fajites, all en pols, mostassa, salsa de soja, soja, ketchup, maionesa, mayonesa, llevat, aigua, agua, alls, all, ajo, formatge ratllat, brou en pastilla, pastilla de brou, romani, farigola, tomillo, colorant, safra'
+		.split(',')
+		.map((x) => normal(x)),
+);
+const esDelRebost = (nom) => DEL_REBOST.has(normal(nom)) || DEL_REBOST.has(canon(nom));
+const numero = (s) => {
+	const t = normal(s);
+	if (t in NUMERO_DE) return NUMERO_DE[t];
+	if (/^\d+\/\d+$/.test(t)) return Number(t.split('/')[0]) / Number(t.split('/')[1]);
+	const n = Number(t.replace(',', '.'));
+	return Number.isFinite(n) && n > 0 ? n : null;
+};
+// "3 ous", "200 g de bacon", "1 paquet de pasta", "mitja ceba", "Ous x3", "pebre" → {nom, q, u, rebost}
+function llegirIngredient(text) {
+	let t = String(text ?? '').replace(/^[\s\-*•·]+/, '').replace(/[.\s]+$/, '').trim();
+	let q = null;
+	let u = 'u';
+	let rebost = /\b(al gust|una mica|un pessic|un raig|del rebost)\b/i.test(t);
+	t = t.replace(/\s*\(?\b(al gust|una mica( de| d')?|un pessic( de| d')?|un raig( de| d')?|del rebost)\b\)?\s*/gi, ' ').trim();
+	const davant = t.match(/^(\d+(?:[.,]\d+)?|\d+\/\d+|½|¼|un|una|uno|dos|dues|tres|quatre|cuatro|cinc|cinco|sis|seis|mig|mitja|mitjà|medio|media)\s*([a-zà-ü]+)?\.?\s+(?:de\s+|d['’]\s*)?(.+)$/i)
+		?? t.match(/^(\d+(?:[.,]\d+)?)\s*([a-z]+)\.?\s*(?:de\s+|d['’]\s*)?(.+)$/i);
+	const darrere = t.match(/^(.+?)\s*[x×]?\s*(\d+(?:[.,]\d+)?)\s*([a-z]+)?$/i);
+	if (davant && numero(davant[1]) != null) {
+		const unitat = davant[2] && UNITAT_DE[normal(davant[2])];
+		q = numero(davant[1]);
+		if (unitat) [u, q] = [unitat[0], q * unitat[1]];
+		t = unitat ? davant[3] : t.replace(/^\S+\s*/, ''); // sense unitat: tot el que va darrere del número
+	} else if (darrere && numero(darrere[2]) != null && (!darrere[3] || UNITAT_DE[normal(darrere[3])])) {
+		const unitat = darrere[3] && UNITAT_DE[normal(darrere[3])];
+		q = numero(darrere[2]);
+		if (unitat) [u, q] = [unitat[0], q * unitat[1]];
+		t = darrere[1];
+	}
+	const nom = nomProducte(t.replace(/^(de|d['’])\s*/i, '').trim());
+	if (q == null && !rebost) rebost = esDelRebost(nom);
+	return {nom, q: q == null ? null : Math.round(q * 100) / 100, u, rebost};
+}
+// les receptes velles tenien els ingredients en text: es llegeixen igual
+const ingredient = (x) => (typeof x === 'string' ? llegirIngredient(x) : {u: 'u', q: null, rebost: false, ...x});
+const ingredientsDe = (r) => (r?.ingredients ?? []).map(ingredient).filter((i) => i.nom);
+const xifra = (n) => (n === 0.5 ? '½' : n === 0.25 ? '¼' : n.toLocaleString('ca-ES', {maximumFractionDigits: 2}));
+// 3 → "×3", 1500 g → "1,5 kg", 2 paquets...
+function quantitat(q, u) {
+	if (q == null) return '';
+	if (u === 'u') return `×${xifra(q)}`;
+	if (u === 'g') return q >= 1000 ? `${xifra(q / 1000)} kg` : `${xifra(q)} g`;
+	if (u === 'ml') return q >= 1000 ? `${xifra(q / 1000)} l` : `${xifra(q)} ml`;
+	return `${xifra(q)} ${UNITATS[u]?.[q > 1 ? 1 : 0] ?? u}`;
+}
+const quantitats = (quant) => Object.entries(quant ?? {}).filter(([, q]) => q > 0).map(([u, q]) => quantitat(q, u)).join(' + ');
+// "Ous ×3", "Bacon 150 g", "Espaguetis 1 paquet"
+const textIngredient = (i) => (i.q == null ? i.nom : `${i.nom} ${quantitat(i.q, i.u)}`);
 
 // --- el xifrat: la clau surt del codi de casa (el mateix als dos mòbils) ---
 const b64 = (b) => btoa(String.fromCharCode(...new Uint8Array(b)));
@@ -153,9 +226,9 @@ async function xifrar(obj) {
 	const x = await crypto.subtle.encrypt({name: 'AES-GCM', iv}, estat.clau, new TextEncoder().encode(JSON.stringify(obj)));
 	return `${b64(iv)}.${b64(x)}`;
 }
-async function desxifrar(s) {
+async function desxifrar(s, clau = estat.clau) {
 	const [iv, x] = s.split('.');
-	return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name: 'AES-GCM', iv: deB64(iv)}, estat.clau, deB64(x))));
+	return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name: 'AES-GCM', iv: deB64(iv)}, clau, deB64(x))));
 }
 
 // --- l'estat: les files (id → {o: l'objecte, a: quan es va tocar}), el que falta pujar i qui ets ---
@@ -234,20 +307,51 @@ document.addEventListener('visibilitychange', () => document.visibilityState ===
 window.addEventListener('online', sincronitzar);
 
 // --- el receptari per començar (Reshi n'omple uns quants; els ids fixos fan que no es repeteixin) ---
+// Les quantitats són per a dos; la pasta, un paquet per àpat (com feu vosaltres). El que és del rebost no va a la llista.
 const RECEPTES = [
-	['llenties', 'Llenties estofades', 'Llenties, Ceba, Pastanaga, Patata, Xoriço, All, Pebre vermell'],
-	['macarrons', 'Macarrons a la bolonyesa', 'Macarrons, Carn picada, Ceba, Tomàquet fregit, Formatge ratllat'],
-	['truita', 'Truita de patates', 'Ous, Patates, Ceba, Oli'],
-	['pollastre', 'Pollastre al forn amb patates', 'Pollastre, Patates, Ceba, Llimona, All'],
-	['amanida', 'Amanida', 'Enciam, Tomàquet, Cogombre, Tonyina en conserva, Olives'],
-	['crema', 'Crema de carbassa', 'Carbassa, Ceba, Pastanaga, Patata, Nata'],
-	['arros', 'Arròs a la cubana', 'Arròs, Tomàquet fregit, Ous, Plàtan'],
-	['salmo', 'Salmó amb verdures', 'Salmó, Carbassó, Pebrot, Ceba'],
+	['llenties', 'Llenties estofades', '1 pot de llenties, 1 ceba, 2 pastanagues, 1 patata, 100 g de xoriço, all, pebre vermell, oli, sal'],
+	['macarrons', 'Macarrons a la bolonyesa', '1 paquet de macarrons, 300 g de carn picada, 1 ceba, 1 pot de tomàquet fregit, formatge ratllat, oli, sal'],
+	['truita', 'Truita de patates', '5 ous, 4 patates, 1 ceba, oli, sal'],
+	['pollastre', 'Pollastre al forn amb patates', '4 cuixes de pollastre, 4 patates, 1 ceba, 1 llimona, all, herbes, oli, sal'],
+	['amanida', 'Amanida completa', '1 enciam, 2 tomàquets, 1 cogombre, 2 llaunes de tonyina, 2 ous, olives, oli, vinagre, sal'],
+	['crema', 'Crema de carbassa', '800 g de carbassa, 1 ceba, 1 pastanaga, 1 patata, 200 ml de nata, oli, sal'],
+	['arros', 'Arròs a la cubana', '200 g d’arròs, 1 pot de tomàquet fregit, 2 ous, 2 plàtans, oli, sal'],
+	['salmo', 'Salmó amb verdures al forn', '2 salmó, 1 carbassó, 1 pebrot, 1 ceba, oli, sal, pebre'],
+	['carbonara', 'Espaguetis a la carbonara', '1 paquet d’espaguetis, 3 ous, 150 g de bacon, formatge ratllat, pebre, sal'],
+	['tonyina', 'Espaguetis amb tonyina i tomàquet', '1 paquet d’espaguetis, 2 llaunes de tonyina, 1 pot de tomàquet fregit, orenga, sal'],
+	['pesto', 'Pasta al pesto', '1 paquet de pasta, 1 pot de pesto, formatge ratllat, sal'],
+	['lasanya', 'Lasanya de carn', '1 paquet de plaques de lasanya, 400 g de carn picada, 1 ceba, 1 pot de tomàquet fregit, 500 ml de beixamel, 100 g de formatge ratllat, oli, sal'],
+	['fajites', 'Fajites de pollastre', '400 g de pollastre, 1 paquet de tortites, 2 pebrots, 1 ceba, espècies per a fajites, oli'],
+	['quesadilles', 'Quesadilles de pernil i formatge', '1 paquet de tortites, 150 g de formatge, 100 g de pernil dolç'],
+	['curri', 'Pollastre al curri amb arròs', '400 g de pollastre, 200 ml de nata, 1 ceba, 200 g d’arròs, curri, oli, sal'],
+	['arros-pollastre', 'Arròs amb pollastre i verdures', '200 g d’arròs, 300 g de pollastre, 1 pebrot, 1 ceba, 1 tomàquet, 1 l de brou, oli, sal'],
+	['hamburgueses', 'Hamburgueses', '2 hamburgueses, 1 paquet de pa d’hamburguesa, 1 tomàquet, 1 enciam, 4 llesques de formatge, ketchup'],
+	['bistec', 'Bistec amb amanida', '2 bistecs, 1 enciam, 2 tomàquets, oli, sal'],
+	['llom', 'Llom amb patates', '400 g de llom, 3 patates, oli, sal, all'],
+	['lluc', 'Lluç al forn amb patates', '2 lluç, 3 patates, 1 ceba, oli, sal, julivert'],
+	['ous-estrellats', 'Ous estrellats amb patates i pernil', '4 ous, 4 patates, 100 g de pernil salat, oli, sal'],
+	['cigrons', 'Cigrons amb espinacs', '1 pot de cigrons, 1 bossa d’espinacs, all, pebre vermell, comí, oli, sal'],
+	['botifarra', 'Botifarra amb mongetes', '2 botifarres, 1 pot de mongetes, all, julivert, oli, sal'],
+	['sopa', 'Sopa de fideus', '100 g de fideus, 1 l de brou, sal'],
+	['crema-verdures', 'Crema de verdures', '2 carbassons, 1 porro, 1 patata, 1 ceba, oli, sal'],
+	['gaspatxo', 'Gaspatxo', '1 kg de tomàquets, 1 cogombre, 1 pebrot, all, oli, vinagre, sal'],
+	['pizza', 'Pizza', '1 pizza'],
+	['croquetes', 'Croquetes amb amanida', '1 paquet de croquetes, 1 enciam, 2 tomàquets, oli, sal'],
+	['salsitxes', 'Salsitxes amb patates', '6 salsitxes, 3 patates, oli, sal'],
+	['wok', 'Wok de verdures amb pollastre', '300 g de pollastre, 1 pebrot, 1 carbassó, 1 pastanaga, 1 ceba, 1 paquet de fideus, salsa de soja, oli'],
 ];
+// les receptes de mostra (amb ids fixos: si dos mòbils les posen alhora, són les mateixes). Les que ja hi eren en text
+// i ningú ha tocat, es passen a ingredients amb quantitat. Les que s'hagin esborrat no tornen.
 function sembrarReceptes() {
-	if (guardat.llegir('llar-sembrat', false) || totes('recepta').length) return;
-	for (const [id, nom, ing] of RECEPTES) if (!estat.files[`r-${id}`]) tocar(`r-${id}`, {t: 'recepta', nom, ingredients: ing.split(', '), qui: 'Reshi'});
-	guardat.posar('llar-sembrat', true);
+	// només amb el que hi ha al núvol a la mà: si no, tornarien les que algú ha esborrat
+	if (guardat.llegir('llar-sembrat-2', false) || (SUPABASE.url && estat.xarxa !== 'al-dia')) return;
+	for (const [id, nom, ing] of RECEPTES) {
+		const ja = estat.files[`r-${id}`]?.o;
+		const ingredients = ing.split(', ').map(llegirIngredient);
+		if (!ja) tocar(`r-${id}`, {t: 'recepta', nom, ingredients, qui: 'Reshi'});
+		else if (!ja.esborrat && ja.qui === 'Reshi' && ja.ingredients?.every((x) => typeof x === 'string')) tocar(`r-${id}`, {...ja, nom, ingredients});
+	}
+	guardat.posar('llar-sembrat-2', true);
 }
 
 // --- el logo: dues "L" (ells dos, i la "Ll" de Llar) sota una teulada, amb el punt de la "l·l" (fer_icona.py) ---
@@ -259,18 +363,52 @@ const av = (q, gran) => `<span class="av av-${normal(q) || 'ningu'}${gran ? ' gr
 // --- la llista ---
 const pendents = () => totes('cosa').filter((c) => !c.fet && !c.arxivat);
 const alCarro = () => totes('cosa').filter((c) => c.fet && !c.arxivat);
-function afegir(noms, plat) {
-	const hiSon = new Set(pendents().map((c) => canon(c.nom)));
-	const ids = [];
-	for (const nom of noms) {
-		if (hiSon.has(canon(nom))) continue;
-		hiSon.add(canon(nom));
-		const id = nouId();
-		tocar(id, {t: 'cosa', nom, cat: catDe(nom), qui: estat.qui, quan: ara(), fet: false, ...(plat && {plat})});
-		ids.push(id);
+// posa coses a la llista: [{nom, q, u}]. Si ja hi són, se'n suma la quantitat. `font` és l'àpat del menú que les
+// demana (així, si es treu el plat, es resten); sense font, és que s'han apuntat a mà.
+function posarALlista(items, font) {
+	const nous = [];
+	let sumats = 0;
+	for (const it of items) {
+		const ja = pendents().find((c) => canon(c.nom) === canon(it.nom));
+		const posa = it.q != null ? [{u: it.u, q: it.q}] : [];
+		if (ja) {
+			const o = estat.files[ja.id].o;
+			if (!posa.length && !font) continue; // ja hi és i no porta quantitat: res a fer
+			const quant = {...(o.quant ?? {})};
+			for (const x of posa) quant[x.u] = (quant[x.u] ?? 0) + x.q;
+			const fonts = font ? {...(o.fonts ?? {}), [font]: [...(o.fonts?.[font] ?? []), ...posa]} : o.fonts;
+			tocar(ja.id, {...o, quant, fonts, manual: o.manual || !font});
+			if (posa.length) sumats++;
+		} else {
+			const id = nouId();
+			const nom = nomProducte(it.nom);
+			tocar(id, {t: 'cosa', nom, cat: catDe(nom), qui: estat.qui, quan: ara(), fet: false, quant: Object.fromEntries(posa.map((x) => [x.u, x.q])), ...(font ? {fonts: {[font]: posa}} : {manual: true})});
+			nous.push(id);
+		}
 	}
-	return ids; // els que s'han afegit (els que ja hi eren, no)
+	return {nous, sumats};
 }
+// a mà ("6 ous", "Llet"): sense rebost, que si s'apunta és que s'ha acabat
+const afegir = (noms) => posarALlista(noms.map((n) => ({...llegirIngredient(n), rebost: false}))).nous;
+// treure un plat del menú: es resta el que havia posat, i el que només hi era per ell, fora
+function treureDeLlista(font) {
+	for (const c of pendents()) {
+		const o = estat.files[c.id].o;
+		const posat = o.fonts?.[font];
+		if (!posat) continue;
+		const fonts = {...o.fonts};
+		delete fonts[font];
+		const quant = {...(o.quant ?? {})};
+		for (const x of posat) {
+			quant[x.u] = Math.round(((quant[x.u] ?? 0) - x.q) * 100) / 100;
+			if (quant[x.u] <= 0) delete quant[x.u];
+		}
+		tocar(c.id, !Object.keys(fonts).length && !o.manual ? {...o, fonts, esborrat: true} : {...o, fonts, quant});
+	}
+}
+// els ingredients d'un plat que van a la llista (els del rebost, no)
+const perComprar = (r) => ingredientsDe(r).filter((i) => !i.rebost);
+const delRebost = (r) => ingredientsDe(r).filter((i) => i.rebost);
 // tot el que heu comprat mai, amb quantes vegades (per a "Sovint" i per suggerir mentre s'escriu)
 function historial() {
 	const compte = {};
@@ -300,7 +438,7 @@ const grupsDe = (coses) =>
 // la llista en text, per enviar-la per WhatsApp
 function textLlista() {
 	return `🛒 Llista de la compra\n${grupsDe(pendents())
-		.map((g) => `\n${g.emoji} ${g.nom}\n${g.coses.map((c) => `• ${c.nom}`).join('\n')}`)
+		.map((g) => `\n${g.emoji} ${g.nom}\n${g.coses.map((c) => `• ${c.nom}${quantitats(c.quant) ? ` (${quantitats(c.quant)})` : ''}`).join('\n')}`)
 		.join('\n')}`;
 }
 async function compartir() {
@@ -350,11 +488,26 @@ function fullRapid() {
 	return `<h2>Què falta?</h2><p class="full-explica">Toca el que s’hagi acabat. Si ja hi és, el treu.</p>
 	${PRODUCTES.map(([cat, ps]) => `<section class="rapid-cat" style="--c:${colorCat(cat)}"><h3><span>${EMOJI_CAT[cat]}</span>${CATEGORIES.find((c) => c[0] === cat)[1]}</h3><div class="rapids graella">${ps.map(([nom]) => fitxaRapid(nom, hiSon.has(canon(nom)))).join('')}</div></section>`).join('')}`;
 }
+// per a quins plats és una cosa (els àpats del menú que l'han posada)
+const platsDe = (c) => [...new Set(Object.keys(c.fonts ?? {}).map((id) => estat.files[id]?.o).filter((a) => a && !a.esborrat).map((a) => a.nom))];
 function filaCosa(c) {
-	const meta = c.plat ? `<small>${icona('plat', 11)} ${esc(c.plat)}</small>` : '';
+	const plats = platsDe(c);
+	const meta = plats.length ? `<small>${icona('plat', 11)} ${esc(plats.join(', '))}</small>` : c.plat ? `<small>${icona('plat', 11)} ${esc(c.plat)}</small>` : '';
+	const q = quantitats(c.quant) ? `<b class="quant">${esc(quantitats(c.quant))}</b>` : '';
 	if (estat.editant)
-		return `<li><div class="cosa"><span class="ic-cosa">${iconaDe(c.nom, c.cat)}</span><span class="nom">${esc(c.nom)}${meta}</span><button type="button" class="treure" data-treure="${c.id}" aria-label="Treure ${esc(c.nom)}">${icona('paperera', 17)}</button></div></li>`;
-	return `<li><button type="button" class="cosa" data-fet="${c.id}"><span class="check"></span><span class="ic-cosa">${iconaDe(c.nom, c.cat)}</span><span class="nom">${esc(c.nom)}${meta}</span>${av(c.qui)}</button></li>`;
+		return `<li><div class="cosa"><span class="ic-cosa">${iconaDe(c.nom, c.cat)}</span><span class="nom">${esc(c.nom)}${meta}</span>${q}<button type="button" class="treure" data-treure="${c.id}" aria-label="Treure ${esc(c.nom)}">${icona('paperera', 17)}</button></div></li>`;
+	return `<li><button type="button" class="cosa" data-fet="${c.id}"><span class="check"></span><span class="ic-cosa">${iconaDe(c.nom, c.cat)}</span><span class="nom">${esc(c.nom)}${meta}</span>${q}${av(c.qui)}</button></li>`;
+}
+// el que els plats d'aquesta setmana fan servir del rebost: per mirar que n'hi hagi (un toc i va a la llista)
+function rebostSetmana() {
+	const ds = new Set(dies().map((d) => d.dia));
+	const hiSon = new Set(pendents().map((c) => canon(c.nom)));
+	const noms = new Map();
+	for (const a of totes('apat')) {
+		if (!ds.has(a.dia) || !a.recepta) continue;
+		for (const i of delRebost(estat.files[a.recepta]?.o)) if (!hiSon.has(canon(i.nom))) noms.set(canon(i.nom), i.nom);
+	}
+	return [...noms.values()];
 }
 function vistaLlista() {
 	const p = pendents();
@@ -377,12 +530,16 @@ function vistaLlista() {
 			</div>`
 			: ''
 	}
+	${(() => {
+		const r = estat.editant ? [] : rebostSetmana();
+		return r.length ? `<section class="rebost-setmana"><h2>🧂 Per als plats de la setmana, mireu que tingueu</h2><div class="xips">${r.map((n) => `<button type="button" data-rapid="${esc(n)}"><span>${iconaDe(n)}</span>${esc(n)}${icona('mes', 13)}</button>`).join('')}</div><small>Si alguna cosa s’ha acabat, toca-la i va a la llista.</small></section>` : '';
+	})()}
 	${grups.map((g) => `<section class="grup" style="--c:${colorCat(g.id)}"><h2><span class="emoji">${g.emoji}</span>${g.nom}<small>${g.coses.length}</small></h2><ul>${g.coses.map(filaCosa).join('')}</ul></section>`).join('')}
 	${!p.length && !carro.length ? `<div class="buit"><div class="buit-dibuix">${icona('carro', 34)}</div><b>No falta res</b><p>Escriu a dalt el que s’acabi, o tria què menjareu al <button type="button" class="enllac" data-vista="menu">Menú</button> i els ingredients vindran sols.</p></div>` : ''}
 	${
 		carro.length
 			? `<section class="grup carro"><h2><span class="emoji">🛒</span>Al carro<small>${carro.length}</small></h2><ul>${carro
-					.map((c) => `<li><button type="button" class="cosa fet${c.id === estat.ultim ? ' nou' : ''}" data-desfer="${c.id}"><span class="check">${icona('fet', 14)}</span><span class="ic-cosa">${iconaDe(c.nom, c.cat)}</span><span class="nom">${esc(c.nom)}</span>${av(c.perQui ?? c.qui)}</button></li>`)
+					.map((c) => `<li><button type="button" class="cosa fet${c.id === estat.ultim ? ' nou' : ''}" data-desfer="${c.id}"><span class="check">${icona('fet', 14)}</span><span class="ic-cosa">${iconaDe(c.nom, c.cat)}</span><span class="nom">${esc(c.nom)}</span>${quantitats(c.quant) ? `<b class="quant">${esc(quantitats(c.quant))}</b>` : ''}${av(c.perQui ?? c.qui)}</button></li>`)
 					.join('')}</ul>
 				<button type="button" class="boto-gran" data-buidar>${icona('fet', 18)} Ja ho hem comprat</button></section>`
 			: ''
@@ -422,10 +579,13 @@ function vistaMenu() {
 
 // --- el receptari ---
 const receptesOrdenades = () => totes('recepta').sort((a, b) => a.nom.localeCompare(b.nom, 'ca'));
+// "3 ous · 1 paquet de pasta · bacon +2"
 const resumIngredients = (r) => {
-	const i = r.ingredients;
-	return i.slice(0, 3).join(', ') + (i.length > 3 ? ` +${i.length - 3}` : '');
+	const i = perComprar(r);
+	return i.slice(0, 3).map(textIngredient).join(' · ') + (i.length > 3 ? ` +${i.length - 3}` : '') || 'Tot del rebost';
 };
+// les icones dels ingredients (els que es compren), com una tira
+const iconesRecepta = (r) => perComprar(r).slice(0, 5).map((i) => iconaDe(i.nom)).join('');
 function vistaReceptes() {
 	const rs = receptesOrdenades();
 	return `<header class="titol"><h1>Receptes</h1><p>Els vostres plats amb els seus ingredients. Toca’n un per canviar-lo o posar-lo a la llista.</p></header>
@@ -436,7 +596,7 @@ function vistaReceptes() {
 	<ul class="receptes">${rs
 		.map(
 			(r) =>
-				`<li data-nom="${esc(normal(r.nom + ' ' + r.ingredients.join(' ')))}"><button type="button" class="recepta" data-recepta="${r.id}"><span class="recepta-icona">${icona('plat', 18)}</span><span class="recepta-text"><b>${esc(r.nom)}</b><small>${esc(resumIngredients(r))}</small></span>${icona('seguent', 18)}</button></li>`,
+				`<li data-nom="${esc(normal(`${r.nom} ${ingredientsDe(r).map((i) => i.nom).join(' ')}`))}"><button type="button" class="recepta" data-recepta="${r.id}"><span class="recepta-icona">${icona('plat', 18)}</span><span class="recepta-text"><b>${esc(r.nom)}</b><small>${esc(resumIngredients(r))}</small><span class="recepta-icones">${iconesRecepta(r)}</span></span>${icona('seguent', 18)}</button></li>`,
 		)
 		.join('')}</ul>
 	<p class="buit-cerca" hidden>Cap recepta amb aquest nom.</p>`;
@@ -500,9 +660,11 @@ function trossosRegals(text, per) {
 		const ambBuida = buida;
 		buida = !l;
 		if (!l) continue;
-		const capcal = l.match(/^(arnau|n[uú]ria)\s*:?\s*$/i);
-		if (capcal) {
-			qui = PERSONES.find((p) => normal(p) === normal(capcal[1]));
+		// el capçal de cada llista: "Arnau:", "Núria:" (o mig nom, si s'ha copiat tallat: "au:")
+		const capcal = l.match(/^([a-zà-ü]{2,8})\s*:\s*$/i) ?? l.match(/^(arnau|n[uú]ria)\s*$/i);
+		const de = capcal && PERSONES.find((p) => normal(p) === normal(capcal[1]) || normal(p).endsWith(normal(capcal[1])) || normal(p).startsWith(normal(capcal[1])));
+		if (de) {
+			qui = de;
 			demanat = true;
 			continue;
 		}
@@ -515,12 +677,13 @@ function trossosRegals(text, per) {
 		const g = llegirRegal(l);
 		// una marca sola en majúscules ("KERASTASE") i just a sota el producte: és un regal sol
 		const ant = fora[fora.length - 1];
-		if (!ambBuida && ant && !ant.nota && /^[A-ZÀ-Ü0-9'’ -]{3,20}$/.test(ant.nom) && !/^[A-ZÀ-Ü0-9'’ -]+$/.test(g.nom)) {
+		if (!ambBuida && ant && !ant.nota && /^[A-ZÀ-Ü0-9'’ -]{3,20}$/.test(ant.cru) && !/^[A-ZÀ-Ü0-9'’ -]+$/.test(g.nom)) {
 			ant.nom = `${majuscula(ant.nom.toLowerCase())} ${g.nom}`;
 			ant.nota = g.nota;
+			ant.cru = l;
 			continue;
 		}
-		if (g.nom.length > 1) fora.push({...g, per: qui, demanat});
+		if (g.nom.length > 1) fora.push({...g, per: qui, demanat, cru: l});
 	}
 	return fora;
 }
@@ -573,7 +736,7 @@ function vistaRegals() {
 	${
 		llista.length
 			? `${!meu && comprats ? `<p class="regals-compte">${comprats} de ${llista.length} ja tenen qui els compri</p>` : ''}<ul class="regals">${llista.map(filaRegal).join('')}</ul>`
-			: `<div class="buit"><div class="buit-dibuix">${icona('regal', 34)}</div><b>${meu ? 'Encara no hi ha res' : `${majuscula(aqui)} encara no hi ha posat res`}</b><p>${meu ? 'Apunta a dalt el que t’agradaria: unes sabates, un llibre, una escapada…' : 'Apunta-hi idees: només les veuràs tu.'}</p></div>`
+			: `<div class="buit"><div class="buit-dibuix">${icona('regal', 34)}</div><b>${meu ? 'Encara no hi ha res' : `${majuscula(aqui)} encara no hi ha posat res`}</b><p>${meu ? 'Apunta a dalt el que t’agradaria: unes sabates, un llibre, una escapada…' : 'Apunta-hi idees: només les veuràs tu.'}</p><button type="button" class="enllac" data-perfil>Els teniu apuntats amb un altre codi? Porta’ls aquí</button></div>`
 	}`;
 }
 function fullRegal(id) {
@@ -600,7 +763,7 @@ function fullPlat(dia) {
 	<ul class="triar">${rs
 		.map(
 			(r) =>
-				`<li data-nom="${esc(normal(r.nom))}"><button type="button" data-apat="${r.id}" data-dia="${dia}"><b>${esc(r.nom)}</b><small>${r.ingredients.length} ingredients</small></button></li>`,
+				`<li data-nom="${esc(normal(`${r.nom} ${ingredientsDe(r).map((i) => i.nom).join(' ')}`))}"><button type="button" data-apat="${r.id}" data-dia="${dia}"><b>${esc(r.nom)}</b><small>${iconesRecepta(r)} ${esc(resumIngredients(r))}</small></button></li>`,
 		)
 		.join('')}</ul>
 	<form id="form-plat-lliure" class="plat-lliure" data-dia="${dia}">
@@ -608,12 +771,39 @@ function fullPlat(dia) {
 		<button type="submit" aria-label="Afegir">${icona('mes', 18)}</button>
 	</form>`;
 }
+// la recepta oberta s'edita en un esborrany (estat.full.esb), que no es perd si arriba un canvi de l'altre mòbil
+const esborranyDe = (id) => {
+	const r = id ? estat.files[id]?.o : null;
+	return {nom: r?.nom ?? '', ing: ingredientsDe(r)};
+};
+function filaIngredient(i, n) {
+	const unitats = Object.entries(UNITATS)
+		.map(([u, [un, molts]]) => `<option value="${u}"${i.u === u ? ' selected' : ''}>${u === 'u' ? 'unitats' : u === 'g' || u === 'ml' ? u : molts}</option>`)
+		.join('');
+	return `<div class="ing${i.rebost ? ' rebost' : ''}" style="--c:${colorCat(catDe(i.nom))}">
+		<span class="ic-cosa">${iconaDe(i.nom)}</span>
+		<input class="ing-nom" id="ing-nom-${n}" data-camp="nom" data-i="${n}" value="${esc(i.nom)}" aria-label="Ingredient" autocomplete="off">
+		${
+			i.rebost
+				? `<span class="ing-rebost">del rebost</span>`
+				: `<input class="ing-q" id="ing-q-${n}" data-camp="q" data-i="${n}" type="number" inputmode="decimal" step="any" min="0" placeholder="—" value="${i.q ?? ''}" aria-label="Quantitat"><select class="ing-u" id="ing-u-${n}" data-camp="u" data-i="${n}" aria-label="Unitat">${unitats}</select>`
+		}
+		<button type="button" class="ing-tipus${i.rebost ? ' actiu' : ''}" data-ing-rebost="${n}" title="${i.rebost ? 'És del rebost: no va a la llista' : 'Marcar com a rebost (sal, pebre, oli…)'}" aria-pressed="${i.rebost}"><span>🧂</span>Rebost</button>
+		<button type="button" class="ing-treure" data-ing-treure="${n}" aria-label="Treure ${esc(i.nom)}">${icona('tancar', 15)}</button>
+	</div>`;
+}
 function fullRecepta(id) {
 	const r = id ? estat.files[id]?.o : null;
+	const esb = (estat.full.esb ??= esborranyDe(id));
 	return `<h2>${r ? 'La recepta' : 'Una recepta nova'}</h2>
 	<form id="form-recepta" class="form-recepta" data-id="${id ?? ''}">
-		<label>Nom del plat<input name="nom" value="${esc(r?.nom ?? '')}" placeholder="Llenties estofades" required autocomplete="off"></label>
-		<label>Ingredients<textarea name="ingredients" rows="6" placeholder="Un per línia, o separats per comes" required>${esc(r?.ingredients.join('\n') ?? '')}</textarea></label>
+		<label>Nom del plat<input id="rec-nom" name="nom" value="${esc(esb.nom)}" placeholder="Espaguetis a la carbonara" required autocomplete="off"></label>
+		<div class="ings">
+			<div class="ings-cap"><b>Ingredients</b><small>per a vosaltres dos</small></div>
+			${esb.ing.map(filaIngredient).join('')}
+			<div class="ing-nou"><input id="ing-nou" placeholder="3 ous, 1 paquet de pasta, pebre…" autocomplete="off" enterkeyhint="enter"><button type="button" data-ing-afegir aria-label="Afegir l’ingredient">${icona('mes', 18)}</button></div>
+			<p class="pista">Escriu-los com els diries: «3 ous», «200 g de bacon», «1 paquet de pasta». 🧂 = del rebost (sal, pebre, oli…): el teniu sempre i no va a la llista. Sense quantitat, va a la llista sense número.</p>
+		</div>
 		<button type="submit" class="boto-gran">${r ? 'Desar els canvis' : 'Desar la recepta'}</button>
 	</form>
 	${
@@ -631,7 +821,41 @@ const ESTAT_XARXA = {
 function fullPerfil() {
 	return `<div class="perfil">${av(estat.qui, true)}<h2>Hola, ${esc(estat.qui)}</h2><p class="xarxa-text ${estat.xarxa}"><i></i>${ESTAT_XARXA[estat.xarxa]}</p></div>
 	<div class="codi"><span>El codi de casa</span><b>${esc(estat.codi)}</b><small>És el mateix als dos mòbils. Amb ell es xifra tot: ningú més ho pot llegir.</small></div>
+	<form id="form-portar" class="portar">
+		<b>Portar coses d’una altra casa</b>
+		<small>Si heu apuntat regals o receptes amb un altre codi, escriu-lo aquí i es copiaran a aquesta casa.</small>
+		<div><input name="codi" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="L’altre codi"><button type="submit" class="boto-suau">Portar</button></div>
+	</form>
 	<button type="button" class="boto-suau ample" data-sortir>Canviar de persona o de codi</button>`;
+}
+// els regals i les receptes d'una altra casa (un altre codi), copiats a aquesta. No s'hi esborra res.
+async function portarDe(codi) {
+	if (normCodi(codi) === estat.codi) return 'Aquest ja és el codi d’aquesta casa';
+	const altra = await prepararCasa(codi);
+	const r = await fetch(`${SUPABASE.url}/rest/v1/llar?casa=eq.${altra.casa}&select=id,dades`, {headers: capcals()});
+	if (!r.ok) throw new Error(`Supabase ${r.status}`);
+	const files = await r.json();
+	const hiSon = new Set(Object.values(estat.files).filter((f) => !f.o.esborrat).map((f) => `${f.o.t}|${f.o.per ?? ''}|${normal(f.o.nom ?? '')}`));
+	let regals = 0;
+	let receptes = 0;
+	for (const f of files) {
+		let o;
+		try {
+			o = await desxifrar(f.dades, altra.clau);
+		} catch {
+			continue;
+		}
+		if (o.esborrat || o.donat || !['regal', 'recepta'].includes(o.t)) continue;
+		const k = `${o.t}|${o.per ?? ''}|${normal(o.nom ?? '')}`;
+		if (hiSon.has(k)) continue;
+		hiSon.add(k);
+		tocar(nouId(), o);
+		if (o.t === 'regal') regals++;
+		else receptes++;
+	}
+	if (!files.length) return 'Amb aquest codi no hi ha res';
+	if (!regals && !receptes) return 'Ja ho teníeu tot aquí';
+	return [regals && `${regals} ${regals === 1 ? 'regal' : 'regals'}`, receptes && `${receptes} ${receptes === 1 ? 'recepta' : 'receptes'}`].filter(Boolean).join(' i ') + ' portats';
 }
 
 // --- la primera vegada: el codi de casa i qui ets ---
@@ -745,21 +969,40 @@ document.addEventListener('click', (ev) => {
 	else if (d.noInstallar !== undefined) guardat.posar('llar-no-installar', true);
 	else if (d.obrirDia) estat.full = {t: 'plat', dia: d.obrirDia};
 	else if (d.apat) {
+		// el plat al menú, i el que cal comprar a la llista (sumat al que ja hi havia)
 		const r = f(d.apat);
-		tocar(nouId(), {t: 'apat', dia: d.dia, recepta: d.apat, nom: r.nom, qui: estat.qui});
-		const n = afegir(r.ingredients, r.nom).length;
+		const apat = nouId();
+		tocar(apat, {t: 'apat', dia: d.dia, recepta: d.apat, nom: r.nom, qui: estat.qui});
+		const {nous, sumats} = posarALlista(perComprar(r), apat);
+		const n = nous.length + sumats;
+		const rebost = delRebost(r).map((i) => i.nom.toLowerCase());
 		estat.full = null;
-		avisar(n ? `${r.nom}: ${n} ${n === 1 ? 'ingredient' : 'ingredients'} a la llista` : `${r.nom}: ja teniu tots els ingredients a la llista`);
+		avisar(`${r.nom}: ${n ? `${n} ${n === 1 ? 'cosa' : 'coses'} a la llista` : 'no cal comprar res'}${rebost.length ? ` · mireu que tingueu ${rebost.slice(0, 3).join(', ')}` : ''}`, () => {
+			treureDeLlista(apat);
+			tocar(apat, {...f(apat), esborrat: true});
+		});
 	} else if (d.treureApat) {
+		// treure el plat del menú també treu de la llista el que havia posat
 		const id = d.treureApat;
 		tocar(id, {...f(id), esborrat: true});
-		avisar(`«${f(id).nom}» fora del menú`, () => tocar(id, {...f(id), esborrat: false}));
+		treureDeLlista(id);
+		avisar(`«${f(id).nom}» fora del menú i de la llista`, () => {
+			tocar(id, {...f(id), esborrat: false});
+			const r = f(id).recepta && f(f(id).recepta);
+			if (r) posarALlista(perComprar(r), id);
+		});
 	} else if (d.recepta !== undefined) estat.full = {t: 'recepta', id: d.recepta || null};
-	else if (d.aLlista) {
+	else if (d.ingAfegir !== undefined) afegirIngredients();
+	else if (d.ingTreure !== undefined) estat.full.esb.ing.splice(Number(d.ingTreure), 1);
+	else if (d.ingRebost !== undefined) {
+		const i = estat.full.esb.ing[Number(d.ingRebost)];
+		i.rebost = !i.rebost;
+	} else if (d.aLlista) {
 		const r = f(d.aLlista);
-		const n = afegir(r.ingredients, r.nom).length;
+		const {nous, sumats} = posarALlista(perComprar(r));
+		const n = nous.length + sumats;
 		estat.full = null;
-		avisar(n ? `${n} ${n === 1 ? 'ingredient' : 'ingredients'} a la llista` : 'Ja hi són tots');
+		avisar(n ? `${n} ${n === 1 ? 'cosa' : 'coses'} a la llista` : 'Ja hi són tots');
 	} else if (d.esborrarRecepta) {
 		const id = d.esborrarRecepta;
 		tocar(id, {...f(id), esborrat: true});
@@ -803,16 +1046,21 @@ document.addEventListener('submit', async (ev) => {
 	if (form.id === 'form-afegir') {
 		const noms = trossos(dades.get('text'));
 		if (!noms.length) return;
-		const n = afegir(noms).length;
+		const {nous, sumats} = posarALlista(noms.map((n) => ({...llegirIngredient(n), rebost: false})));
+		const n = nous.length;
 		form.querySelector('textarea').value = '';
 		pintar();
 		document.querySelector('#form-afegir textarea')?.focus();
-		avisar(!n ? 'Ja hi era' : n > 1 ? `${n} coses afegides` : `${noms[0]} afegit`);
+		avisar(!n && !sumats ? 'Ja hi era' : !n ? 'Quantitat sumada' : n > 1 ? `${n} coses afegides` : `${estat.files[nous[0]].o.nom} afegit`);
 	} else if (form.id === 'form-recepta') {
-		const ingredients = trossos(dades.get('ingredients'));
-		if (!ingredients.length) return;
+		afegirIngredients(); // el que hi hagués escrit a la casella de baix, també
+		const esb = estat.full.esb;
+		const nom = majuscula(String(dades.get('nom') ?? esb.nom).trim());
+		const ingredients = esb.ing.filter((i) => i.nom.trim()).map((i) => ({nom: nomProducte(i.nom), q: i.rebost ? null : i.q, u: i.u, rebost: !!i.rebost}));
+		if (!nom) return;
+		if (!ingredients.length) return avisar('Posa-hi algun ingredient');
 		const id = form.dataset.id || nouId();
-		tocar(id, {...(estat.files[id]?.o ?? {qui: estat.qui}), t: 'recepta', nom: majuscula(String(dades.get('nom')).trim()), ingredients});
+		tocar(id, {...(estat.files[id]?.o ?? {qui: estat.qui}), t: 'recepta', nom, ingredients});
 		estat.full = null;
 		pintar();
 		avisar(form.dataset.id ? 'Recepta desada' : 'Recepta nova desada');
@@ -841,6 +1089,20 @@ document.addEventListener('submit', async (ev) => {
 		avisar('Desat');
 	} else if (form.id === 'form-entrar') {
 		await entrar(dades.get('codi'), dades.get('qui'));
+	} else if (form.id === 'form-portar') {
+		const boto = form.querySelector('button');
+		boto.disabled = true;
+		boto.textContent = 'Portant…';
+		try {
+			const text = await portarDe(dades.get('codi'));
+			estat.full = null;
+			pintar();
+			avisar(text);
+		} catch {
+			boto.disabled = false;
+			boto.textContent = 'Portar';
+			avisar('Sense connexió: torna-ho a provar');
+		}
 	}
 });
 // a la casella d'afegir, Intro afegeix (Maj+Intro fa una línia nova, per enganxar llistes)
@@ -849,14 +1111,41 @@ document.addEventListener('keydown', (ev) => {
 		ev.preventDefault();
 		ev.target.form.requestSubmit();
 	}
+	// a la recepta, Intro a la casella d'ingredients l'afegeix (i a les altres no envia el formulari)
+	if (ev.key === 'Enter' && ev.target.matches('#form-recepta input')) {
+		ev.preventDefault();
+		if (ev.target.id === 'ing-nou') {
+			afegirIngredients();
+			pintar();
+		}
+	}
 	if (ev.key === 'Escape' && estat.full) {
 		estat.full = null;
 		pintar();
 	}
 });
-// mentre s'escriu: suggeriments a la llista i cerques als fulls (sense tornar a pintar tot)
+// el que hi ha escrit a la casella d'ingredients (un o uns quants: "3 ous, 1 paquet de pasta, pebre") → files
+function afegirIngredients() {
+	const caixa = document.getElementById('ing-nou');
+	const text = caixa?.value ?? '';
+	if (!estat.full?.esb || !text.trim()) return;
+	const nous = text
+		.split(/\r?\n|,|;/)
+		.map((t) => t.trim())
+		.filter((t) => t.length > 1)
+		.map(llegirIngredient);
+	estat.full.esb.ing.push(...nous);
+	caixa.value = '';
+}
+// mentre s'escriu: suggeriments a la llista, cerques als fulls i l'esborrany de la recepta (sense tornar a pintar tot)
 function filtrar(el) {
-	if (el.matches('#form-afegir textarea')) {
+	if (el.dataset?.camp && estat.full?.esb) {
+		const i = estat.full.esb.ing[Number(el.dataset.i)];
+		if (!i) return;
+		if (el.dataset.camp === 'q') i.q = el.value === '' ? null : Number(el.value);
+		else i[el.dataset.camp] = el.value;
+	} else if (el.id === 'rec-nom' && estat.full?.esb) estat.full.esb.nom = el.value;
+	else if (el.matches('#form-afegir textarea')) {
 		const caixa = document.getElementById('suggeriments');
 		const s = suggeriments(el.value);
 		caixa.hidden = !s.length;
@@ -873,6 +1162,16 @@ function filtrar(el) {
 	}
 }
 document.addEventListener('input', (ev) => filtrar(ev.target));
+document.addEventListener('change', (ev) => ev.target.matches('select[data-camp]') && filtrar(ev.target));
+// si al nom d'un ingredient s'hi escriu la quantitat ("4 ous"), en sortir es posa al seu lloc
+document.addEventListener('focusout', (ev) => {
+	if (!ev.target.matches?.('.ing-nom') || !estat.full?.esb) return;
+	const i = estat.full.esb.ing[Number(ev.target.dataset.i)];
+	if (!i || !i.nom.trim()) return;
+	// si s'hi ha escrit amb quantitat ("4 ous"), es reparteix
+	const llegit = llegirIngredient(i.nom);
+	if (llegit.q != null) Object.assign(i, {nom: llegit.nom, q: llegit.q, u: llegit.u});
+});
 
 // --- l'avís de baix (amb "Desfer" quan es pot) ---
 let avisT = null;

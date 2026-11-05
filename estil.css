@@ -285,3 +285,61 @@ body.amb-full #avis.veure { transform: translate(-50%, 0); }
 	.regal-cos { flex-basis: 100%; padding-bottom: 6px; }
 	.regal-compro { margin-left: 69px; }
 }
+
+/* portar coses d'una altra casa (al full del perfil) */
+.portar { display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 16px; background: var(--panell-2); }
+.portar b { font-size: 15px; }
+.portar small { font-size: 13px; line-height: 1.45; color: var(--text-2); }
+.portar div { display: flex; gap: 8px; margin-top: 4px; }
+.portar input { flex: 1; min-width: 0; height: 44px; padding: 0 12px; border: 0; border-radius: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text); background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora); }
+.portar .boto-suau { height: 44px; }
+.buit .enllac { margin-top: 12px; }
+
+/* --- les receptes amb ingredients de veritat: cada un en una fila (producte, quantitat, unitat, rebost) --- */
+.ings { display: flex; flex-direction: column; gap: 6px; }
+.ings-cap { display: flex; align-items: baseline; justify-content: space-between; margin: 2px 2px 2px; font-size: 13px; color: var(--text-2); }
+.ings-cap b { font-weight: 800; }
+.ings-cap small { color: var(--text-3); }
+.ing { display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 14px; background: var(--panell); box-shadow: inset 3px 0 0 var(--c), inset 0 0 0 1px var(--vora); }
+.ing .ic-cosa { width: 34px; height: 34px; font-size: 19px; }
+.ing input, .ing select { min-width: 0; height: 38px; border: 0; border-radius: 10px; font: inherit; font-size: 15px; font-weight: 600; color: var(--text); background: var(--panell-2); }
+.ing .ing-nom { flex: 1; padding: 0 10px; background: none; }
+.ing .ing-nom:focus { background: var(--panell-2); outline: 0; }
+.ing .ing-q { width: 58px; padding: 0 6px; text-align: right; font-variant-numeric: tabular-nums; }
+.ing .ing-u { width: 82px; padding: 0 4px; font-size: 13.5px; }
+.ing-rebost { padding: 0 8px; font-size: 12.5px; font-weight: 700; white-space: nowrap; color: var(--text-3); }
+.ing.rebost { box-shadow: inset 3px 0 0 var(--text-3), inset 0 0 0 1px var(--vora); }
+.ing.rebost .ing-nom { color: var(--text-2); }
+.ing-tipus, .ing-treure { display: grid; flex: none; place-items: center; width: 32px; height: 38px; padding: 0; border: 0; border-radius: 10px; font-size: 16px; color: var(--text-3); background: none; }
+.ing-tipus { filter: grayscale(1); opacity: 0.45; }
+.ing-tipus.actiu { filter: none; opacity: 1; background: var(--panell-2); }
+.ing-nou { display: flex; gap: 6px; margin-top: 2px; }
+.ing-nou input { flex: 1; min-width: 0; height: 46px; padding: 0 12px; border: 0; border-radius: 14px; font: inherit; font-size: 15.5px; color: var(--text); background: var(--panell); box-shadow: inset 0 0 0 1.5px var(--accent-suau), inset 0 0 0 1px var(--vora); }
+.ing-nou input:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--accent); }
+.ing-nou button { display: grid; place-items: center; width: 46px; height: 46px; border: 0; border-radius: 14px; color: #fff; background: var(--accent); }
+.ings .pista { margin: 2px 2px 0; }
+/* la quantitat a la llista, i per a quins plats és */
+.cosa .quant { flex: none; padding: 3px 8px; border-radius: 8px; font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--c, var(--text)); background: color-mix(in srgb, var(--c, var(--text-3)) 13%, transparent); }
+.cosa.fet .quant { opacity: 0.55; }
+/* el que els plats de la setmana agafen del rebost */
+.rebost-setmana { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: var(--radi); background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora); }
+.rebost-setmana h2 { margin: 0; font-size: 14px; font-weight: 800; }
+.rebost-setmana small { font-size: 12.5px; color: var(--text-3); }
+.xips { display: flex; flex-wrap: wrap; gap: 6px; }
+.xips button { display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 10px 0 8px; border: 0; border-radius: 999px; font-size: 14px; font-weight: 700; color: var(--text); background: var(--panell-2); }
+.xips button svg { color: var(--text-3); }
+.recepta-icones { font-size: 15px; letter-spacing: 2px; line-height: 1.2; }
+.triar button { flex-direction: column; align-items: stretch; gap: 2px; }
+.triar small { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* cada ingredient en dues línies: el nom sencer a dalt; la quantitat, la unitat i el rebost a sota */
+.ing { flex-wrap: wrap; row-gap: 4px; }
+.ing .ing-nom { flex: 1 0 calc(100% - 90px); order: 0; }
+.ing .ing-treure { order: 1; }
+.ing .ing-q, .ing .ing-u, .ing .ing-rebost, .ing .ing-tipus { order: 2; }
+.ing .ing-q { width: 70px; margin-left: 40px; }
+.ing .ing-u { flex: 1; width: auto; max-width: 150px; }
+.ing .ing-rebost { flex: 1; margin-left: 40px; padding: 0 2px; line-height: 38px; }
+.ing .ing-tipus { margin-left: auto; width: auto; padding: 0 10px; gap: 4px; display: inline-flex; align-items: center; font-size: 13px; font-weight: 700; filter: none; opacity: 1; color: var(--text-3); }
+.ing .ing-tipus span { filter: grayscale(1); opacity: 0.5; font-size: 15px; }
+.ing .ing-tipus.actiu { color: var(--text); }
+.ing .ing-tipus.actiu span { filter: none; opacity: 1; }
