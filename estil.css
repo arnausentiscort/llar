@@ -412,3 +412,7 @@ body.amb-full #avis.veure { transform: translate(-50%, 0); }
 .form-cal div { display: flex; gap: 6px; }
 .form-cal div input { flex: 1; }
 .form-cal small { font-size: 12.5px; line-height: 1.4; color: var(--text-3); }
+
+/* que no s'ampliï en tocar dos cops ni en escriure (a l'iPhone, les caselles de menys de 16px fan zoom) */
+html { touch-action: manipulation; }
+input, select, textarea { font-size: 16px !important; }
