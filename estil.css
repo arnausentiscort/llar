@@ -416,3 +416,76 @@ body.amb-full #avis.veure { transform: translate(-50%, 0); }
 /* que no s'ampliï en tocar dos cops ni en escriure (a l'iPhone, les caselles de menys de 16px fan zoom) */
 html { touch-action: manipulation; }
 input, select, textarea { font-size: 16px !important; }
+
+/* --- calendari (v2): el botó d'apuntar, la llegenda, i qui és a Reus i els plans en llistes, separats --- */
+.titol-amb-boto { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.titol-amb-boto .boto-suau { height: 38px; }
+.llegenda { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -2px 0 10px; }
+.mostra { height: 30px; padding: 0 10px; border: 0; border-radius: 999px; font-size: 12.5px; font-weight: 800; color: var(--text-3); background: var(--panell-2); text-decoration: line-through; }
+.mostra.actiu { color: var(--text); background: var(--accent-suau); text-decoration: none; }
+.claus { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-left: auto; font-size: 12px; font-weight: 700; color: var(--text-3); }
+.claus span { display: inline-flex; align-items: center; gap: 4px; }
+.claus i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.cel b { gap: 1px; width: auto; min-width: 24px; padding: 0 3px; }
+.cel b .plat { font-size: 9px; font-style: normal; }
+.cel-textos { display: none; }
+.cel-info i span { display: none; }
+.cal-graella { display: flex; flex-direction: column; gap: 16px; }
+.cal-esq, .cal-dre { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.cal-llista { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: var(--radi); background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora), var(--ombra); }
+.cal-llista h2 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px; font-size: 17px; font-weight: 900; }
+.cal-llista h2 small { font-size: 13px; font-weight: 700; color: var(--text-3); }
+.persona-fila, .pla-fila { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 8px; border: 0; border-radius: 12px; text-align: left; background: none; }
+.persona-fila:active, .pla-fila:active { transform: none; background: var(--panell-2); }
+.persona-fila i { flex: none; width: 26px; height: 8px; border-radius: 4px; background: var(--c); }
+.persona-fila b { flex: 1; font-size: 15.5px; font-weight: 700; }
+.persona-fila span { font-size: 13.5px; font-weight: 700; color: color-mix(in srgb, var(--c) 70%, var(--text)); }
+.pla-fila { box-shadow: inset 3px 0 0 var(--c); border-radius: 4px 12px 12px 4px; }
+.pla-fila.passat { opacity: 0.45; }
+.pla-dia { display: flex; flex: none; flex-direction: column; align-items: center; width: 30px; line-height: 1.05; }
+.pla-dia b { font-size: 17px; font-weight: 900; }
+.pla-dia small { font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--text-3); }
+.pla-text { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.pla-text b { overflow: hidden; font-size: 15px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; }
+.pla-text small { font-size: 12.5px; color: var(--text-3); }
+.pla-fila .av { width: 22px; height: 22px; font-size: 10.5px; }
+.dia-bloc h3 { margin: 0 0 6px; font-size: 14px; font-weight: 800; color: var(--text-2); }
+
+/* --- a l'ordinador: més ample, les pestanyes a dalt al costat del logo, i les coses en dues columnes --- */
+@media (min-width: 900px) {
+	.cap { min-height: 68px; padding: 10px max(28px, calc((100% - 1120px) / 2 + 28px)); }
+	.marca b { font-size: 24px; }
+	.pestanyes { top: 0; right: auto; bottom: auto; left: 50%; z-index: 6; height: 68px; align-items: center; gap: 2px; padding: 0; transform: translateX(-50%); background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+	.pestanyes button { flex: none; flex-direction: row; gap: 8px; max-width: none; height: 42px; padding: 0 14px; border-radius: 12px; font-size: 15px; }
+	.pestanyes button svg { width: 19px; height: 19px; }
+	.pestanyes button[aria-pressed='true'] { background: var(--accent-suau); }
+	.pestanyes i { position: static; margin-left: -2px; border: 0; line-height: 19px; }
+	.pantalla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; align-items: start; max-width: 1120px; padding: 18px 28px 60px; }
+	.pantalla > * { grid-column: 1 / -1; }
+	.pantalla > .grup, .pantalla > .dia { grid-column: auto; }
+	.titol h1 { font-size: 40px; }
+	.titol p { font-size: 16px; }
+	.receptes, .regals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.receptes li + li, .regals li + li { border-top: 0; }
+	.receptes li, .regals li { border-bottom: 1px solid var(--vora); }
+	.cosa .nom, .regal-text b { font-size: 17.5px; }
+	/* el calendari: el mes gran a l'esquerra, amb el que hi ha escrit a cada dia; les llistes a la dreta */
+	.cal-graella { display: grid; grid-template-columns: minmax(0, 2.3fr) minmax(300px, 1fr); gap: 24px; align-items: start; }
+	.mes { padding: 18px; }
+	.mes-cap b { font-size: 22px; }
+	.graella-mes { gap: 5px; }
+	.cel { align-items: stretch; height: 112px; padding: 6px; border-radius: 12px; background: var(--panell-2); }
+	.cel.finde { background: color-mix(in srgb, var(--accent) 10%, var(--panell-2)); }
+	.cel:hover { box-shadow: inset 0 0 0 2px var(--accent-suau); }
+	.cel b { align-self: flex-start; font-size: 14px; }
+	.cel-plans { display: none; }
+	.cel-textos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+	.cel-ev { overflow: hidden; padding: 1px 5px; border-radius: 5px; font-size: 11.5px; font-weight: 700; line-height: 1.35; white-space: nowrap; text-overflow: ellipsis; text-align: left; color: color-mix(in srgb, var(--c) 70%, var(--text)); background: color-mix(in srgb, var(--c) 14%, transparent); }
+	.cel-textos em { font-size: 11px; font-style: normal; font-weight: 800; color: var(--text-3); }
+	.cel-info i { height: 15px; border-radius: 4px; }
+	.cel-info i span { display: block; overflow: hidden; padding: 0 5px; font-size: 10.5px; font-weight: 800; line-height: 15px; white-space: nowrap; text-overflow: ellipsis; color: #fff; }
+	/* els fulls: una finestra al mig en lloc de pujar des de baix */
+	.full { top: 50%; bottom: auto; left: 50%; right: auto; width: min(620px, 92vw); max-height: 86vh; margin: 0; padding: 22px 26px 26px; border-radius: 24px; transform: translate(-50%, -50%); animation: apareix 0.18s ease-out; }
+	.full-nansa { display: none; }
+	#avis { bottom: 28px; }
+}
