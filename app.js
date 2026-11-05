@@ -767,6 +767,8 @@ function fullRegal(id) {
 // Cada un enganxa el seu enllaç al perfil (es desa xifrat, com tot). Google no deixa que una web el llegeixi directament,
 // així que passa per la funció "calendari" del Supabase (supabase-calendari.ts), que el va a buscar i el torna.
 // Hi ha dues menes de calendari: els plans de cadascú i els "d'informació" (qui és a Reus), que es veuen com a franges.
+// el nom que Supabase va posar a la funció del pont quan es va crear (supabase-calendari.ts)
+const FUNCIO_CALENDARI = 'swift-processor';
 const calendaris = () => totes('calendari');
 const DIES_SETMANA = ['dl', 'dt', 'dc', 'dj', 'dv', 'ds', 'dg'];
 const MESOS_LLARGS = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
@@ -867,7 +869,7 @@ async function carregarCalendaris(forca) {
 	await Promise.all(
 		cals.map(async (c) => {
 			try {
-				const r = await fetch(`${SUPABASE.url}/functions/v1/calendari`, {method: 'POST', headers: capcals(), body: JSON.stringify({url: c.url})});
+				const r = await fetch(`${SUPABASE.url}/functions/v1/${FUNCIO_CALENDARI}`, {method: 'POST', headers: capcals(), body: JSON.stringify({url: c.url})});
 				if (!r.ok) throw new Error(r.status === 404 ? 'Falta el pont al Supabase' : `Google ha dit ${r.status}`);
 				const events = desplegar(llegirIcs(await r.text()), des, fins).map((e) => ({...e, inici: e.inici.toISOString(), fi: e.fi.toISOString()}));
 				estat.cal[c.id] = {quan: Date.now(), events};
