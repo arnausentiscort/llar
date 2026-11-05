@@ -245,6 +245,8 @@ const estat = {
 	full: null, // el full de baix obert: {t: 'plat', dia} · {t: 'recepta', id} · {t: 'perfil'}
 	editant: false, // la llista en mode de treure coses
 	ultim: null, // l'última cosa tatxada (fa l'animació)
+	mesCal: 0, // el mes que es mira al calendari (0 = aquest, -1 = l'anterior...)
+	cal: guardat.llegir('llar-cal', {}), // els esdeveniments de cada calendari (id → {quan, events, error}), per obrir-la sense xarxa
 	perRegals: null, // de qui són els regals que es miren (si no, els teus)
 	secreta: true, // les idees per a l'altre, d'entrada, que no les vegi
 };
@@ -562,6 +564,7 @@ function vistaMenu() {
 	const apats = totes('apat');
 	const ds = dies();
 	const n = apats.filter((a) => ds.some((d) => d.dia === a.dia)).length;
+	const evs = totsEvents();
 	return `<header class="titol"><h1>Menú</h1><p>${n ? `${n} ${n === 1 ? 'plat' : 'plats'} aquesta setmana. ` : ''}Tria què menjareu i els ingredients van sols a la llista.</p></header>
 	${ds
 		.map((d) => {
@@ -569,6 +572,11 @@ function vistaMenu() {
 			return `<section class="dia${d.avui ? ' avui' : ''}">
 				<div class="dia-data"><b>${d.num}</b><span>${d.mes}</span></div>
 				<div class="dia-cos"><h2>${d.nom}</h2>
+					${(() => {
+						const plans = delDia(evs, d.dia).filter((e) => e.tipus !== 'info');
+						return plans.length ? `<p class="dia-plans">${plans.slice(0, 3).map((e) => `<span style="--c:${e.color}">${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}</span>`).join('')}</p>` : '';
+					})()}
+					${notaApats(evs, d.dia)}
 					${seus.map((a) => `<div class="plat">${av(a.qui)}<span>${esc(a.nom)}</span><button type="button" data-treure-apat="${a.id}" aria-label="Treure ${esc(a.nom)}">${icona('tancar', 15)}</button></div>`).join('')}
 					<button type="button" class="afegir-plat" data-obrir-dia="${d.dia}">${icona('mes', 15)} ${seus.length ? 'Un altre plat' : 'Afegir un plat'}</button>
 				</div>
@@ -755,6 +763,308 @@ function fullRegal(id) {
 	}<button type="button" class="boto-perill" data-esborrar-regal="${id}">${icona('paperera', 16)} Esborrar</button></div>`;
 }
 
+// --- el calendari: els Google Calendar de tots dos, llegits amb l'enllaç secret (.ics) ---
+// Cada un enganxa el seu enllaç al perfil (es desa xifrat, com tot). Google no deixa que una web el llegeixi directament,
+// així que passa per la funció "calendari" del Supabase (supabase-calendari.ts), que el va a buscar i el torna.
+// Hi ha dues menes de calendari: els plans de cadascú i els "d'informació" (qui és a Reus), que es veuen com a franges.
+const calendaris = () => totes('calendari');
+const DIES_SETMANA = ['dl', 'dt', 'dc', 'dj', 'dv', 'ds', 'dg'];
+const MESOS_LLARGS = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
+const deMes = (m) => (/^[aeiou]/.test(MESOS_LLARGS[m]) ? `d’${MESOS_LLARGS[m]}` : `de ${MESOS_LLARGS[m]}`);
+const desfer = (s) => s.replace(/\\n/gi, '\n').replace(/\\([,;\\])/g, '$1');
+// "20261206" (tot el dia), "20261206T210000Z" (UTC) o amb TZID (hora d'aquí)
+function dataIcs(v) {
+	const m = v.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?/);
+	if (!m) return null;
+	const [, a, me, d, h = '0', mi = '0', s = '0', z] = m;
+	return z ? new Date(Date.UTC(+a, +me - 1, +d, +h, +mi, +s)) : new Date(+a, +me - 1, +d, +h, +mi, +s);
+}
+function llegirIcs(text) {
+	const evs = [];
+	let e = null;
+	for (const l of text.replace(/\r/g, '').replace(/\n[ \t]/g, '').split('\n')) {
+		if (l === 'BEGIN:VEVENT') e = {};
+		else if (l === 'END:VEVENT') {
+			if (e?.inici && e.estat !== 'CANCELLED') evs.push(e);
+			e = null;
+		} else if (e) {
+			const i = l.indexOf(':');
+			if (i < 0) continue;
+			const [nom, ...params] = l.slice(0, i).split(';');
+			const val = l.slice(i + 1);
+			if (nom === 'SUMMARY') e.titol = desfer(val);
+			else if (nom === 'LOCATION') e.lloc = desfer(val);
+			else if (nom === 'DTSTART') [e.inici, e.totDia] = [dataIcs(val), params.includes('VALUE=DATE') || /^\d{8}$/.test(val)];
+			else if (nom === 'DTEND') e.fi = dataIcs(val);
+			else if (nom === 'RRULE') e.regla = Object.fromEntries(val.split(';').map((x) => x.split('=')));
+			else if (nom === 'EXDATE') (e.excepte ??= []).push(...val.split(',').map((v) => dataIcs(v)?.getTime()));
+			else if (nom === 'RECURRENCE-ID') e.recId = dataIcs(val)?.getTime();
+			else if (nom === 'UID') e.uid = val;
+			else if (nom === 'STATUS') e.estat = val;
+		}
+	}
+	return evs;
+}
+// els que es repeteixen (cada setmana, cada any...), desplegats entre dues dates
+const DIES_ICS = {MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6, SU: 0};
+function desplegar(evs, des, fins) {
+	const fora = [];
+	const canviats = new Set(evs.filter((e) => e.recId).map((e) => `${e.uid}|${e.recId}`));
+	for (const e of evs) {
+		const dura = (e.fi ?? e.inici).getTime() - e.inici.getTime() || (e.totDia ? 864e5 : 36e5);
+		const posa = (ini) => {
+			const fi = new Date(ini.getTime() + dura);
+			if (fi > des && ini < fins && !e.excepte?.includes(ini.getTime()) && !(e.regla && canviats.has(`${e.uid}|${ini.getTime()}`)))
+				fora.push({titol: e.titol ?? '(sense títol)', lloc: e.lloc ?? '', totDia: e.totDia, inici: ini, fi});
+		};
+		if (!e.regla) {
+			posa(e.inici);
+			continue;
+		}
+		const r = e.regla;
+		const cada = Number(r.INTERVAL ?? 1);
+		const fins2 = r.UNTIL ? dataIcs(r.UNTIL) : fins;
+		let n = 0;
+		const maxim = Number(r.COUNT ?? 1e9);
+		const dies = r.BYDAY ? r.BYDAY.split(',').map((d) => DIES_ICS[d.slice(-2)]) : null;
+		for (let k = 0, d = new Date(e.inici); k < 800 && d <= fins2 && d < fins && n < maxim; k++) {
+			if (r.FREQ === 'WEEKLY' && dies) {
+				// la setmana de d: cada dia que toca
+				const dl = new Date(d);
+				dl.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+				for (const dia of dies) {
+					const x = new Date(dl);
+					x.setDate(dl.getDate() + ((dia + 6) % 7));
+					if (x < e.inici || x > fins2 || n >= maxim) continue;
+					n++;
+					posa(x);
+				}
+				d.setDate(d.getDate() + 7 * cada);
+				continue;
+			}
+			n++;
+			posa(new Date(d));
+			if (r.FREQ === 'DAILY') d.setDate(d.getDate() + cada);
+			else if (r.FREQ === 'WEEKLY') d.setDate(d.getDate() + 7 * cada);
+			else if (r.FREQ === 'MONTHLY') d.setMonth(d.getMonth() + cada);
+			else if (r.FREQ === 'YEARLY') d.setFullYear(d.getFullYear() + cada);
+			else break;
+		}
+	}
+	return fora;
+}
+// va a buscar els calendaris (com a molt cada 10 minuts, si no es força) i ho desa per obrir-la sense xarxa
+let carregantCal = false;
+async function carregarCalendaris(forca) {
+	if (carregantCal || !SUPABASE.url || !estat.clau) return;
+	const cals = calendaris().filter((c) => forca || !estat.cal[c.id] || Date.now() - estat.cal[c.id].quan > 10 * 60e3);
+	if (!cals.length) return;
+	carregantCal = true;
+	const des = new Date();
+	des.setMonth(des.getMonth() - 2);
+	const fins = new Date();
+	fins.setMonth(fins.getMonth() + 7);
+	await Promise.all(
+		cals.map(async (c) => {
+			try {
+				const r = await fetch(`${SUPABASE.url}/functions/v1/calendari`, {method: 'POST', headers: capcals(), body: JSON.stringify({url: c.url})});
+				if (!r.ok) throw new Error(r.status === 404 ? 'Falta el pont al Supabase' : `Google ha dit ${r.status}`);
+				const events = desplegar(llegirIcs(await r.text()), des, fins).map((e) => ({...e, inici: e.inici.toISOString(), fi: e.fi.toISOString()}));
+				estat.cal[c.id] = {quan: Date.now(), events};
+			} catch (e) {
+				estat.cal[c.id] = {...(estat.cal[c.id] ?? {events: []}), quan: Date.now(), error: String(e.message ?? e)};
+			}
+		}),
+	);
+	guardat.posar('llar-cal', estat.cal);
+	carregantCal = false;
+	pintar();
+	// si mentrestant se n'ha afegit un altre, també
+	if (calendaris().some((c) => !estat.cal[c.id])) carregarCalendaris();
+}
+// tots els esdeveniments, amb de qui són i de quina mena: [{titol, inici: Date, fi: Date, totDia, qui, tipus, color, partit}]
+const PALETA_INFO = ['#3d8bd9', '#43a047', '#e8833a', '#8c68d6', '#1fa9b8', '#d99a2b', '#5b9fe0', '#c0397f'];
+const colorDeNom = (nom) => (/🏠/.test(nom) ? '#d9628f' : PALETA_INFO[[...normal(nom)].reduce((t, c) => t + c.charCodeAt(0), 0) % PALETA_INFO.length]);
+function totsEvents() {
+	const fora = [];
+	for (const c of calendaris()) {
+		for (const e of estat.cal[c.id]?.events ?? []) {
+			const partit = /⚽|real tiesada/i.test(e.titol);
+			const nom = e.titol.replace(/ a Reus$/i, '');
+			fora.push({...e, inici: new Date(e.inici), fi: new Date(e.fi), qui: c.qui, tipus: c.tipus, partit, nom,
+				color: c.tipus === 'info' ? colorDeNom(e.titol) : partit ? '#e0524f' : c.qui === 'Núria' ? 'var(--nuria)' : 'var(--arnau)'});
+		}
+	}
+	return fora.sort((a, b) => a.inici - b.inici);
+}
+const iniciDia = (dia) => new Date(`${dia}T00:00:00`);
+const fiDia = (dia) => new Date(iniciDia(dia).getTime() + 864e5);
+const delDia = (evs, dia) => evs.filter((e) => e.inici < fiDia(dia) && e.fi > iniciDia(dia));
+const horaDe = (d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+// qui no menja a casa: algú amb un pla (amb hora) que agafa l'hora de dinar o de sopar
+const APATS = [['dinar', 13.5, 15.5], ['sopar', 20.5, 22.5]];
+function foraDeCasa(evs, dia) {
+	const fora = [];
+	for (const [apat, h0, h1] of APATS) {
+		const a = new Date(iniciDia(dia).getTime() + h0 * 36e5);
+		const b = new Date(iniciDia(dia).getTime() + h1 * 36e5);
+		for (const q of PERSONES) {
+			const e = evs.find((x) => x.tipus !== 'info' && !x.totDia && x.qui === q && x.inici < b && x.fi > a);
+			if (e) fora.push({apat, qui: q, e});
+		}
+	}
+	return fora;
+}
+// "🍽 Sopar: l'Arnau no hi és (⚽ 21:10)"
+function notaApats(evs, dia) {
+	const fora = foraDeCasa(evs, dia);
+	return APATS.map(([apat]) => {
+		const f = fora.filter((x) => x.apat === apat);
+		if (!f.length) return '';
+		const qui = f.length === PERSONES.length ? 'no sou cap a casa' : `${articleDe(f[0].qui)}${f[0].qui} no hi és`;
+		return `<p class="nota-apat">🍽 <b>${majuscula(apat)}:</b> ${esc(qui)} <small>(${f.map((x) => `${x.e.partit ? '⚽ ' : ''}${horaDe(x.e.inici)}`).join(', ')})</small></p>`;
+	}).join('');
+}
+const filaEvent = (e, dia) => {
+	const quan = e.totDia ? 'Tot el dia' : `${horaDe(e.inici)}${e.fi - e.inici > 0 && e.fi.toDateString() === e.inici.toDateString() ? `–${horaDe(e.fi)}` : ''}`;
+	const multi = e.totDia && e.fi - e.inici > 864e5 ? ` <small>${dia === diaDe(e.inici) ? 'arriba' : diaDe(new Date(e.fi.getTime() - 864e5)) === dia ? 'marxa' : 'hi és'}</small>` : '';
+	return `<li class="event${e.tipus === 'info' ? ' info' : ''}" style="--c:${e.color}"><span class="event-hora">${quan}</span><span class="event-text"><b>${esc(e.titol)}</b>${multi}${e.lloc ? `<small>${esc(e.lloc)}</small>` : ''}</span>${e.tipus === 'info' ? '' : av(e.qui)}</li>`;
+};
+// el resum d'avui (i de demà, si avui ja s'ha acabat)
+function resumAvui(evs) {
+	const avui = diaDe(new Date());
+	const plans = delDia(evs, avui).filter((e) => e.tipus !== 'info');
+	const info = delDia(evs, avui).filter((e) => e.tipus === 'info');
+	const plats = totes('apat').filter((a) => a.dia === avui);
+	return `<section class="avui-cal">
+		<h2>Avui <small>${NOMS_DIES[new Date().getDay()].toLowerCase()} ${new Date().getDate()} ${deMes(new Date().getMonth())}</small></h2>
+		${plans.length ? `<ul class="events">${plans.map((e) => filaEvent(e, avui)).join('')}</ul>` : '<p class="buit-petit">Cap pla per avui.</p>'}
+		${notaApats(evs, avui)}
+		${plats.length ? `<p class="avui-plat">${icona('plat', 14)} ${plats.map((a) => esc(a.nom)).join(' · ')}</p>` : `<button type="button" class="enllac" data-obrir-dia="${avui}">Què menjareu avui?</button>`}
+		${info.length ? `<div class="avui-info">${info.map((e) => `<span style="--c:${e.color}">${esc(e.nom)}</span>`).join('')} <small>a Reus</small></div>` : ''}
+	</section>`;
+}
+function vistaCalendari() {
+	const evs = totsEvents();
+	const ara = new Date();
+	const primer = new Date(ara.getFullYear(), ara.getMonth() + estat.mesCal, 1);
+	const nDies = new Date(primer.getFullYear(), primer.getMonth() + 1, 0).getDate();
+	const buits = (primer.getDay() + 6) % 7;
+	const avui = diaDe(ara);
+	const apats = totes('apat');
+	const errors = calendaris().filter((c) => estat.cal[c.id]?.error);
+	const cel = (n) => {
+		const d = diaDe(new Date(primer.getFullYear(), primer.getMonth(), n));
+		const seus = delDia(evs, d);
+		const info = seus.filter((e) => e.tipus === 'info');
+		const plans = seus.filter((e) => e.tipus !== 'info');
+		const finde = [0, 6].includes(new Date(`${d}T12:00`).getDay());
+		return `<button type="button" class="cel${finde ? ' finde' : ''}${d === avui ? ' avui' : ''}${d < avui ? ' passat' : ''}" data-dia-cal="${d}">
+			<b>${n}</b>
+			<span class="cel-plans">${plans.slice(0, 3).map((e) => (e.partit ? '<i class="partit">⚽</i>' : `<i style="--c:${e.color}"></i>`)).join('')}${plans.length > 3 ? '<em>+</em>' : ''}${apats.some((a) => a.dia === d) ? '<i class="plat">🍽</i>' : ''}</span>
+			<span class="cel-info">${info.slice(0, 3).map((e) => `<i style="--c:${e.color}" title="${esc(e.titol)}"></i>`).join('')}</span>
+		</button>`;
+	};
+	// els propers caps de setmana, que és el que més es mira
+	const findes = [];
+	for (let d = new Date(ara); findes.length < 3; d.setDate(d.getDate() + 1)) {
+		if (d.getDay() !== 6) continue;
+		const ds = diaDe(d);
+		const dg = diaDe(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1));
+		const seus = [...new Map([...delDia(evs, ds), ...delDia(evs, dg)].map((e) => [`${e.titol}|${e.inici}`, e])).values()];
+		findes.push({ds, d: new Date(d), seus});
+	}
+	return `<header class="titol"><h1>Calendari</h1></header>
+	${calendaris().length ? resumAvui(evs) : `<div class="connecta-cal"><b>Connecta els vostres calendaris</b><p>Enganxa l’enllaç secret del teu Google Calendar i aquí veureu els plans de tots dos, qui és a Reus i el menú, tot junt.</p><button type="button" class="boto-suau" data-perfil>${icona('menu', 16)} Connectar el meu</button></div>`}
+	<form class="apunta" id="form-apunta"><input name="text" id="text-apunta" placeholder="Apunta: sopar amb la Marina dissabte 21h" autocomplete="off" enterkeyhint="go"><button type="submit" aria-label="Apuntar al calendari">${icona('mes', 20)}</button></form>
+	<section class="mes">
+		<div class="mes-cap"><button type="button" class="boto-suau" data-mes-cal="-1" aria-label="Mes anterior">‹</button><b>${majuscula(MESOS_LLARGS[primer.getMonth()])}${primer.getFullYear() !== ara.getFullYear() ? ` ${primer.getFullYear()}` : ''}</b><button type="button" class="boto-suau" data-mes-cal="1" aria-label="Mes següent">›</button></div>
+		<div class="graella-mes">${DIES_SETMANA.map((d, i) => `<small class="${i > 4 ? 'finde' : ''}">${d}</small>`).join('')}${'<span></span>'.repeat(buits)}${[...Array(nDies)].map((_, i) => cel(i + 1)).join('')}</div>
+	</section>
+	${errors.length ? `<p class="error-cal">${icona('sense', 14)} ${errors.map((c) => `${esc(c.nom)}: ${esc(estat.cal[c.id].error)}`).join(' · ')}</p>` : ''}
+	<section class="findes"><h2>Els propers caps de setmana</h2>${findes
+		.map((f) => `<button type="button" class="finde-fila" data-dia-cal="${f.ds}"><span class="finde-data"><small>ds</small><b>${f.d.getDate()}</b><small>${MESOS[f.d.getMonth()]}</small></span><span class="finde-coses">${f.seus.length ? f.seus.slice(0, 4).map((e) => `<span style="--c:${e.color}">${e.partit ? '⚽ ' : ''}${esc(e.titol)}</span>`).join('') : '<small>Lliure</small>'}</span></button>`)
+		.join('')}</section>`;
+}
+// el full d'un dia: els plans, qui és a Reus, qui menja a casa i el menú
+function fullDia(dia) {
+	const evs = totsEvents();
+	const seus = delDia(evs, dia);
+	const d = new Date(`${dia}T12:00`);
+	const plats = totes('apat').filter((a) => a.dia === dia);
+	return `<h2>${NOMS_DIES[d.getDay()]} ${d.getDate()} ${deMes(d.getMonth())}</h2>
+	${seus.length ? `<ul class="events">${seus.map((e) => filaEvent(e, dia)).join('')}</ul>` : '<p class="buit-petit">Res apuntat.</p>'}
+	${notaApats(evs, dia)}
+	<div class="dia-menu"><h3>${icona('plat', 14)} Menú</h3>
+		${plats.map((a) => `<div class="plat">${av(a.qui)}<span>${esc(a.nom)}</span><button type="button" data-treure-apat="${a.id}" aria-label="Treure ${esc(a.nom)}">${icona('tancar', 15)}</button></div>`).join('')}
+		<button type="button" class="afegir-plat" data-obrir-dia="${dia}">${icona('mes', 15)} ${plats.length ? 'Un altre plat' : 'Afegir un plat'}</button>
+	</div>
+	<form class="apunta" id="form-apunta-dia" data-dia="${dia}"><input name="text" id="text-apunta-dia" placeholder="Apuntar: sopar a casa la Marina 21h" autocomplete="off" enterkeyhint="go"><button type="submit" aria-label="Apuntar al calendari">${icona('mes', 20)}</button></form>`;
+}
+// "sopar amb la Marina dissabte 21h" → {titol, dia, hora}. Entén avui, demà, demà passat, els dies de la setmana i 6/12
+function llegirApunt(text, diaFix) {
+	let t = ` ${text.trim()} `;
+	let dia = diaFix ?? null;
+	let hora = null;
+	const avui = new Date();
+	const treu = (re) => {
+		const m = t.match(re);
+		if (m) t = t.replace(m[0], ' ');
+		return m;
+	};
+	let m;
+	if ((m = treu(/\s(?:a les |a las )?(\d{1,2})(?::|\.|h)(\d{2})?h?\s/i))) hora = `${m[1].padStart(2, '0')}:${m[2] ?? '00'}`;
+	if (!dia) {
+		if (treu(/\sdem[aà] passat\s|\spasado mañana\s/i)) dia = diaDe(new Date(avui.getFullYear(), avui.getMonth(), avui.getDate() + 2));
+		else if (treu(/\sdem[aà]\s|\smañana\s/i)) dia = diaDe(new Date(avui.getFullYear(), avui.getMonth(), avui.getDate() + 1));
+		else if (treu(/\savui\s|\shoy\s/i)) dia = diaDe(avui);
+		else if ((m = treu(/\s(?:el |dia )?(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s/i))) {
+			let any = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : avui.getFullYear();
+			if (!m[3] && new Date(any, +m[2] - 1, +m[1]) < new Date(avui.getFullYear(), avui.getMonth(), avui.getDate())) any++;
+			dia = diaDe(new Date(any, +m[2] - 1, +m[1]));
+		} else {
+			const noms = [['diumenge', 'domingo'], ['dilluns', 'lunes'], ['dimarts', 'martes'], ['dimecres', 'miércoles', 'miercoles'], ['dijous', 'jueves'], ['divendres', 'viernes'], ['dissabte', 'sábado', 'sabado']];
+			for (const [n, ps] of noms.entries()) {
+				if (treu(new RegExp(`\\s(?:aquest |este |el )?(?:${ps.join('|')})\\s`, 'i'))) {
+					const x = new Date(avui);
+					x.setDate(avui.getDate() + ((n - avui.getDay() + 7) % 7 || 7));
+					dia = diaDe(x);
+					break;
+				}
+			}
+		}
+	}
+	const titol = majuscula(t.replace(/\s+/g, ' ').trim());
+	return {titol, dia: dia ?? diaDe(avui), hora};
+}
+// l'enllaç de Google per crear l'esdeveniment ja omplert (un toc a "Desar" i ja hi és)
+function enllacGoogle({titol, dia, hora}) {
+	const d = dia.replace(/-/g, '');
+	let dates;
+	if (hora) {
+		const [h, m] = hora.split(':').map(Number);
+		const fi = new Date(`${dia}T${hora}:00`);
+		fi.setHours(h + 1, m);
+		dates = `${d}T${hora.replace(':', '')}00/${diaDe(fi).replace(/-/g, '')}T${horaDe(fi).replace(':', '')}00`;
+	} else dates = `${d}/${diaDe(new Date(new Date(`${dia}T12:00`).getTime() + 864e5)).replace(/-/g, '')}`;
+	return `https://calendar.google.com/calendar/render?${new URLSearchParams({action: 'TEMPLATE', text: titol, dates, ctz: 'Europe/Madrid'})}`;
+}
+// al perfil: els calendaris de cadascú (l'enllaç secret de Google)
+function seccioCalendaris() {
+	const meus = calendaris().filter((c) => c.qui === estat.qui);
+	const altres = calendaris().filter((c) => c.qui !== estat.qui);
+	return `<div class="cals">
+		<b>Calendaris</b>
+		${[...meus, ...altres].map((c) => `<div class="cal-fila"><span class="cal-tipus">${c.tipus === 'info' ? '📍' : '🗓️'}</span><span><b>${esc(c.nom)}</b><small>${c.qui === estat.qui ? 'teu' : `de ${articleDe(c.qui)}${esc(c.qui)}`}${estat.cal[c.id]?.error ? ` · ${esc(estat.cal[c.id].error)}` : estat.cal[c.id] ? ` · ${estat.cal[c.id].events.length} coses` : ''}</small></span>${c.qui === estat.qui ? `<button type="button" class="cal-treure" data-treure-cal="${c.id}" aria-label="Treure ${esc(c.nom)}">${icona('tancar', 15)}</button>` : ''}</div>`).join('')}
+		<form id="form-cal" class="form-cal">
+			<input name="url" required autocomplete="off" inputmode="url" placeholder="Enllaç secret iCal del teu Google Calendar">
+			<div><input name="nom" required autocomplete="off" placeholder="Nom (p. ex. El meu, A Reus)"><select name="tipus"><option value="plans">Plans</option><option value="info">Informació (qui és a Reus…)</option></select></div>
+			<button type="submit" class="boto-suau">Afegir el calendari</button>
+			<small>A Google Calendar (al web): ⚙️ Configuració → el teu calendari → «Integrar el calendari» → «Adreça secreta en format iCal».</small>
+		</form>
+	</div>`;
+}
+
 // --- els fulls de baix ---
 function fullPlat(dia) {
 	const rs = receptesOrdenades();
@@ -826,6 +1136,7 @@ function fullPerfil() {
 		<small>Si heu apuntat regals o receptes amb un altre codi, escriu-lo aquí i es copiaran a aquesta casa.</small>
 		<div><input name="codi" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="L’altre codi"><button type="submit" class="boto-suau">Portar</button></div>
 	</form>
+	${seccioCalendaris()}
 	<button type="button" class="boto-suau ample" data-sortir>Canviar de persona o de codi</button>`;
 }
 // els regals i les receptes d'una altra casa (un altre codi), copiats a aquesta. No s'hi esborra res.
@@ -896,17 +1207,18 @@ function pintar() {
 		<button type="button" class="estat-xarxa ${estat.xarxa}" data-perfil title="${ESTAT_XARXA[estat.xarxa]}"><i></i>${perEnviar ? `${perEnviar} per enviar` : estat.xarxa === 'sense' ? 'Sense connexió' : ''}</button>
 		<button type="button" class="qui" data-perfil aria-label="${esc(estat.qui)}">${av(estat.qui)}</button>
 	</header>
-	<main class="pantalla">${{llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals}[estat.vista]()}</main>
+	<main class="pantalla">${{llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals, calendari: vistaCalendari}[estat.vista]()}</main>
 	<nav class="pestanyes">
 		<button type="button" data-vista="llista" aria-pressed="${estat.vista === 'llista'}">${icona('llista', 22)}<span>Llista</span>${n ? `<i>${n}</i>` : ''}</button>
-		<button type="button" data-vista="menu" aria-pressed="${estat.vista === 'menu'}">${icona('menu', 22)}<span>Menú</span></button>
+		<button type="button" data-vista="menu" aria-pressed="${estat.vista === 'menu'}">${icona('plat', 22)}<span>Menú</span></button>
+		<button type="button" data-vista="calendari" aria-pressed="${estat.vista === 'calendari'}">${icona('menu', 22)}<span>Calendari</span></button>
 		<button type="button" data-vista="receptes" aria-pressed="${estat.vista === 'receptes'}">${icona('recepta', 22)}<span>Receptes</span></button>
 		<button type="button" data-vista="regals" aria-pressed="${estat.vista === 'regals'}">${icona('regal', 22)}<span>Regals</span></button>
 	</nav>
 	${
 		full
 			? `<div class="vel${quiet ? ' quiet' : ''}" data-tancar-full></div><section class="full${quiet ? ' quiet' : ''}" data-t="${full.t}" role="dialog" aria-modal="true"><div class="full-nansa"></div><button type="button" class="full-tancar" data-tancar-full aria-label="Tancar">${icona('tancar', 18)}</button>${
-					{plat: () => fullPlat(full.dia), recepta: () => fullRecepta(full.id), perfil: fullPerfil, rapid: fullRapid, regal: () => fullRegal(full.id)}[full.t]()
+					{plat: () => fullPlat(full.dia), recepta: () => fullRecepta(full.id), perfil: fullPerfil, rapid: fullRapid, regal: () => fullRegal(full.id), dia: () => fullDia(full.dia)}[full.t]()
 				}</section>`
 			: ''
 	}`;
@@ -937,6 +1249,7 @@ document.addEventListener('click', (ev) => {
 		estat.vista = d.vista;
 		estat.editant = false;
 		window.scrollTo(0, 0);
+		if (['calendari', 'menu'].includes(d.vista)) carregarCalendaris();
 	} else if (d.fet) {
 		tocar(d.fet, {...f(d.fet), fet: true, fetQuan: ara(), perQui: estat.qui});
 		estat.ultim = d.fet;
@@ -1008,6 +1321,13 @@ document.addEventListener('click', (ev) => {
 		tocar(id, {...f(id), esborrat: true});
 		estat.full = null;
 		avisar(`«${f(id).nom}» esborrada`, () => tocar(id, {...f(id), esborrat: false}));
+	} else if (d.diaCal) estat.full = {t: 'dia', dia: d.diaCal};
+	else if (d.mesCal) estat.mesCal += Number(d.mesCal);
+	else if (d.treureCal) {
+		const id = d.treureCal;
+		tocar(id, {...f(id), esborrat: true});
+		delete estat.cal[id];
+		avisar(`Calendari «${f(id).nom}» tret`, () => tocar(id, {...f(id), esborrat: false}));
 	} else if (d.per) estat.perRegals = d.per;
 	else if (d.secreta !== undefined) estat.secreta = !estat.secreta;
 	else if (d.compro) {
@@ -1089,6 +1409,25 @@ document.addEventListener('submit', async (ev) => {
 		avisar('Desat');
 	} else if (form.id === 'form-entrar') {
 		await entrar(dades.get('codi'), dades.get('qui'));
+	} else if (form.id === 'form-cal') {
+		// un calendari nou: l'enllaç secret .ics de Google
+		const url = String(dades.get('url') ?? '').trim();
+		if (!/^https:\/\/calendar\.google\.com\/calendar\/ical\/.+\.ics$/.test(url)) return avisar('Ha de ser l’adreça secreta iCal de Google (acaba en .ics)');
+		const id = nouId();
+		tocar(id, {t: 'calendari', qui: estat.qui, nom: majuscula(String(dades.get('nom')).trim()), tipus: dades.get('tipus') === 'info' ? 'info' : 'plans', url});
+		pintar();
+		avisar('Calendari afegit');
+		carregarCalendaris(true);
+	} else if (form.id === 'form-apunta' || form.id === 'form-apunta-dia') {
+		// apuntar al Google Calendar: s'obre Google amb tot omplert i només cal tocar "Desar"
+		const text = String(dades.get('text') ?? '').trim();
+		if (text.length < 2) return;
+		const a = llegirApunt(text, form.dataset.dia);
+		window.open(enllacGoogle(a), '_blank', 'noopener');
+		form.querySelector('input').value = '';
+		const d = new Date(`${a.dia}T12:00`);
+		avisar(`${a.titol} · ${NOMS_DIES[d.getDay()].toLowerCase()} ${d.getDate()}${a.hora ? ` a les ${a.hora}` : ''}: toca «Desar» a Google`);
+		setTimeout(() => carregarCalendaris(true), 60e3); // quan torni, que ja hi surti
 	} else if (form.id === 'form-portar') {
 		const boto = form.querySelector('button');
 		boto.disabled = true;
@@ -1213,6 +1552,7 @@ async function entrar(codi, qui) {
 	pintar();
 	await sincronitzar();
 	sembrarReceptes();
+	carregarCalendaris();
 	pintar();
 }
 
