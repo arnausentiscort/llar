@@ -95,7 +95,7 @@ const PRODUCTES = [
 	['lactics', [['Llet', '🥛', 'leche'], ['Ous', '🥚', 'ou, huevo, huevos'], ['Iogurts', '🍦', 'iogurt, yogur, yogures'], ['Formatge', '🧀', 'queso'], ['Formatge ratllat', '🧀', 'queso rallado, parmesa, parmesano'], ['Mozzarella', '🧀', 'mozarella'], ['Mantega', '🧈', 'mantequilla'], ['Nata', '🥛', 'nata per cuinar'], ['Beixamel', '🥛', 'bechamel']]],
 	['embotit', [['Pernil salat', '🍖', 'pernil, jamon, jamon serrano'], ['Pernil dolç', '🍖', 'jamon york, jamon cocido'], ['Fuet', '🥓', 'llonganissa, salchichon'], ['Xoriço', '🌭', 'xorico, chorizo'], ['Gall dindi', '🦃', 'pavo'], ['Bacon', '🥓', 'baco, beicon']]],
 	['forn', [['Pa', '🥖', 'pan, barra de pa'], ['Pa de motlle', '🍞', 'pan de molde'], ['Pa d’hamburguesa', '🍔', 'pa d hamburguesa, pan de hamburguesa'], ['Tortites', '🌮', 'tortites de blat, tortillas de trigo, wraps'], ['Croissants', '🥐', 'croissant'], ['Magdalenes', '🧁', 'magdalena'], ['Torrades', '🍞', 'tostadas']]],
-	['rebost', [['Arròs', '🍚', 'arroz'], ['Pasta', '🍝', ''], ['Macarrons', '🍝', 'macarrones'], ['Espaguetis', '🍝', 'spaghetti'], ['Fideus', '🍜', 'fideos'], ['Plaques de lasanya', '🍝', 'lasanya, lasaña'], ['Oli', '🫒', 'aceite, oli d oliva'], ['Tomàquet fregit', '🥫', 'tomate frito'], ['Tomàquet triturat', '🥫', 'tomate triturado'], ['Tonyina', '🐟', 'atun, tonyina en conserva'], ['Llenties', '🫘', 'llentia, lentejas'], ['Cigrons', '🫘', 'garbanzos'], ['Mongetes', '🫘', 'mongeta, alubias, judias, fesols'], ['Brou', '🍲', 'caldo, brou de pollastre'], ['Pesto', '🌿', ''], ['Sal', '🧂', ''], ['Sucre', '🍬', 'azucar'], ['Cafè', '☕', 'cafe'], ['Cereals', '🥣', 'cereales, muesli'], ['Galetes', '🍪', 'galleta, galletas'], ['Xocolata', '🍫', 'chocolate, cacau, cola cao'], ['Mel', '🍯', 'miel'], ['Olives', '🫒', 'aceitunas'], ['Patates xips', '🥔', 'patatas fritas']]],
+	['rebost', [['Arròs', '🍚', 'arroz'], ['Pasta', '🍝', ''], ['Macarrons', '🍝', 'macarrones'], ['Espaguetis', '🍝', 'spaghetti'], ['Fideus', '🍜', 'fideos'], ['Plaques de lasanya', '🍝', 'lasanya, lasaña'], ['Oli', '🫒', 'aceite, oli d oliva'], ['Tomàquet fregit', '🥫', 'tomate frito'], ['Tomàquet triturat', '🥫', 'tomate triturado'], ['Tonyina', '🐟', 'atun, tonyina en conserva'], ['Llenties', '🫘', 'llentia, lentejas'], ['Cigrons', '🫘', 'garbanzos'], ['Mongetes', '🫘', 'mongeta, alubias, judias, fesols'], ['Brou', '🍲', 'caldo, brou de pollastre'], ['Pesto', '🌿', ''], ['Sal', '🧂', ''], ['Pebre', '🧂', 'pebre negre, pimienta'], ['Pebre vermell', '🌶️', 'pimenton, paprika'], ['Orenga', '🌿', 'oregano'], ['Julivert', '🌿', 'perejil'], ['Curri', '🍛', 'curry'], ['Comí', '🌿', 'comino'], ['Vinagre', '🍶', ''], ['Farina', '🌾', 'harina'], ['Sucre', '🍬', 'azucar'], ['Cafè', '☕', 'cafe'], ['Cereals', '🥣', 'cereales, muesli'], ['Galetes', '🍪', 'galleta, galletas'], ['Xocolata', '🍫', 'chocolate, cacau, cola cao'], ['Mel', '🍯', 'miel'], ['Olives', '🫒', 'aceitunas'], ['Patates xips', '🥔', 'patatas fritas']]],
 	['begudes', [['Aigua', '💧', 'agua'], ['Cervesa', '🍺', 'cerveza'], ['Vi', '🍷', 'vino'], ['Suc', '🧃', 'zumo'], ['Refrescos', '🥤', 'refresc, coca-cola, fanta']]],
 	['congelats', [['Pizza', '🍕', ''], ['Gelat', '🍨', 'helado'], ['Croquetes', '🧆', 'croquetas'], ['Verdura congelada', '🧊', 'congelats']]],
 	['neteja', [['Paper de cuina', '🧻', 'papel de cocina'], ['Paper higiènic', '🧻', 'papel higienico'], ['Detergent', '🫧', 'detergente, suavitzant'], ['Rentaplats', '🍽️', 'lavavajillas, sabo de plats'], ['Bosses d’escombraries', '🗑️', 'bolsas de basura'], ['Esponges', '🧽', 'fregall, estropajo, esponja'], ['Lleixiu', '🧪', 'lejia, netejador']]],
@@ -560,29 +560,131 @@ function dies() {
 	});
 }
 const nomDia = (dia) => dies().find((d) => d.dia === dia)?.nom ?? dia;
+// --- el menú (v2): cada dia, dinar i sopar; cada plat diu per a qui és i si se'n fan tuppers; i la nevera ---
+// Un àpat: {t: 'apat', dia, moment: 'dinar'|'sopar', tipus: 'recepta'|'tupper'|'fet', recepta?, nom, per: [qui...], tuppers}
+// La nevera: {t: 'nevera', nom, racions, des: dia (a partir de quan hi és), origen?: l'àpat que l'ha fet}
+const MOMENTS = [['dinar', '☀️', 'Dinar'], ['sopar', '🌙', 'Sopar']];
+const momentDe = (a) => a.moment ?? 'sopar'; // els d'abans no en tenien
+const perDe = (a) => (Array.isArray(a.per) && a.per.length ? a.per : PERSONES);
+const nevera = () => totes('nevera').filter((n) => !n.acabat && n.racions > 0).sort((a, b) => (a.des ?? '').localeCompare(b.des ?? ''));
+const demaDe = (dia) => diaDe(new Date(new Date(`${dia}T12:00`).getTime() + 864e5));
+// el moment que toca per defecte: avui, abans de les 16 h, el dinar; si no, el sopar
+const momentPerDefecte = (dia) => (dia === diaDe(new Date()) && new Date().getHours() < 16 ? 'dinar' : 'sopar');
+// qui menja a casa aquell àpat, segons els calendaris (si algú té un pla a l'hora de dinar o de sopar, no hi és)
+function perPerDefecte(dia, moment) {
+	const fora = foraDeCasa(totsEvents(), dia)
+		.filter((x) => x.apat === moment)
+		.map((x) => x.qui);
+	const hi = PERSONES.filter((p) => !fora.includes(p));
+	return hi.length ? hi : [...PERSONES];
+}
+// les receptes per quan fa pal cuinar: les marcades com a ràpides (i, si no n'hi ha cap de marcada, unes quantes de les de mostra)
+const RAPIDES_DE_MOSTRA = ['r-pizza', 'r-croquetes', 'r-quesadilles', 'r-pesto', 'r-ous-estrellats', 'r-salsitxes', 'r-sopa', 'r-tonyina', 'r-hamburgueses', 'r-bistec'];
+const esRapida = (r) => r.rapida ?? RAPIDES_DE_MOSTRA.includes(r.id);
+// les quantitats de les receptes són per a dos: per a una persona, la meitat; amb tuppers, més
+function escalar(items, f) {
+	if (f === 1) return items;
+	return items.map((i) => {
+		if (i.q == null) return i;
+		const q = i.q * f;
+		return {...i, q: i.u === 'g' || i.u === 'ml' ? Math.max(10, Math.round(q / 10) * 10) : i.u === 'u' ? Math.ceil(q * 2) / 2 : Math.ceil(q)};
+	});
+}
+const ICONA_TIPUS = {recepta: '🍳', tupper: '🥡', fet: '🛒'};
+function filaApat(a) {
+	const per = perDe(a);
+	const quins = per.length === PERSONES.length ? '' : per.map((q) => av(q)).join('');
+	return `<div class="plat"><span class="plat-tipus">${ICONA_TIPUS[a.tipus ?? (a.recepta ? 'recepta' : 'fet')]}</span><span class="plat-nom">${esc(a.nom)}${a.tuppers ? `<small>+${a.tuppers} 🥡 per a després</small>` : ''}</span>${quins ? `<span class="plat-per" title="Només per a ${per.join(' i ')}">${quins}</span>` : ''}<button type="button" data-treure-apat="${a.id}" aria-label="Treure ${esc(a.nom)}">${icona('tancar', 15)}</button></div>`;
+}
 function vistaMenu() {
 	const apats = totes('apat');
 	const ds = dies();
 	const n = apats.filter((a) => ds.some((d) => d.dia === a.dia)).length;
 	const evs = totsEvents();
+	const nev = nevera();
 	return `<header class="titol"><h1>Menú</h1><p>${n ? `${n} ${n === 1 ? 'plat' : 'plats'} aquesta setmana. ` : ''}Tria què menjareu i els ingredients van sols a la llista.</p></header>
+	<section class="nevera">
+		<h2>🧊 A la nevera <small>${nev.length ? `${nev.reduce((t, x) => t + x.racions, 0)} racions` : 'buida'}</small></h2>
+		${nev.length ? `<div class="nevera-xips">${nev.map((x) => `<button type="button" class="nevera-xip" data-nevera="${x.id}">🥡 ${esc(x.nom)} <small>${x.racions === 1 ? '1 ració' : `${xifra(x.racions)} racions`}</small></button>`).join('')}</div>` : ''}
+		<form id="form-nevera" class="nevera-afegir"><input name="text" id="text-nevera" placeholder="Hi ha: 2 tuppers de llenties, mig pollastre…" autocomplete="off" enterkeyhint="done"><button type="submit" aria-label="Afegir a la nevera">${icona('mes', 18)}</button></form>
+	</section>
 	${ds
 		.map((d) => {
-			const seus = apats.filter((a) => a.dia === d.dia);
+			const plans = delDia(evs, d.dia).filter((e) => e.tipus !== 'info');
 			return `<section class="dia${d.avui ? ' avui' : ''}">
 				<div class="dia-data"><b>${d.num}</b><span>${d.mes}</span></div>
 				<div class="dia-cos"><h2>${d.nom}</h2>
-					${(() => {
-						const plans = delDia(evs, d.dia).filter((e) => e.tipus !== 'info');
-						return plans.length ? `<p class="dia-plans">${plans.slice(0, 3).map((e) => `<span style="--c:${e.color}">${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}</span>`).join('')}</p>` : '';
-					})()}
-					${notaApats(evs, d.dia)}
-					${seus.map((a) => `<div class="plat">${av(a.qui)}<span>${esc(a.nom)}</span><button type="button" data-treure-apat="${a.id}" aria-label="Treure ${esc(a.nom)}">${icona('tancar', 15)}</button></div>`).join('')}
-					<button type="button" class="afegir-plat" data-obrir-dia="${d.dia}">${icona('mes', 15)} ${seus.length ? 'Un altre plat' : 'Afegir un plat'}</button>
+					${plans.length ? `<p class="dia-plans">${plans.slice(0, 3).map((e) => `<span style="--c:${e.color}">${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}</span>`).join('')}</p>` : ''}
+					${MOMENTS.map(([m, ic, nom]) => {
+						const seus = apats.filter((a) => a.dia === d.dia && momentDe(a) === m);
+						const fora = foraDeCasa(evs, d.dia).filter((x) => x.apat === m);
+						const nota = fora.length === PERSONES.length ? 'No sou cap a casa' : fora.length ? `${articleDe(fora[0].qui)}${fora[0].qui} no hi és (${fora[0].e.partit ? '⚽ ' : ''}${horaDe(fora[0].e.inici)})` : '';
+						// si no hi ha res i a la nevera hi ha un tupper, se suggereix
+						const tupper = !seus.length && nev.find((x) => (x.des ?? '') <= d.dia);
+						return `<div class="moment">
+							<h3>${ic} ${nom}${nota ? `<small>${esc(majuscula(nota))}</small>` : ''}</h3>
+							${seus.map(filaApat).join('')}
+							<div class="moment-botons">
+								<button type="button" class="afegir-plat" data-obrir-dia="${d.dia}" data-moment="${m}">${icona('mes', 15)} ${seus.length ? 'Un altre' : 'Afegir'}</button>
+								${tupper ? `<button type="button" class="suggeriment-tupper" data-de-nevera="${tupper.id}" data-dia="${d.dia}" data-moment="${m}">🥡 ${esc(tupper.nom)}?</button>` : ''}
+							</div>
+						</div>`;
+					}).join('')}
 				</div>
 			</section>`;
 		})
 		.join('')}`;
+}
+// triar què es menja: per a qui, quants tuppers, i d'on surt (la nevera, una cosa ràpida, una recepta o un plat fet)
+function fullPlat(full) {
+	const {dia, moment} = full;
+	const per = full.per;
+	const rs = receptesOrdenades();
+	const rapides = rs.filter(esRapida);
+	const nev = nevera();
+	const racions = per.length + (full.tuppers ?? 0);
+	const d = new Date(`${dia}T12:00`);
+	const quan = dia === diaDe(new Date()) ? 'avui' : dia === demaDe(diaDe(new Date())) ? 'demà' : `${NOMS_DIES[d.getDay()].toLowerCase()} ${d.getDate()}`;
+	const fila = (r) =>
+		`<li data-nom="${esc(normal(`${r.nom} ${ingredientsDe(r).map((i) => i.nom).join(' ')}`))}"><button type="button" data-apat="${r.id}"><b>${esc(r.nom)}</b><small>${iconesRecepta(r)} ${esc(resumIngredients(r))}</small></button></li>`;
+	return `<h2>Què menjareu ${quan}?</h2>
+	<div class="plat-opcions">
+		<div class="segment">${MOMENTS.map(([m, ic, nom]) => `<button type="button" data-plat-moment="${m}" aria-pressed="${m === moment}">${ic} ${nom}</button>`).join('')}</div>
+		<div class="plat-per-tria"><span>Per a</span>${PERSONES.map((p) => `<button type="button" class="persona-xip${per.includes(p) ? ' actiu' : ''}" data-plat-per="${p}" aria-pressed="${per.includes(p)}">${av(p)} ${p}</button>`).join('')}</div>
+		<div class="plat-tuppers"><span>🥡 Tuppers per a després</span><div class="ing-q-grup"><button type="button" class="ing-pas" data-plat-tupper="-1" aria-label="Menys">−</button><b>${full.tuppers ?? 0}</b><button type="button" class="ing-pas" data-plat-tupper="1" aria-label="Més">+</button></div></div>
+		<p class="plat-racions">${racions} ${racions === 1 ? 'ració' : 'racions'}: les receptes són per a dos, així que els ingredients ${racions === 2 ? 'van tal qual' : racions < 2 ? 'van a la meitat' : `es multipliquen per ${xifra(racions / 2)}`}.${full.tuppers ? ' Els tuppers aniran sols a la nevera.' : ''}</p>
+	</div>
+	${nev.length ? `<h3 class="plat-sub">🧊 De la nevera</h3><ul class="triar">${nev.map((x) => `<li><button type="button" data-de-nevera="${x.id}"><b>🥡 ${esc(x.nom)}</b><small>${x.racions === 1 ? '1 ració' : `${xifra(x.racions)} racions`}</small></button></li>`).join('')}</ul>` : ''}
+	${rapides.length ? `<h3 class="plat-sub">⚡ Si fa pal cuinar</h3><ul class="triar">${rapides.map(fila).join('')}</ul>` : ''}
+	<h3 class="plat-sub">📖 Les receptes</h3>
+	<label class="cerca">${icona('cerca', 17)}<input type="search" id="cerca-plat" placeholder="Cercar un plat" autocomplete="off"></label>
+	<ul class="triar receptes-triar">${rs.filter((r) => !esRapida(r)).map(fila).join('')}</ul>
+	<h3 class="plat-sub">🛒 Una altra cosa</h3>
+	<form id="form-plat-lliure" class="plat-lliure">
+		<input name="nom" placeholder="Un plat fet, sopar fora, pizza del súper…" autocomplete="off" required>
+		<button type="submit" aria-label="Afegir">${icona('mes', 18)}</button>
+	</form>
+	<label class="comprar-tambe"><input type="checkbox" name="comprar" form="form-plat-lliure"> Posar-lo també a la llista de la compra</label>`;
+}
+// la nevera, una cosa: quantes racions queden, menjar-la un dia o dir que s'ha acabat
+function fullNevera(id) {
+	const x = estat.files[id]?.o;
+	if (!x) return '<h2>Ja no hi és</h2>';
+	const avui = diaDe(new Date());
+	const dema = demaDe(avui);
+	const opcions = [[avui, 'dinar', 'Avui dinar'], [avui, 'sopar', 'Avui sopar'], [dema, 'dinar', 'Demà dinar'], [dema, 'sopar', 'Demà sopar']].filter(([d, m]) => !(d === avui && m === 'dinar' && new Date().getHours() >= 16));
+	return `<h2>🥡 ${esc(x.nom)}</h2>
+	<div class="plat-tuppers"><span>Racions</span><div class="ing-q-grup"><button type="button" class="ing-pas" data-nevera-pas="-1" data-id="${id}" aria-label="Menys">−</button><b>${xifra(x.racions)}</b><button type="button" class="ing-pas" data-nevera-pas="1" data-id="${id}" aria-label="Més">+</button></div></div>
+	<h3 class="plat-sub">Menjar-ne</h3>
+	<div class="nevera-quan">${opcions.map(([d, m, nom]) => `<button type="button" class="boto-suau" data-de-nevera="${id}" data-dia="${d}" data-moment="${m}">${nom}</button>`).join('')}</div>
+	<button type="button" class="boto-perill" data-nevera-acabat="${id}">${icona('paperera', 16)} Ja s’ha acabat</button>`;
+}
+// "2 tuppers de llenties", "mig pollastre", "pizza" → {nom, racions}
+function llegirNevera(text) {
+	const m = text.trim().match(/^(\d+(?:[.,]\d+)?|un|una|dos|dues|tres|quatre|mig|mitja)\s+(?:(?:tuppers?|racions?|plats?)\s+)?(?:(?:de|d['’])\s*)?(.+)$/i);
+	const nombres = {un: 1, una: 1, dos: 2, dues: 2, tres: 3, quatre: 4, mig: 1, mitja: 1};
+	if (!m) return {nom: majuscula(text.trim()), racions: 1};
+	return {nom: majuscula(m[2].trim()), racions: Number(nombres[m[1].toLowerCase()] ?? m[1].replace(',', '.')) || 1};
 }
 
 // --- el receptari ---
@@ -1112,53 +1214,145 @@ function seccioCalendaris() {
 }
 
 // --- els fulls de baix ---
-function fullPlat(dia) {
-	const rs = receptesOrdenades();
-	return `<h2>Què menjareu ${dia === diaDe(new Date()) ? 'avui' : nomDia(dia) === 'Demà' ? 'demà' : `el ${nomDia(dia).toLowerCase()}`}?</h2>
-	<label class="cerca">${icona('cerca', 17)}<input type="search" id="cerca-plat" placeholder="Cercar un plat" autocomplete="off"></label>
-	<ul class="triar">${rs
-		.map(
-			(r) =>
-				`<li data-nom="${esc(normal(`${r.nom} ${ingredientsDe(r).map((i) => i.nom).join(' ')}`))}"><button type="button" data-apat="${r.id}" data-dia="${dia}"><b>${esc(r.nom)}</b><small>${iconesRecepta(r)} ${esc(resumIngredients(r))}</small></button></li>`,
-		)
-		.join('')}</ul>
-	<form id="form-plat-lliure" class="plat-lliure" data-dia="${dia}">
-		<input name="nom" placeholder="Un altre plat (sense recepta)" autocomplete="off" required>
-		<button type="submit" aria-label="Afegir">${icona('mes', 18)}</button>
-	</form>`;
-}
 // la recepta oberta s'edita en un esborrany (estat.full.esb), que no es perd si arriba un canvi de l'altre mòbil
 const esborranyDe = (id) => {
 	const r = id ? estat.files[id]?.o : null;
-	return {nom: r?.nom ?? '', ing: ingredientsDe(r)};
+	return {nom: r?.nom ?? '', ing: ingredientsDe(r), rapida: r ? esRapida({...r, id}) : false};
 };
+// --- afegir ingredients amb ajuda: suggeriments mentre s'escriu, la quantitat de sempre ja posada, i el rebost d'un toc ---
+// La quantitat habitual de cada producte per a dos (si encara no l'heu fet servir mai en cap recepta)
+const HABITUAL = {
+	pasta: [1, 'paquet'], macarrons: [1, 'paquet'], espaguetis: [1, 'paquet'], fideus: [100, 'g'], 'plaques de lasanya': [1, 'paquet'], arros: [200, 'g'],
+	'carn picada': [300, 'g'], pollastre: [400, 'g'], bistecs: [2, 'u'], llom: [400, 'g'], hamburgueses: [2, 'u'], salsitxes: [6, 'u'], botifarra: [2, 'u'],
+	salmo: [2, 'u'], lluc: [2, 'u'], bacalla: [300, 'g'], gambes: [250, 'g'], calamars: [300, 'g'], bacon: [150, 'g'], 'pernil dolc': [100, 'g'],
+	'pernil salat': [100, 'g'], xorico: [100, 'g'], fuet: [1, 'u'], formatge: [100, 'g'], mozzarella: [1, 'u'], nata: [200, 'ml'], llet: [500, 'ml'],
+	beixamel: [500, 'ml'], ous: [2, 'u'], mantega: [50, 'g'], iogurts: [2, 'u'], 'tomaquet fregit': [1, 'pot'], 'tomaquet triturat': [1, 'pot'],
+	tonyina: [2, 'llauna'], llenties: [1, 'pot'], cigrons: [1, 'pot'], mongetes: [1, 'pot'], brou: [1000, 'ml'], pesto: [1, 'pot'], tortites: [1, 'paquet'],
+	'pa d’hamburguesa': [1, 'paquet'], pa: [1, 'u'], croquetes: [1, 'paquet'], pizza: [1, 'u'], espinacs: [1, 'bossa'], enciam: [1, 'u'], tomaquets: [2, 'u'],
+	cebes: [1, 'u'], patates: [3, 'u'], pastanagues: [2, 'u'], pebrots: [1, 'u'], carbasso: [1, 'u'], carbassa: [800, 'g'], porros: [1, 'u'], bolets: [200, 'g'],
+	alberginia: [1, 'u'], cogombre: [1, 'u'], llimones: [1, 'u'], platans: [2, 'u'], alvocat: [1, 'u'], 'blat de moro': [1, 'llauna'],
+};
+// el que es té sempre a casa, per afegir-ho a la recepta d'un toc
+const REBOST_RAPID = ['Sal', 'Oli', 'Pebre', 'Alls', 'Pebre vermell', 'Orenga', 'Formatge ratllat', 'Julivert', 'Vinagre', 'Comí', 'Curri', 'Sucre', 'Farina'];
+// quantes receptes fan servir cada producte, i com (per ordenar els suggeriments i saber la quantitat de sempre)
+function usosIngredients() {
+	const usos = new Map();
+	for (const r of totes('recepta'))
+		for (const i of ingredientsDe(r)) {
+			const k = canon(i.nom);
+			const x = usos.get(k) ?? {n: 0, quant: {}};
+			x.n++;
+			if (i.q != null && !i.rebost) x.quant[`${i.q}|${i.u}`] = (x.quant[`${i.q}|${i.u}`] ?? 0) + 1;
+			usos.set(k, x);
+		}
+	return usos;
+}
+// la quantitat que se sol posar d'un producte: la que més heu fet servir vosaltres; si no, la de sempre
+function habitual(nom, usos = usosIngredients()) {
+	const q = Object.entries(usos.get(canon(nom))?.quant ?? {}).sort((a, b) => b[1] - a[1])[0];
+	if (q) {
+		const [n, u] = q[0].split('|');
+		return {q: Number(n), u};
+	}
+	const h = HABITUAL[canon(nom)];
+	return h ? {q: h[0], u: h[1]} : null;
+}
+// tots els productes que es poden suggerir: els de les vostres receptes, els del catàleg, els del rebost i els de la llista
+function catalegIngredients() {
+	const vist = new Map();
+	const posa = (nom) => {
+		const k = canon(nom);
+		if (nom && !vist.has(k)) vist.set(k, nomProducte(nom));
+	};
+	for (const r of totes('recepta')) for (const i of ingredientsDe(r)) posa(i.nom);
+	for (const [, ps] of PRODUCTES) for (const [nom] of ps) posa(nom);
+	for (const n of REBOST_RAPID) posa(n);
+	for (const c of totes('cosa')) posa(c.nom);
+	return [...vist.values()];
+}
+// un ingredient a punt d'afegir: si s'ha escrit la quantitat, aquella; si no, la de sempre (i si és de rebost, sense)
+function completar(nom, llegit, usos) {
+	const rebost = llegit?.q == null && (llegit?.rebost || esDelRebost(nom));
+	const h = rebost || llegit?.q != null ? null : habitual(nom, usos);
+	return {nom: nomProducte(nom), q: llegit?.q ?? h?.q ?? null, u: llegit?.q != null ? llegit.u : (h?.u ?? 'u'), rebost, escrit: llegit?.q != null};
+}
+// el que surt sota la casella mentre s'escriu ("ceb" → Cebes ×1, "3 ou" → Ous ×3)
+function suggerimentsIng(text) {
+	if (!text.trim() || /[,;\n]/.test(text)) return [];
+	const llegit = llegirIngredient(text);
+	const t = normal(llegit.nom);
+	if (t.length < 2) return [];
+	const usos = usosIngredients();
+	const trobats = catalegIngredients()
+		.map((nom) => ({nom, n: normal(nom)}))
+		.filter((x) => x.n.includes(t) || formesDe(t).some((f) => f.length > 1 && x.n.startsWith(f)))
+		.sort((a, b) => (canon(b.nom) === canon(llegit.nom)) - (canon(a.nom) === canon(llegit.nom)) || b.n.startsWith(t) - a.n.startsWith(t) || (usos.get(canon(b.nom))?.n ?? 0) - (usos.get(canon(a.nom))?.n ?? 0) || a.nom.length - b.nom.length)
+		.slice(0, 5)
+		.map((x) => completar(x.nom, llegit, usos));
+	// si el que s'ha escrit no és cap dels de la llista, també es pot afegir tal qual
+	if (!trobats.some((x) => normal(x.nom).startsWith(t))) trobats.push({...completar(llegit.nom, llegit, usos), nou: true});
+	return trobats;
+}
+const textQuantitat = (i) => (i.rebost ? 'del rebost' : i.q != null ? quantitat(i.q, i.u) : 'sense quantitat');
+// posa un ingredient a la recepta; si ja hi era, no el repeteix (si s'ha escrit una quantitat nova, la canvia)
+function posaIngredient(nou) {
+	const esb = estat.full.esb;
+	const i = esb.ing.findIndex((x) => canon(x.nom) === canon(nou.nom));
+	if (i < 0) {
+		esb.ing.push({nom: nou.nom, q: nou.q, u: nou.u, rebost: nou.rebost});
+		estat.full.flash = esb.ing.length - 1;
+		return;
+	}
+	if (nou.escrit) Object.assign(esb.ing[i], {q: nou.q, u: nou.u, rebost: false});
+	estat.full.flash = i;
+	avisar(nou.escrit ? `${esb.ing[i].nom}: ara ${textQuantitat(esb.ing[i])}` : `${esb.ing[i].nom} ja hi és`);
+}
+// el pas dels botons − i + segons la unitat (d'1 en 1, de 50 g en 50 g...)
+const PAS = {u: 1, g: 50, ml: 50, paquet: 1, pot: 1, llauna: 1, bossa: 1};
 function filaIngredient(i, n) {
 	const unitats = Object.entries(UNITATS)
-		.map(([u, [un, molts]]) => `<option value="${u}"${i.u === u ? ' selected' : ''}>${u === 'u' ? 'unitats' : u === 'g' || u === 'ml' ? u : molts}</option>`)
+		.map(([u, [, molts]]) => `<option value="${u}"${i.u === u ? ' selected' : ''}>${u === 'u' ? 'unitats' : u === 'g' || u === 'ml' ? u : molts}</option>`)
 		.join('');
-	return `<div class="ing${i.rebost ? ' rebost' : ''}" style="--c:${colorCat(catDe(i.nom))}">
+	return `<div class="ing${estat.full?.flash === n ? ' flash' : ''}" style="--c:${colorCat(catDe(i.nom))}">
 		<span class="ic-cosa">${iconaDe(i.nom)}</span>
 		<input class="ing-nom" id="ing-nom-${n}" data-camp="nom" data-i="${n}" value="${esc(i.nom)}" aria-label="Ingredient" autocomplete="off">
-		${
-			i.rebost
-				? `<span class="ing-rebost">del rebost</span>`
-				: `<input class="ing-q" id="ing-q-${n}" data-camp="q" data-i="${n}" type="number" inputmode="decimal" step="any" min="0" placeholder="—" value="${i.q ?? ''}" aria-label="Quantitat"><select class="ing-u" id="ing-u-${n}" data-camp="u" data-i="${n}" aria-label="Unitat">${unitats}</select>`
-		}
-		<button type="button" class="ing-tipus${i.rebost ? ' actiu' : ''}" data-ing-rebost="${n}" title="${i.rebost ? 'És del rebost: no va a la llista' : 'Marcar com a rebost (sal, pebre, oli…)'}" aria-pressed="${i.rebost}"><span>🧂</span>Rebost</button>
 		<button type="button" class="ing-treure" data-ing-treure="${n}" aria-label="Treure ${esc(i.nom)}">${icona('tancar', 15)}</button>
+		<div class="ing-fila2">
+		<div class="ing-q-grup">
+			<button type="button" class="ing-pas" data-ing-pas="${n}" data-sentit="-1" aria-label="Menys">−</button>
+			<input class="ing-q" id="ing-q-${n}" data-camp="q" data-i="${n}" type="number" inputmode="decimal" step="any" min="0" placeholder="—" value="${i.q ?? ''}" aria-label="Quantitat">
+			<button type="button" class="ing-pas" data-ing-pas="${n}" data-sentit="1" aria-label="Més">+</button>
+		</div>
+		<select class="ing-u" id="ing-u-${n}" data-camp="u" data-i="${n}" aria-label="Unitat">${unitats}</select>
+		<button type="button" class="ing-tipus" data-ing-rebost="${n}" title="Passar-lo al rebost: el teniu sempre i no va a la llista"><span>🧂</span></button>
+		</div>
 	</div>`;
 }
 function fullRecepta(id) {
 	const r = id ? estat.files[id]?.o : null;
 	const esb = (estat.full.esb ??= esborranyDe(id));
-	return `<h2>${r ? 'La recepta' : 'Una recepta nova'}</h2>
+	const compra = esb.ing.map((i, n) => [i, n]).filter(([i]) => !i.rebost);
+	const rebost = esb.ing.map((i, n) => [i, n]).filter(([i]) => i.rebost);
+	const jaHi = new Set(esb.ing.map((i) => canon(i.nom)));
+	const rapids = REBOST_RAPID.filter((n) => !jaHi.has(canon(n))).slice(0, 8);
+	const html = `<h2>${r ? 'La recepta' : 'Una recepta nova'}</h2>
 	<form id="form-recepta" class="form-recepta" data-id="${id ?? ''}">
 		<label>Nom del plat<input id="rec-nom" name="nom" value="${esc(esb.nom)}" placeholder="Espaguetis a la carbonara" required autocomplete="off"></label>
+		<button type="button" class="rapida-tria${esb.rapida ? ' actiu' : ''}" data-rapida aria-pressed="${!!esb.rapida}">⚡ ${esb.rapida ? 'És ràpida: surt a «Si fa pal cuinar»' : 'Marcar-la com a ràpida (per si fa pal cuinar)'}</button>
 		<div class="ings">
 			<div class="ings-cap"><b>Ingredients</b><small>per a vosaltres dos</small></div>
-			${esb.ing.map(filaIngredient).join('')}
-			<div class="ing-nou"><input id="ing-nou" placeholder="3 ous, 1 paquet de pasta, pebre…" autocomplete="off" enterkeyhint="enter"><button type="button" data-ing-afegir aria-label="Afegir l’ingredient">${icona('mes', 18)}</button></div>
-			<p class="pista">Escriu-los com els diries: «3 ous», «200 g de bacon», «1 paquet de pasta». 🧂 = del rebost (sal, pebre, oli…): el teniu sempre i no va a la llista. Sense quantitat, va a la llista sense número.</p>
+			<div class="ing-nou">
+				<textarea id="ing-nou" rows="1" placeholder="Escriu un ingredient: ous, pasta, 200 g de bacon…" autocomplete="off" autocorrect="off" enterkeyhint="enter"></textarea>
+				<button type="button" data-ing-afegir aria-label="Afegir l’ingredient">${icona('mes', 18)}</button>
+			</div>
+			<div class="ing-sug" id="ing-sug" hidden></div>
+			<p class="pista">Escriu i tria’l de la llista: ja hi posa la quantitat de sempre, que pots canviar amb − i +. També pots enganxar-ne uns quants, separats per comes o en línies.</p>
+			${compra.length ? `<h3 class="ings-sub">🛒 Per comprar <small>${compra.length}</small></h3>${compra.map(([i, n]) => filaIngredient(i, n)).join('')}` : ''}
+			<h3 class="ings-sub">🧂 Del rebost <small>no va a la llista</small></h3>
+			<div class="rebost-xips">
+				${rebost.map(([i, n]) => `<span class="ing-xip${estat.full.flash === n ? ' flash' : ''}">${iconaDe(i.nom)} ${esc(i.nom)}<button type="button" data-ing-rebost="${n}" title="Passar-lo a «per comprar»" aria-label="Passar ${esc(i.nom)} a per comprar">🛒</button><button type="button" data-ing-treure="${n}" aria-label="Treure ${esc(i.nom)}">${icona('tancar', 13)}</button></span>`).join('')}
+				${rapids.map((n) => `<button type="button" class="ing-rapid" data-ing-rapid="${esc(n)}">${icona('mes', 12)} ${esc(n)}</button>`).join('')}
+			</div>
 		</div>
 		<button type="submit" class="boto-gran">${r ? 'Desar els canvis' : 'Desar la recepta'}</button>
 	</form>
@@ -1167,6 +1361,8 @@ function fullRecepta(id) {
 			? `<div class="full-botons"><button type="button" class="boto-suau" data-a-llista="${id}">${icona('llista', 16)} Ingredients a la llista</button><button type="button" class="boto-perill" data-esborrar-recepta="${id}">${icona('paperera', 16)} Esborrar</button></div>`
 			: ''
 	}`;
+	estat.full.flash = null; // l'últim afegit brilla un cop
+	return html;
 }
 const ESTAT_XARXA = {
 	'al-dia': 'Tot desat i compartit',
@@ -1264,7 +1460,7 @@ function pintar() {
 	${
 		full
 			? `<div class="vel${quiet ? ' quiet' : ''}" data-tancar-full></div><section class="full${quiet ? ' quiet' : ''}" data-t="${full.t}" role="dialog" aria-modal="true"><div class="full-nansa"></div><button type="button" class="full-tancar" data-tancar-full aria-label="Tancar">${icona('tancar', 18)}</button>${
-					{plat: () => fullPlat(full.dia), recepta: () => fullRecepta(full.id), perfil: fullPerfil, rapid: fullRapid, regal: () => fullRegal(full.id), dia: () => fullDia(full.dia), apunta: () => fullApunta(full.dia)}[full.t]()
+					{plat: () => fullPlat(full), nevera: () => fullNevera(full.id), recepta: () => fullRecepta(full.id), perfil: fullPerfil, rapid: fullRapid, regal: () => fullRegal(full.id), dia: () => fullDia(full.dia), apunta: () => fullApunta(full.dia)}[full.t]()
 				}</section>`
 			: ''
 	}`;
@@ -1326,36 +1522,110 @@ document.addEventListener('click', (ev) => {
 	else if (d.editar !== undefined) estat.editant = !estat.editant;
 	else if (d.compartir !== undefined) return compartir();
 	else if (d.noInstallar !== undefined) guardat.posar('llar-no-installar', true);
-	else if (d.obrirDia) estat.full = {t: 'plat', dia: d.obrirDia};
+	else if (d.obrirDia) {
+		const m = d.moment || momentPerDefecte(d.obrirDia);
+		estat.full = {t: 'plat', dia: d.obrirDia, moment: m, per: perPerDefecte(d.obrirDia, m), tuppers: 0};
+	} else if (d.platMoment) Object.assign(estat.full, {moment: d.platMoment, per: perPerDefecte(estat.full.dia, d.platMoment)});
+	else if (d.platPer) {
+		const per = estat.full.per.includes(d.platPer) ? estat.full.per.filter((q) => q !== d.platPer) : [...estat.full.per, d.platPer];
+		if (per.length) estat.full.per = PERSONES.filter((q) => per.includes(q));
+	} else if (d.platTupper) estat.full.tuppers = Math.max(0, Math.min(6, (estat.full.tuppers ?? 0) + Number(d.platTupper)));
+	else if (d.nevera) estat.full = {t: 'nevera', id: d.nevera};
+	else if (d.neveraPas) {
+		const x = f(d.id);
+		const racions = Math.max(0, x.racions + Number(d.neveraPas));
+		tocar(d.id, {...x, racions, acabat: racions <= 0});
+		if (!racions) estat.full = null;
+	} else if (d.neveraAcabat) {
+		const id = d.neveraAcabat;
+		tocar(id, {...f(id), acabat: true});
+		estat.full = null;
+		avisar(`${f(id).nom}: fora de la nevera`, () => tocar(id, {...f(id), acabat: false}));
+	} else if (d.deNevera) {
+		// menjar-se un tupper: surt de la nevera (tantes racions com persones) i va al menú
+		const id = d.deNevera;
+		const x = f(id);
+		const enPlat = estat.full?.t === 'plat';
+		const dia = d.dia || estat.full?.dia || diaDe(new Date());
+		const moment = d.moment || estat.full?.moment || momentPerDefecte(dia);
+		const per = enPlat ? estat.full.per : perPerDefecte(dia, moment);
+		const menja = Math.min(per.length, x.racions);
+		tocar(id, {...x, racions: x.racions - menja, acabat: x.racions - menja <= 0});
+		const apat = nouId();
+		tocar(apat, {t: 'apat', dia, moment, tipus: 'tupper', nevera: id, consumides: menja, nom: x.nom, per, qui: estat.qui});
+		estat.full = null;
+		const dd = new Date(`${dia}T12:00`);
+		avisar(`🥡 ${x.nom}: ${moment === 'dinar' ? 'dinar' : 'sopar'} ${dia === diaDe(new Date()) ? 'd’avui' : `del ${NOMS_DIES[dd.getDay()].toLowerCase()}`}`, () => {
+			tocar(apat, {...f(apat), esborrat: true});
+			tocar(id, {...f(id), racions: f(id).racions + menja, acabat: false});
+		});
+	}
 	else if (d.apat) {
 		// el plat al menú, i el que cal comprar a la llista (sumat al que ja hi havia)
+		// per a qui és, quants tuppers se'n fan i, per tant, quantes racions (les receptes són per a dos)
 		const r = f(d.apat);
+		const full = estat.full;
 		const apat = nouId();
-		tocar(apat, {t: 'apat', dia: d.dia, recepta: d.apat, nom: r.nom, qui: estat.qui});
-		const {nous, sumats} = posarALlista(perComprar(r), apat);
+		const tuppers = full.tuppers ?? 0;
+		const racions = full.per.length + tuppers;
+		tocar(apat, {t: 'apat', dia: full.dia, moment: full.moment, tipus: 'recepta', recepta: d.apat, nom: r.nom, per: full.per, tuppers, qui: estat.qui});
+		const {nous, sumats} = posarALlista(escalar(perComprar(r), racions / 2), apat);
+		// els tuppers que en sobraran van sols a la nevera, a partir de l'endemà
+		const neveraId = tuppers ? nouId() : null;
+		if (neveraId) tocar(neveraId, {t: 'nevera', nom: r.nom, racions: tuppers, des: demaDe(full.dia), origen: apat, qui: estat.qui, quan: ara()});
 		const n = nous.length + sumats;
 		const rebost = delRebost(r).map((i) => i.nom.toLowerCase());
 		estat.full = null;
-		avisar(`${r.nom}: ${n ? `${n} ${n === 1 ? 'cosa' : 'coses'} a la llista` : 'no cal comprar res'}${rebost.length ? ` · mireu que tingueu ${rebost.slice(0, 3).join(', ')}` : ''}`, () => {
+		avisar(`${r.nom}: ${n ? `${n} ${n === 1 ? 'cosa' : 'coses'} a la llista` : 'no cal comprar res'}${tuppers ? ` · ${tuppers} 🥡 a la nevera` : ''}${rebost.length ? ` · mireu que tingueu ${rebost.slice(0, 2).join(', ')}` : ''}`, () => {
 			treureDeLlista(apat);
 			tocar(apat, {...f(apat), esborrat: true});
+			if (neveraId) tocar(neveraId, {...f(neveraId), esborrat: true});
 		});
 	} else if (d.treureApat) {
 		// treure el plat del menú també treu de la llista el que havia posat
 		const id = d.treureApat;
-		tocar(id, {...f(id), esborrat: true});
+		const a = f(id);
+		tocar(id, {...a, esborrat: true});
 		treureDeLlista(id);
-		avisar(`«${f(id).nom}» fora del menú i de la llista`, () => {
+		// si era un tupper, torna a la nevera; si n'havia de fer, aquests fora
+		if (a.tipus === 'tupper' && f(a.nevera)) tocar(a.nevera, {...f(a.nevera), racions: f(a.nevera).racions + (a.consumides ?? 1), acabat: false});
+		const fets = totes('nevera').filter((x) => x.origen === id);
+		for (const x of fets) tocar(x.id, {...f(x.id), esborrat: true});
+		avisar(`«${a.nom}» fora del menú${a.recepta ? ' i de la llista' : ''}`, () => {
 			tocar(id, {...f(id), esborrat: false});
-			const r = f(id).recepta && f(f(id).recepta);
-			if (r) posarALlista(perComprar(r), id);
+			const r = a.recepta && f(a.recepta);
+			if (r) posarALlista(escalar(perComprar(r), (perDe(a).length + (a.tuppers ?? 0)) / 2), id);
+			if (a.tipus === 'tupper' && f(a.nevera)) tocar(a.nevera, {...f(a.nevera), racions: Math.max(0, f(a.nevera).racions - (a.consumides ?? 1)), acabat: f(a.nevera).racions - (a.consumides ?? 1) <= 0});
+			for (const x of fets) tocar(x.id, {...f(x.id), esborrat: false});
 		});
 	} else if (d.recepta !== undefined) estat.full = {t: 'recepta', id: d.recepta || null};
+	else if (d.rapida !== undefined) estat.full.esb.rapida = !estat.full.esb.rapida;
 	else if (d.ingAfegir !== undefined) afegirIngredients();
-	else if (d.ingTreure !== undefined) estat.full.esb.ing.splice(Number(d.ingTreure), 1);
-	else if (d.ingRebost !== undefined) {
+	else if (d.ingSug !== undefined) {
+		const s = estat.full.sugg?.[Number(d.ingSug)];
+		if (s) posaIngredient(s);
+		const caixa = document.getElementById('ing-nou');
+		if (caixa) caixa.value = '';
+		estat.full.sugg = [];
+	} else if (d.ingRapid) posaIngredient({nom: d.ingRapid, q: null, u: 'u', rebost: true});
+	else if (d.ingTreure !== undefined) {
+		const [fora] = estat.full.esb.ing.splice(Number(d.ingTreure), 1);
+		avisar(`${fora.nom} fora de la recepta`, () => {
+			estat.full?.esb?.ing.push(fora);
+			pintar();
+		});
+	} else if (d.ingRebost !== undefined) {
+		// passar del rebost a "per comprar" (amb la quantitat de sempre) o al revés
 		const i = estat.full.esb.ing[Number(d.ingRebost)];
 		i.rebost = !i.rebost;
+		if (!i.rebost && i.q == null) Object.assign(i, habitual(i.nom) ?? {q: 1, u: 'u'});
+		estat.full.flash = Number(d.ingRebost);
+	} else if (d.ingPas !== undefined) {
+		// − i +: d'1 en 1 (o de mig en mig per sota d'1), de 50 g en 50 g...
+		const i = estat.full.esb.ing[Number(d.ingPas)];
+		const pas = i.u === 'u' && (i.q ?? 1) <= 1 && d.sentit === '-1' ? 0.5 : (PAS[i.u] ?? 1);
+		const q = Math.round(((i.q ?? 0) + pas * Number(d.sentit)) * 100) / 100;
+		i.q = q > 0 ? q : null;
 	} else if (d.aLlista) {
 		const r = f(d.aLlista);
 		const {nous, sumats} = posarALlista(perComprar(r));
@@ -1433,17 +1703,29 @@ document.addEventListener('submit', async (ev) => {
 		if (!nom) return;
 		if (!ingredients.length) return avisar('Posa-hi algun ingredient');
 		const id = form.dataset.id || nouId();
-		tocar(id, {...(estat.files[id]?.o ?? {qui: estat.qui}), t: 'recepta', nom, ingredients});
+		tocar(id, {...(estat.files[id]?.o ?? {qui: estat.qui}), t: 'recepta', nom, ingredients, rapida: !!esb.rapida});
 		estat.full = null;
 		pintar();
 		avisar(form.dataset.id ? 'Recepta desada' : 'Recepta nova desada');
 	} else if (form.id === 'form-plat-lliure') {
+		// un plat fet (comprat, de fora...): al menú, i si cal, a la llista
 		const nom = majuscula(String(dades.get('nom')).trim());
 		if (!nom) return;
-		tocar(nouId(), {t: 'apat', dia: form.dataset.dia, recepta: null, nom, qui: estat.qui});
+		const full = estat.full;
+		tocar(nouId(), {t: 'apat', dia: full.dia, moment: full.moment, tipus: 'fet', recepta: null, nom, per: full.per, qui: estat.qui});
+		if (dades.get('comprar')) afegir([nom]);
 		estat.full = null;
 		pintar();
-		avisar(`${nom} al menú`);
+		avisar(`${nom} al menú${dades.get('comprar') ? ' i a la llista' : ''}`);
+	} else if (form.id === 'form-nevera') {
+		// el que hi ha a la nevera ("2 tuppers de llenties")
+		const text = String(dades.get('text') ?? '').trim();
+		if (!text) return;
+		const x = llegirNevera(text);
+		tocar(nouId(), {t: 'nevera', nom: x.nom, racions: x.racions, des: diaDe(new Date()), qui: estat.qui, quan: ara()});
+		form.querySelector('input').value = '';
+		pintar();
+		avisar(`🥡 ${x.nom} a la nevera`);
 	} else if (form.id === 'form-regal') {
 		const llista = trossosRegals(dades.get('text'), perRegals());
 		if (!llista.length) return;
@@ -1506,13 +1788,11 @@ document.addEventListener('keydown', (ev) => {
 		ev.target.form.requestSubmit();
 	}
 	// a la recepta, Intro a la casella d'ingredients l'afegeix (i a les altres no envia el formulari)
-	if (ev.key === 'Enter' && ev.target.matches('#form-recepta input')) {
+	if (ev.key === 'Enter' && !ev.shiftKey && ev.target.id === 'ing-nou') {
 		ev.preventDefault();
-		if (ev.target.id === 'ing-nou') {
-			afegirIngredients();
-			pintar();
-		}
-	}
+		afegirIngredients();
+		pintar();
+	} else if (ev.key === 'Enter' && ev.target.matches('#form-recepta input')) ev.preventDefault();
 	if (ev.key === 'Escape' && estat.full) {
 		estat.full = null;
 		pintar();
@@ -1523,13 +1803,20 @@ function afegirIngredients() {
 	const caixa = document.getElementById('ing-nou');
 	const text = caixa?.value ?? '';
 	if (!estat.full?.esb || !text.trim()) return;
-	const nous = text
-		.split(/\r?\n|,|;/)
-		.map((t) => t.trim())
-		.filter((t) => t.length > 1)
-		.map(llegirIngredient);
-	estat.full.esb.ing.push(...nous);
+	if (/[,;\n]/.test(text.trim())) {
+		// uns quants de cop (enganxats d'una recepta): cada un amb la seva quantitat o la de sempre
+		const usos = usosIngredients();
+		for (const tros of text.split(/\r?\n|,|;/).map((x) => x.replace(/^[\s\-*•·]+/, '').trim()).filter((x) => x.length > 1)) {
+			const l = llegirIngredient(tros);
+			posaIngredient(completar(l.nom, l, usos));
+		}
+	} else {
+		// un de sol: el primer suggeriment (el que surt a dalt de tot)
+		const l = llegirIngredient(text);
+		posaIngredient(suggerimentsIng(text)[0] ?? completar(l.nom, l));
+	}
 	caixa.value = '';
+	estat.full.sugg = [];
 }
 // mentre s'escriu: suggeriments a la llista, cerques als fulls i l'esborrany de la recepta (sense tornar a pintar tot)
 function filtrar(el) {
@@ -1539,6 +1826,14 @@ function filtrar(el) {
 		if (el.dataset.camp === 'q') i.q = el.value === '' ? null : Number(el.value);
 		else i[el.dataset.camp] = el.value;
 	} else if (el.id === 'rec-nom' && estat.full?.esb) estat.full.esb.nom = el.value;
+	else if (el.id === 'ing-nou' && estat.full?.esb) {
+		const s = (estat.full.sugg = suggerimentsIng(el.value));
+		const caixa = document.getElementById('ing-sug');
+		caixa.hidden = !s.length;
+		caixa.innerHTML = s
+			.map((x, k) => `<button type="button" class="sug-ing${x.nou ? ' nou' : ''}" data-ing-sug="${k}"><span class="ic-cosa">${iconaDe(x.nom)}</span><b>${x.nou ? `«${esc(x.nom)}»` : esc(x.nom)}</b><small>${textQuantitat(x)}</small></button>`)
+			.join('');
+	}
 	else if (el.matches('#form-afegir textarea')) {
 		const caixa = document.getElementById('suggeriments');
 		const s = suggeriments(el.value);
@@ -1556,6 +1851,9 @@ function filtrar(el) {
 	}
 }
 document.addEventListener('input', (ev) => filtrar(ev.target));
+document.addEventListener('pointerdown', (ev) => {
+	if (ev.target.closest('[data-ing-sug], [data-ing-afegir], [data-ing-rapid]') && document.activeElement?.id === 'ing-nou') ev.preventDefault();
+});
 document.addEventListener('change', (ev) => ev.target.matches('select[data-camp]') && filtrar(ev.target));
 // si al nom d'un ingredient s'hi escriu la quantitat ("4 ous"), en sortir es posa al seu lloc
 document.addEventListener('focusout', (ev) => {

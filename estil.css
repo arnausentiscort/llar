@@ -489,3 +489,81 @@ input, select, textarea { font-size: 16px !important; }
 	.full-nansa { display: none; }
 	#avis { bottom: 28px; }
 }
+
+/* --- afegir ingredients (v2): la casella amb suggeriments, cada ingredient amb − i +, i el rebost en xips --- */
+.ing-nou textarea { flex: 1; min-width: 0; min-height: 46px; max-height: 140px; padding: 12px; border: 0; border-radius: 14px; font: inherit; font-size: 16px; line-height: 1.35; color: var(--text); background: var(--panell); box-shadow: inset 0 0 0 1.5px var(--accent-suau), inset 0 0 0 1px var(--vora); resize: none; field-sizing: content; }
+.ing-nou textarea:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--accent); }
+.ing-nou button { align-self: flex-end; }
+.ing-sug { display: flex; flex-direction: column; overflow: hidden; margin-top: -2px; border-radius: 14px; background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora), var(--ombra); }
+.sug-ing { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 6px 12px 6px 8px; border: 0; text-align: left; background: none; }
+.sug-ing + .sug-ing { border-top: 1px solid var(--vora); }
+.sug-ing:first-child { background: var(--accent-suau); }
+.sug-ing:active { transform: none; background: var(--panell-2); }
+.sug-ing .ic-cosa { width: 30px; height: 30px; font-size: 17px; }
+.sug-ing b { flex: 1; font-size: 15.5px; font-weight: 700; }
+.sug-ing small { font-size: 13px; font-weight: 700; color: var(--accent-fort); }
+.sug-ing.nou b { font-weight: 600; color: var(--text-2); }
+.ings-sub { display: flex; align-items: baseline; gap: 6px; margin: 10px 2px 2px; font-size: 14px; font-weight: 800; color: var(--text-2); }
+.ings-sub small { font-size: 12px; font-weight: 700; color: var(--text-3); }
+/* cada ingredient: icona, nom i treure a dalt; − quantitat + i la unitat a sota */
+.ing { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; column-gap: 8px; row-gap: 4px; align-items: center; padding: 8px; }
+.ing .ic-cosa { grid-column: 1; grid-row: 1 / span 2; align-self: start; }
+.ing .ing-nom { grid-column: 2; grid-row: 1; height: 36px; padding: 0 8px; font-weight: 700; }
+.ing .ing-treure { grid-column: 3; grid-row: 1; }
+.ing-fila2 { grid-column: 2 / span 2; grid-row: 2; display: flex; align-items: center; gap: 6px; }
+.ing-q-grup { display: flex; align-items: center; overflow: hidden; border-radius: 11px; background: var(--panell-2); }
+.ing-pas { display: grid; flex: none; place-items: center; width: 36px; height: 38px; padding: 0; border: 0; font-size: 20px; font-weight: 700; color: var(--accent-fort); background: none; }
+.ing-pas:active { background: var(--accent-suau); }
+.ing .ing-q { width: 54px; height: 38px; margin: 0; padding: 0; border-radius: 0; text-align: center; background: none; }
+.ing .ing-u { flex: 1; max-width: 130px; height: 38px; margin: 0; }
+.ing .ing-tipus { margin-left: auto; width: 38px; height: 38px; padding: 0; justify-content: center; }
+.ing .ing-tipus span { filter: none; opacity: 1; }
+.ing.flash, .ing-xip.flash { animation: brilla 1.2s ease-out; }
+@keyframes brilla { from { box-shadow: inset 3px 0 0 var(--c, var(--accent)), 0 0 0 3px var(--accent); } }
+.rebost-xips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ing-xip { display: inline-flex; align-items: center; gap: 2px; height: 36px; padding: 0 2px 0 10px; border-radius: 999px; font-size: 14.5px; font-weight: 700; background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora); }
+.ing-xip button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; font-size: 13px; color: var(--text-3); background: none; }
+.ing-rapid { display: inline-flex; align-items: center; gap: 4px; height: 36px; padding: 0 12px 0 9px; border: 0; border-radius: 999px; font-size: 14px; font-weight: 700; color: var(--text-2); background: none; outline: 1.5px dashed var(--text-3); outline-offset: -1.5px; }
+.ing .ing-nom, .ing .ing-q, .ing .ing-u, .ing .ing-tipus, .ing .ing-treure, .ing .ing-pas { order: 0; }
+
+/* --- el menú (v2): la nevera, dinar i sopar, per a qui, tuppers --- */
+.nevera { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--radi); background: color-mix(in srgb, #5b9fe0 9%, var(--panell)); box-shadow: inset 0 0 0 1px color-mix(in srgb, #5b9fe0 25%, transparent), var(--ombra); }
+.nevera h2 { display: flex; align-items: baseline; gap: 8px; margin: 0; font-size: 17px; font-weight: 900; }
+.nevera h2 small { font-size: 13px; font-weight: 700; color: var(--text-3); }
+.nevera-xips { display: flex; flex-wrap: wrap; gap: 6px; }
+.nevera-xip { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 12px; border: 0; border-radius: 999px; font-size: 15px; font-weight: 700; color: var(--text); background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora); }
+.nevera-xip small { font-size: 12.5px; font-weight: 700; color: var(--text-3); }
+.nevera-afegir { display: flex; gap: 6px; }
+.nevera-afegir input { flex: 1; min-width: 0; height: 42px; padding: 0 12px; border: 0; border-radius: 12px; font: inherit; color: var(--text); background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora); }
+.nevera-afegir button { display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 12px; color: #fff; background: #5b9fe0; }
+.moment { display: flex; flex-direction: column; padding: 6px 0 4px; }
+.moment + .moment { border-top: 1px dashed var(--vora); margin-top: 4px; padding-top: 8px; }
+.moment h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: 0 0 2px; font-size: 14px; font-weight: 800; color: var(--text-2); }
+.moment h3 small { font-size: 12.5px; font-weight: 700; color: var(--accent-fort); }
+.moment-botons { display: flex; flex-wrap: wrap; gap: 6px; }
+.moment .afegir-plat { margin-top: 6px; }
+.suggeriment-tupper { height: 34px; margin-top: 6px; padding: 0 12px; border: 0; border-radius: 10px; font-size: 14px; font-weight: 700; color: #2f6db5; background: color-mix(in srgb, #5b9fe0 14%, transparent); }
+.plat .plat-tipus { flex: none; font-size: 16px; }
+.plat .plat-nom { display: flex; flex: 1; flex-direction: column; min-width: 0; font-size: 15.5px; font-weight: 600; }
+.plat .plat-nom small { font-size: 12px; font-weight: 700; color: #2f6db5; }
+.plat .plat-per { display: flex; flex: none; gap: 2px; }
+/* el full de triar plat */
+.plat-opcions { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; background: var(--panell-2); }
+.segment { display: flex; gap: 4px; padding: 3px; border-radius: 12px; background: var(--panell); }
+.segment button { flex: 1; height: 38px; border: 0; border-radius: 9px; font-size: 15px; font-weight: 800; color: var(--text-3); background: none; }
+.segment button[aria-pressed='true'] { color: #fff; background: var(--accent); }
+.plat-per-tria { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.plat-per-tria > span, .plat-tuppers > span { font-size: 14px; font-weight: 800; color: var(--text-2); }
+.persona-xip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px 0 6px; border: 0; border-radius: 999px; font-size: 14.5px; font-weight: 700; color: var(--text-3); background: var(--panell); opacity: 0.6; }
+.persona-xip.actiu { color: var(--text); opacity: 1; box-shadow: inset 0 0 0 2px var(--accent); }
+.plat-tuppers { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.plat-tuppers .ing-q-grup { background: var(--panell); }
+.plat-tuppers b { min-width: 30px; font-size: 17px; text-align: center; }
+.plat-racions { margin: 0; font-size: 13px; line-height: 1.4; color: var(--text-3); }
+.plat-sub { margin: 6px 0 -4px; font-size: 14.5px; font-weight: 800; color: var(--text-2); }
+.comprar-tambe { display: flex; align-items: center; gap: 8px; margin-top: -6px; font-size: 14px; color: var(--text-2); }
+.comprar-tambe input { width: 20px; height: 20px; accent-color: var(--accent); }
+.nevera-quan { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.nevera-quan .boto-suau { height: 46px; }
+.rapida-tria { align-self: flex-start; height: 38px; padding: 0 12px; border: 0; border-radius: 999px; font-size: 14px; font-weight: 700; color: var(--text-3); background: var(--panell-2); }
+.rapida-tria.actiu { color: #8a5a00; background: color-mix(in srgb, var(--groc) 35%, transparent); }
