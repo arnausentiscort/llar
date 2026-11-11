@@ -722,7 +722,9 @@ function vistaReceptes() {
 // Cadascú apunta el que vol (ho veuen tots dos) i també pot apuntar idees secretes per a l'altre (només les veu qui les
 // apunta). Quan algú diu "el compro jo", l'altre no ho veu a la seva llista: és sorpresa, i així no en compreu dos.
 // (Va tot xifrat amb el mateix codi de casa: amagat vol dir que l'app no ho ensenya, no que l'altre no ho pugui desxifrar.)
-const perRegals = () => (PERSONES.includes(estat.perRegals) ? estat.perRegals : estat.qui);
+// a més de la llista de cadascú, hi ha la dels dos ("Junts"): el que us faria il·lusió a casa; no és sorpresa per a ningú
+const JUNTS = 'Junts';
+const perRegals = () => ([...PERSONES, JUNTS].includes(estat.perRegals) ? estat.perRegals : estat.qui);
 const articleDe = (q) => (q === 'Núria' ? 'la ' : /^[AEIOU]/.test(q) ? 'l’' : 'el ');
 // una icona per a cada tipus de regal (si no n'hi ha cap, el paquet)
 const ICONES_REGAL = [
@@ -733,7 +735,7 @@ const ICONES_REGAL = [
 	['secador, planxa, plancha, rizador', '💨'], ['ulleres de busseig, ulleres de bucejar, ulleres de buceja, gafas de buceo, aletes, aletas, snorkel, busseig, bucejar, buceo', '🤿'],
 	['ulleres de sol, gafas de sol, ulleres, gafas', '🕶️'], ['serum, kerastase, crema, xampu, champu, mascarilla', '🧴'], ['pinta, peine, raspall, cepillo', '🪮'],
 	['contorno, contorn, make up, maquillatge, maquillaje, eyeliner, polvos, pols, pintallavis, labial, rimel, bronceadores, matizantes', '💄'],
-	['llibre, llibres, libro, libros', '📚'], ['gopro, camera, camara', '📷'], ['dron, drone', '🚁'], ['bolso, bossa, bolsa, motxilla, mochila, gortari', '👜'],
+	['llencols, llencol, sabanas, sabana, llit, cama, matalas, colchon, nordic, edredon', '🛏️'], ['llibre, llibres, libro, libros', '📚'], ['gopro, camera, camara', '📷'], ['dron, drone', '🚁'], ['bolso, bossa, bolsa, motxilla, mochila, gortari', '👜'],
 	['joc, juego, cartes, cartas, puzzle', '🃏'], ['gym, gimnas, gimnasio, velcro, turmelleres, tobilleras, peses, pesas', '🏋️'], ['rellotge, reloj, smartwatch', '⌚'],
 	['samarreta, camiseta, jersei, jersey, jaqueta, chaqueta, abric, abrigo, pantalons, pantalones, vestit, vestido, roba, ropa', '👕'], ['viatge, viaje, escapada, hotel', '✈️'],
 	['sopar, cena, restaurant, restaurante', '🍽️'], ['entrades, entradas, concert, concierto', '🎟️'], ['joia, joya, collaret, collar, arracades, pendientes, anell, anillo, polsera, pulsera', '💍'],
@@ -812,7 +814,7 @@ function afegirRegals(llista, secreta) {
 		if (hiSon.has(k) || [...hiSon].some((x) => x.startsWith(`${k} `))) continue;
 		hiSon.add(k);
 		// a la llista de l'altre és una idea secreta si el botó ho diu; el que ve d'un "Núria:" enganxat ho ha demanat ella
-		const secret = g.per !== estat.qui && secreta && !g.demanat;
+		const secret = g.per !== estat.qui && g.per !== JUNTS && secreta && !g.demanat;
 		tocar(nouId(), {t: 'regal', per: g.per, nom: g.nom, nota: g.nota, enllac: '', secret, qui: estat.qui, quan: ara(), comprat: null, donat: false});
 		n++;
 	}
@@ -840,26 +842,27 @@ function vistaRegals() {
 	const meu = per === estat.qui;
 	const llista = regalsDe(per);
 	const comprats = llista.filter((g) => g.comprat).length;
-	const aqui = `${articleDe(per)}${per}`;
-	return `<header class="titol"><h1>Regals</h1><p>${meu ? 'El que t’agradaria. Qui te’l compra ho marca i tu no ho veus: així és sorpresa.' : `El que vol ${aqui}, i les teves idees. Marca el que li compres: ${aqui} no ho veurà.`}</p></header>
-	<div class="per-qui">${PERSONES.map((p) => `<button type="button" data-per="${p}" aria-pressed="${p === per}">${av(p)}${p === estat.qui ? 'Els meus' : `Per a ${articleDe(p)}${p}`}</button>`).join('')}</div>
+	const junts = per === JUNTS;
+	const aqui = junts ? 'els dos' : `${articleDe(per)}${per}`;
+	return `<header class="titol"><h1>Regals</h1><p>${junts ? 'El que us faria il·lusió als dos, per a casa. Ho veieu tots dos; qui el compra ho marca.' : meu ? 'El que t’agradaria. Qui te’l compra ho marca i tu no ho veus: així és sorpresa.' : `El que vol ${aqui}, i les teves idees. Marca el que li compres: ${aqui} no ho veurà.`}</p></header>
+	<div class="per-qui">${PERSONES.map((p) => `<button type="button" data-per="${p}" aria-pressed="${p === per}">${av(p)}${p === estat.qui ? 'Els meus' : `Per a ${articleDe(p)}${p}`}</button>`).join('')}<button type="button" data-per="${JUNTS}" aria-pressed="${junts}"><span class="av av-junts">${icona('casa', 14)}</span>Dels dos</button></div>
 	<form class="afegir" id="form-regal">
-		<textarea id="text-regal" name="text" rows="1" placeholder="${meu ? 'Què t’agradaria?' : `Una idea per a ${aqui}`}" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>
+		<textarea id="text-regal" name="text" rows="1" placeholder="${meu ? 'Què t’agradaria?' : junts ? 'Una idea per a casa' : `Una idea per a ${aqui}`}" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>
 		<button type="submit" aria-label="Afegir">${icona('mes', 22)}</button>
 	</form>
-	${meu ? '' : `<button type="button" class="secreta${estat.secreta ? ' actiu' : ''}" data-secreta aria-pressed="${estat.secreta}">${icona('secret', 15)} ${estat.secreta ? `Idea secreta: ${aqui} no la veurà` : `Ho ha demanat ${aqui}: ho veurà`}</button>`}
+	${meu || junts ? '' : `<button type="button" class="secreta${estat.secreta ? ' actiu' : ''}" data-secreta aria-pressed="${estat.secreta}">${icona('secret', 15)} ${estat.secreta ? `Idea secreta: ${aqui} no la veurà` : `Ho ha demanat ${aqui}: ho veurà`}</button>`}
 	<p class="pista">Pots enganxar una llista sencera, una cosa per línia. Si hi ha «Arnau:» i «Núria:», cada part va a la llista de cadascú.</p>
 	${
 		llista.length
 			? `${!meu && comprats ? `<p class="regals-compte">${comprats} de ${llista.length} ja tenen qui els compri</p>` : ''}<ul class="regals">${llista.map(filaRegal).join('')}</ul>`
-			: `<div class="buit"><div class="buit-dibuix">${icona('regal', 34)}</div><b>${meu ? 'Encara no hi ha res' : `${majuscula(aqui)} encara no hi ha posat res`}</b><p>${meu ? 'Apunta a dalt el que t’agradaria: unes sabates, un llibre, una escapada…' : 'Apunta-hi idees: només les veuràs tu.'}</p><button type="button" class="enllac" data-perfil>Els teniu apuntats amb un altre codi? Porta’ls aquí</button></div>`
+			: `<div class="buit"><div class="buit-dibuix">${icona('regal', 34)}</div><b>${meu ? 'Encara no hi ha res' : junts ? 'Encara no hi ha res per a casa' : `${majuscula(aqui)} encara no hi ha posat res`}</b><p>${meu ? 'Apunta a dalt el que t’agradaria: unes sabates, un llibre, una escapada…' : junts ? 'Apunta-hi el que us faria il·lusió als dos: uns llençols, una estanteria…' : 'Apunta-hi idees: només les veuràs tu.'}</p><button type="button" class="enllac" data-perfil>Els teniu apuntats amb un altre codi? Porta’ls aquí</button></div>`
 	}`;
 }
 function fullRegal(id) {
 	const g = estat.files[id]?.o;
 	if (!g) return '<h2>Aquest regal ja no hi és</h2>';
 	const meu = g.per === estat.qui;
-	return `<h2 class="titol-regal"><span class="ic-regal">${iconaRegal(g.nom)}</span>${meu ? 'El teu regal' : `Per a ${articleDe(g.per)}${esc(g.per)}`}</h2>
+	return `<h2 class="titol-regal"><span class="ic-regal">${iconaRegal(g.nom)}</span>${meu ? 'El teu regal' : g.per === JUNTS ? 'Regal dels dos' : `Per a ${articleDe(g.per)}${esc(g.per)}`}</h2>
 	<form id="form-regal-edit" class="form-recepta" data-id="${id}">
 		<label>Què<input name="nom" value="${esc(g.nom)}" required autocomplete="off"></label>
 		<label>Detalls (talla, color, model…)<textarea name="nota" rows="3" placeholder="Opcional">${esc(g.nota ?? '')}</textarea></label>
