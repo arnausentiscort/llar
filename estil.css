@@ -302,9 +302,12 @@ body.amb-full #avis.veure { transform: translate(-50%, 0); }
 .ings-cap small { color: var(--text-3); }
 .ing { display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 14px; background: var(--panell); box-shadow: inset 3px 0 0 var(--c), inset 0 0 0 1px var(--vora); }
 .ing .ic-cosa { width: 34px; height: 34px; font-size: 19px; }
-.ing input, .ing select { min-width: 0; height: 38px; border: 0; border-radius: 10px; font: inherit; font-size: 15px; font-weight: 600; color: var(--text); background: var(--panell-2); }
+.ing input, .ing select { min-width: 0; height: 38px; border: 0; border-radius: 10px; font: inherit; font-size: 16px; font-weight: 600; color: var(--text); background: var(--panell-2); }
 .ing .ing-nom { flex: 1; padding: 0 10px; background: none; }
-.ing .ing-nom:focus { background: var(--panell-2); outline: 0; }
+.ing .ing-nom:focus { background: var(--panell-2); outline: 0; box-shadow: inset 0 0 0 2px var(--accent); }
+/* el marc quan s'escriu: el codi d'entrada i els formularis (abans es treia el focus sense res a canvi) */
+.entrar input[name='codi']:focus { box-shadow: inset 0 0 0 2px var(--accent), var(--ombra); }
+.plat-lliure input:focus, .form-recepta input:focus, .form-recepta textarea:focus { box-shadow: inset 0 0 0 2px var(--accent); }
 .ing .ing-q { width: 58px; padding: 0 6px; text-align: right; font-variant-numeric: tabular-nums; }
 .ing .ing-u { width: 82px; padding: 0 4px; font-size: 13.5px; }
 .ing-rebost { padding: 0 8px; font-size: 12.5px; font-weight: 700; white-space: nowrap; color: var(--text-3); }

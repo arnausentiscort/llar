@@ -1333,7 +1333,7 @@ function filaIngredient(i, n) {
 			<button type="button" class="ing-pas" data-ing-pas="${n}" data-sentit="1" aria-label="Més">+</button>
 		</div>
 		<select class="ing-u" id="ing-u-${n}" data-camp="u" data-i="${n}" aria-label="Unitat">${unitats}</select>
-		<button type="button" class="ing-tipus" data-ing-rebost="${n}" title="Passar-lo al rebost: el teniu sempre i no va a la llista"><span>${icona('casa', 15)}</span></button>
+		<button type="button" class="ing-tipus" data-ing-rebost="${n}" title="Passar-lo al rebost: el teniu sempre i no va a la llista" aria-label="Passar ${esc(i.nom)} al rebost"><span>${icona('casa', 15)}</span></button>
 		</div>
 	</div>`;
 }
