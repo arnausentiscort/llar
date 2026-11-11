@@ -362,9 +362,9 @@ function sembrarReceptes() {
 	guardat.posar('llar-sembrat-2', true);
 }
 
-// --- el logo: dues "L" (ells dos, i la "Ll" de Llar) sota una teulada, amb el punt de la "l·l" (fer_icona.py) ---
+// --- el logo: la mateixa icona de l'app (la casa amb la porta encesa i la ratlleta daurada de la família, fer_icones) ---
 const logo = (mida) =>
-	`<svg class="logo-marca" width="${mida}" height="${mida}" viewBox="2.2 2.2 20.4 20.4" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.6 11 12.4 3.6 21.2 11"/><path d="M7.75 11v8.5h3"/><path d="M14.75 11v8.5h3"/><circle cx="11.25" cy="15.6" r="1.25" fill="var(--groc)" stroke="none"/></svg>`;
+	`<svg class="logo-marca" width="${mida}" height="${mida}" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="lg-fons" x1="0" y1="0" x2=".5" y2="1"><stop offset="0" stop-color="#3a2219"/><stop offset="1" stop-color="#1a0f0b"/></linearGradient><linearGradient id="lg-te" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e57a4c"/><stop offset="1" stop-color="#b44a24"/></linearGradient><linearGradient id="lg-pa" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#efe4cf"/><stop offset=".5" stop-color="#fdf8ee"/><stop offset="1" stop-color="#e3d5b8"/></linearGradient><radialGradient id="lg-ll"><stop offset="0" stop-color="#ffe6a8"/><stop offset="1" stop-color="#eda23a"/></radialGradient></defs><rect width="120" height="120" rx="27" fill="url(#lg-fons)"/><g transform="translate(60 56) scale(.95) translate(-60 -59)"><path d="M30 60 60 32 90 60v30a6 6 0 0 1-6 6H36a6 6 0 0 1-6-6z" fill="url(#lg-pa)"/><path d="M60 22 100 58a5 5 0 0 1-7 7L60 35 27 65a5 5 0 0 1-7-7z" fill="url(#lg-te)"/><path d="M52 96V80a8 8 0 0 1 16 0v16z" fill="url(#lg-ll)"/></g><rect x="46" y="104" width="28" height="3" rx="1.5" fill="#e0b25a"/></svg>`;
 // cada persona amb la seva rodoneta de color
 const av = (q, gran) => `<span class="av av-${normal(q) || 'ningu'}${gran ? ' gran' : ''}" title="${esc(q)}">${esc(String(q ?? '?').charAt(0))}</span>`;
 
@@ -469,7 +469,7 @@ const esIphone = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const instal·lada = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
 const avisInstal·lar = () =>
 	esIphone && !instal·lada && !guardat.llegir('llar-no-installar', false)
-		? `<aside class="installar"><div class="installar-icona">${logo(26)}</div><div><b>Posa-la a la pantalla d’inici</b><p>Toca ${icona('compartir', 14)} a baix i després <b>Afegir a la pantalla d’inici</b> <span>(Añadir a pantalla de inicio)</span>.</p></div><button type="button" data-no-installar aria-label="Tancar">${icona('tancar', 16)}</button></aside>`
+		? `<aside class="installar"><div class="installar-icona">${logo(44)}</div><div><b>Posa-la a la pantalla d’inici</b><p>Toca ${icona('compartir', 14)} a baix i després <b>Afegir a la pantalla d’inici</b> <span>(Añadir a pantalla de inicio)</span>.</p></div><button type="button" data-no-installar aria-label="Tancar">${icona('tancar', 16)}</button></aside>`
 		: '';
 
 // "D'un toc": el que compreu sovint i, darrere, els productes de sempre que ara no són a la llista
@@ -1423,7 +1423,7 @@ async function portarDe(codi) {
 // --- la primera vegada: el codi de casa i qui ets ---
 function vistaEntrar() {
 	return `<main class="entrar">
-		<div class="logo-gran">${logo(56)}</div>
+		<div class="logo-gran">${logo(96)}</div>
 		<h1>Llar</h1>
 		<p>La llista de la compra, els menús, les receptes i els regals de casa. Per a tots dos.</p>
 		<form id="form-entrar">
@@ -1454,7 +1454,7 @@ function pintar() {
 	const scrollFull = abans?.scrollTop ?? 0;
 	app.innerHTML = `
 	<header class="cap">
-		<div class="marca">${logo(24)}<b>Llar</b></div>
+		<div class="marca">${logo(32)}<b>Llar</b></div>
 		<button type="button" class="estat-xarxa ${estat.xarxa}" data-perfil title="${ESTAT_XARXA[estat.xarxa]}"><i></i>${perEnviar ? `${perEnviar} per enviar` : estat.xarxa === 'sense' ? 'Sense connexió' : ''}</button>
 		<button type="button" class="qui" data-perfil aria-label="${esc(estat.qui)}">${av(estat.qui)}</button>
 	</header>

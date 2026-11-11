@@ -49,7 +49,7 @@ svg { flex: none; }
 
 /* entrar */
 .entrar { display: flex; flex-direction: column; align-items: center; max-width: 420px; margin: 0 auto; padding: max(56px, calc(env(safe-area-inset-top) + 36px)) 22px 40px; text-align: center; }
-.logo-gran { display: grid; place-items: center; width: 96px; height: 96px; border-radius: 28px; color: #fff5e9; background: linear-gradient(180deg, #e88862, #c45c3a); box-shadow: 0 14px 34px rgba(196, 92, 58, 0.35); }
+.logo-gran { display: grid; place-items: center; width: 96px; height: 96px; border-radius: 22.5%; box-shadow: 0 14px 34px rgba(58, 34, 25, 0.35); }
 .entrar h1 { margin: 20px 0 6px; font-size: 42px; font-weight: 700; letter-spacing: -0.035em; }
 .entrar > p { margin: 0 0 30px; font-size: 16px; line-height: 1.45; color: var(--text-2); }
 .entrar form { display: flex; flex-direction: column; gap: 14px; width: 100%; text-align: left; }
@@ -89,7 +89,7 @@ svg { flex: none; }
 
 /* instal·lar a l'iPhone */
 .installar { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border-radius: var(--radi); background: var(--accent-suau); }
-.installar-icona { display: grid; flex: none; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: #fff5e9; background: linear-gradient(180deg, #e88862, #c45c3a); }
+.installar-icona { display: grid; flex: none; place-items: center; width: 44px; height: 44px; border-radius: 22.5%; }
 .installar > div:nth-child(2) { flex: 1; }
 .installar b { font-size: 15px; }
 .installar p { margin: 3px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--text-2); }
@@ -579,3 +579,6 @@ input, select, textarea { font-size: 16px !important; }
 .sovint h2 svg, .grup h2 svg { color: var(--text-3); }
 
 .av-junts { color: #fff; background: var(--text-2); }
+
+/* el logo és la icona de l'app sencera (amb el seu fons): no s'encongeix dins de la barra */
+.logo-marca { flex: none; display: block; }
