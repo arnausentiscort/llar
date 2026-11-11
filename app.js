@@ -58,6 +58,12 @@ const ICONES = {
 	regal: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
 	secret: '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>',
 	enllac: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+	sol: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+	lluna: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+	nevera: '<path d="M5 6a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6Z"/><path d="M5 10h14"/><path d="M15 7v6"/>',
+	tupper: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+	pin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+	llamp: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
 	estrella: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
 };
 const icona = (nom, mida = 18) =>
@@ -534,13 +540,13 @@ function vistaLlista() {
 	}
 	${(() => {
 		const r = estat.editant ? [] : rebostSetmana();
-		return r.length ? `<section class="rebost-setmana"><h2>🧂 Per als plats de la setmana, mireu que tingueu</h2><div class="xips">${r.map((n) => `<button type="button" data-rapid="${esc(n)}"><span>${iconaDe(n)}</span>${esc(n)}${icona('mes', 13)}</button>`).join('')}</div><small>Si alguna cosa s’ha acabat, toca-la i va a la llista.</small></section>` : '';
+		return r.length ? `<section class="rebost-setmana"><h2>Per als plats de la setmana, mireu que tingueu</h2><div class="xips">${r.map((n) => `<button type="button" data-rapid="${esc(n)}"><span>${iconaDe(n)}</span>${esc(n)}${icona('mes', 13)}</button>`).join('')}</div><small>Si alguna cosa s’ha acabat, toca-la i va a la llista.</small></section>` : '';
 	})()}
 	${grups.map((g) => `<section class="grup" style="--c:${colorCat(g.id)}"><h2><span class="emoji">${g.emoji}</span>${g.nom}<small>${g.coses.length}</small></h2><ul>${g.coses.map(filaCosa).join('')}</ul></section>`).join('')}
 	${!p.length && !carro.length ? `<div class="buit"><div class="buit-dibuix">${icona('carro', 34)}</div><b>No falta res</b><p>Escriu a dalt el que s’acabi, o tria què menjareu al <button type="button" class="enllac" data-vista="menu">Menú</button> i els ingredients vindran sols.</p></div>` : ''}
 	${
 		carro.length
-			? `<section class="grup carro"><h2><span class="emoji">🛒</span>Al carro<small>${carro.length}</small></h2><ul>${carro
+			? `<section class="grup carro"><h2>Al carro<small>${carro.length}</small></h2><ul>${carro
 					.map((c) => `<li><button type="button" class="cosa fet${c.id === estat.ultim ? ' nou' : ''}" data-desfer="${c.id}"><span class="check">${icona('fet', 14)}</span><span class="ic-cosa">${iconaDe(c.nom, c.cat)}</span><span class="nom">${esc(c.nom)}</span>${quantitats(c.quant) ? `<b class="quant">${esc(quantitats(c.quant))}</b>` : ''}${av(c.perQui ?? c.qui)}</button></li>`)
 					.join('')}</ul>
 				<button type="button" class="boto-gran" data-buidar>${icona('fet', 18)} Ja ho hem comprat</button></section>`
@@ -563,7 +569,7 @@ const nomDia = (dia) => dies().find((d) => d.dia === dia)?.nom ?? dia;
 // --- el menú (v2): cada dia, dinar i sopar; cada plat diu per a qui és i si se'n fan tuppers; i la nevera ---
 // Un àpat: {t: 'apat', dia, moment: 'dinar'|'sopar', tipus: 'recepta'|'tupper'|'fet', recepta?, nom, per: [qui...], tuppers}
 // La nevera: {t: 'nevera', nom, racions, des: dia (a partir de quan hi és), origen?: l'àpat que l'ha fet}
-const MOMENTS = [['dinar', '☀️', 'Dinar'], ['sopar', '🌙', 'Sopar']];
+const MOMENTS = [['dinar', icona('sol', 15), 'Dinar'], ['sopar', icona('lluna', 15), 'Sopar']];
 const momentDe = (a) => a.moment ?? 'sopar'; // els d'abans no en tenien
 const perDe = (a) => (Array.isArray(a.per) && a.per.length ? a.per : PERSONES);
 const nevera = () => totes('nevera').filter((n) => !n.acabat && n.racions > 0).sort((a, b) => (a.des ?? '').localeCompare(b.des ?? ''));
@@ -590,7 +596,7 @@ function escalar(items, f) {
 		return {...i, q: i.u === 'g' || i.u === 'ml' ? Math.max(10, Math.round(q / 10) * 10) : i.u === 'u' ? Math.ceil(q * 2) / 2 : Math.ceil(q)};
 	});
 }
-const ICONA_TIPUS = {recepta: '🍳', tupper: '🥡', fet: '🛒'};
+const ICONA_TIPUS = {recepta: icona('recepta', 16), tupper: icona('tupper', 16), fet: icona('carro', 16)};
 function filaApat(a) {
 	const per = perDe(a);
 	const quins = per.length === PERSONES.length ? '' : per.map((q) => av(q)).join('');
@@ -604,8 +610,8 @@ function vistaMenu() {
 	const nev = nevera();
 	return `<header class="titol"><h1>Menú</h1><p>${n ? `${n} ${n === 1 ? 'plat' : 'plats'} aquesta setmana. ` : ''}Tria què menjareu i els ingredients van sols a la llista.</p></header>
 	<section class="nevera">
-		<h2>🧊 A la nevera <small>${nev.length ? `${nev.reduce((t, x) => t + x.racions, 0)} racions` : 'buida'}</small></h2>
-		${nev.length ? `<div class="nevera-xips">${nev.map((x) => `<button type="button" class="nevera-xip" data-nevera="${x.id}">🥡 ${esc(x.nom)} <small>${x.racions === 1 ? '1 ració' : `${xifra(x.racions)} racions`}</small></button>`).join('')}</div>` : ''}
+		<h2>A la nevera <small>${nev.length ? `${nev.reduce((t, x) => t + x.racions, 0)} racions` : 'buida'}</small></h2>
+		${nev.length ? `<div class="nevera-xips">${nev.map((x) => `<button type="button" class="nevera-xip" data-nevera="${x.id}">${icona('tupper', 14)} ${esc(x.nom)} <small>${x.racions === 1 ? '1 ració' : `${xifra(x.racions)} racions`}</small></button>`).join('')}</div>` : ''}
 		<form id="form-nevera" class="nevera-afegir"><input name="text" id="text-nevera" placeholder="Hi ha: 2 tuppers de llenties, mig pollastre…" autocomplete="off" enterkeyhint="done"><button type="submit" aria-label="Afegir a la nevera">${icona('mes', 18)}</button></form>
 	</section>
 	${ds
@@ -626,7 +632,7 @@ function vistaMenu() {
 							${seus.map(filaApat).join('')}
 							<div class="moment-botons">
 								<button type="button" class="afegir-plat" data-obrir-dia="${d.dia}" data-moment="${m}">${icona('mes', 15)} ${seus.length ? 'Un altre' : 'Afegir'}</button>
-								${tupper ? `<button type="button" class="suggeriment-tupper" data-de-nevera="${tupper.id}" data-dia="${d.dia}" data-moment="${m}">🥡 ${esc(tupper.nom)}?</button>` : ''}
+								${tupper ? `<button type="button" class="suggeriment-tupper" data-de-nevera="${tupper.id}" data-dia="${d.dia}" data-moment="${m}">${icona('tupper', 14)} ${esc(tupper.nom)}?</button>` : ''}
 							</div>
 						</div>`;
 					}).join('')}
@@ -651,15 +657,15 @@ function fullPlat(full) {
 	<div class="plat-opcions">
 		<div class="segment">${MOMENTS.map(([m, ic, nom]) => `<button type="button" data-plat-moment="${m}" aria-pressed="${m === moment}">${ic} ${nom}</button>`).join('')}</div>
 		<div class="plat-per-tria"><span>Per a</span>${PERSONES.map((p) => `<button type="button" class="persona-xip${per.includes(p) ? ' actiu' : ''}" data-plat-per="${p}" aria-pressed="${per.includes(p)}">${av(p)} ${p}</button>`).join('')}</div>
-		<div class="plat-tuppers"><span>🥡 Tuppers per a després</span><div class="ing-q-grup"><button type="button" class="ing-pas" data-plat-tupper="-1" aria-label="Menys">−</button><b>${full.tuppers ?? 0}</b><button type="button" class="ing-pas" data-plat-tupper="1" aria-label="Més">+</button></div></div>
+		<div class="plat-tuppers"><span>Tuppers per a després</span><div class="ing-q-grup"><button type="button" class="ing-pas" data-plat-tupper="-1" aria-label="Menys">−</button><b>${full.tuppers ?? 0}</b><button type="button" class="ing-pas" data-plat-tupper="1" aria-label="Més">+</button></div></div>
 		<p class="plat-racions">${racions} ${racions === 1 ? 'ració' : 'racions'}: les receptes són per a dos, així que els ingredients ${racions === 2 ? 'van tal qual' : racions < 2 ? 'van a la meitat' : `es multipliquen per ${xifra(racions / 2)}`}.${full.tuppers ? ' Els tuppers aniran sols a la nevera.' : ''}</p>
 	</div>
-	${nev.length ? `<h3 class="plat-sub">🧊 De la nevera</h3><ul class="triar">${nev.map((x) => `<li><button type="button" data-de-nevera="${x.id}"><b>🥡 ${esc(x.nom)}</b><small>${x.racions === 1 ? '1 ració' : `${xifra(x.racions)} racions`}</small></button></li>`).join('')}</ul>` : ''}
-	${rapides.length ? `<h3 class="plat-sub">⚡ Si fa pal cuinar</h3><ul class="triar">${rapides.map(fila).join('')}</ul>` : ''}
-	<h3 class="plat-sub">📖 Les receptes</h3>
+	${nev.length ? `<h3 class="plat-sub">De la nevera</h3><ul class="triar">${nev.map((x) => `<li><button type="button" data-de-nevera="${x.id}"><b>${icona('tupper', 14)} ${esc(x.nom)}</b><small>${x.racions === 1 ? '1 ració' : `${xifra(x.racions)} racions`}</small></button></li>`).join('')}</ul>` : ''}
+	${rapides.length ? `<h3 class="plat-sub">Si fa pal cuinar</h3><ul class="triar">${rapides.map(fila).join('')}</ul>` : ''}
+	<h3 class="plat-sub">Les receptes</h3>
 	<label class="cerca">${icona('cerca', 17)}<input type="search" id="cerca-plat" placeholder="Cercar un plat" autocomplete="off"></label>
 	<ul class="triar receptes-triar">${rs.filter((r) => !esRapida(r)).map(fila).join('')}</ul>
-	<h3 class="plat-sub">🛒 Una altra cosa</h3>
+	<h3 class="plat-sub">Una altra cosa</h3>
 	<form id="form-plat-lliure" class="plat-lliure">
 		<input name="nom" placeholder="Un plat fet, sopar fora, pizza del súper…" autocomplete="off" required>
 		<button type="submit" aria-label="Afegir">${icona('mes', 18)}</button>
@@ -673,7 +679,7 @@ function fullNevera(id) {
 	const avui = diaDe(new Date());
 	const dema = demaDe(avui);
 	const opcions = [[avui, 'dinar', 'Avui dinar'], [avui, 'sopar', 'Avui sopar'], [dema, 'dinar', 'Demà dinar'], [dema, 'sopar', 'Demà sopar']].filter(([d, m]) => !(d === avui && m === 'dinar' && new Date().getHours() >= 16));
-	return `<h2>🥡 ${esc(x.nom)}</h2>
+	return `<h2>${icona('tupper', 20)} ${esc(x.nom)}</h2>
 	<div class="plat-tuppers"><span>Racions</span><div class="ing-q-grup"><button type="button" class="ing-pas" data-nevera-pas="-1" data-id="${id}" aria-label="Menys">−</button><b>${xifra(x.racions)}</b><button type="button" class="ing-pas" data-nevera-pas="1" data-id="${id}" aria-label="Més">+</button></div></div>
 	<h3 class="plat-sub">Menjar-ne</h3>
 	<div class="nevera-quan">${opcions.map(([d, m, nom]) => `<button type="button" class="boto-suau" data-de-nevera="${id}" data-dia="${d}" data-moment="${m}">${nom}</button>`).join('')}</div>
@@ -1030,7 +1036,7 @@ function notaApats(evs, dia) {
 		const f = fora.filter((x) => x.apat === apat);
 		if (!f.length) return '';
 		const qui = f.length === PERSONES.length ? 'no sou cap a casa' : `${articleDe(f[0].qui)}${f[0].qui} no hi és`;
-		return `<p class="nota-apat">🍽 <b>${majuscula(apat)}:</b> ${esc(qui)} <small>(${f.map((x) => `${x.e.partit ? '⚽ ' : ''}${horaDe(x.e.inici)}`).join(', ')})</small></p>`;
+		return `<p class="nota-apat">${icona('plat', 14)} <b>${majuscula(apat)}:</b> ${esc(qui)} <small>(${f.map((x) => `${x.e.partit ? '⚽ ' : ''}${horaDe(x.e.inici)}`).join(', ')})</small></p>`;
 	}).join('');
 }
 const filaEvent = (e, dia) => {
@@ -1080,7 +1086,7 @@ function vistaCalendari() {
 		const finde = [0, 6].includes(new Date(`${d}T12:00`).getDay());
 		const plat = apats.some((a) => a.dia === d);
 		return `<button type="button" class="cel${finde ? ' finde' : ''}${d === avui ? ' avui' : ''}${d < avui ? ' passat' : ''}" data-dia-cal="${d}">
-			<b>${n}${plat ? '<i class="plat" title="Hi ha plat al menú">🍽</i>' : ''}</b>
+			<b>${n}${plat ? `<i class="plat" title="Hi ha plat al menú">${icona('plat', 11)}</i>` : ''}</b>
 			<span class="cel-plans">${ps.slice(0, 3).map((e) => (e.partit ? '<i class="partit">⚽</i>' : `<i style="--c:${e.color}"></i>`)).join('')}${ps.length > 3 ? '<em>+</em>' : ''}</span>
 			<span class="cel-textos">${ps.slice(0, 2).map((e) => `<span class="cel-ev" style="--c:${e.color}" title="${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}">${e.partit ? `⚽ ${esc(e.titol.replace(/^⚽\s*/, '').replace(/Real Tiesada\s*[–-]\s*|\s*[–-]\s*Real Tiesada/i, ''))}` : esc(e.titol)}</span>`).join('')}${ps.length > 2 ? `<em>+${ps.length - 2}</em>` : ''}</span>
 			<span class="cel-info">${info.slice(0, 3).map((e) => `<i style="--c:${e.color}" title="${esc(e.titol)}"><span>${esc(e.nom)}</span></i>`).join('')}</span>
@@ -1103,18 +1109,18 @@ function vistaCalendari() {
 			${calendaris().length ? resumAvui(evs) : `<div class="connecta-cal"><b>Connecta els vostres calendaris</b><p>Enganxa l’enllaç secret del teu Google Calendar i aquí veureu els plans de tots dos, qui és a Reus i el menú, tot junt.</p><button type="button" class="boto-suau" data-perfil>${icona('menu', 16)} Connectar el meu</button></div>`}
 			<section class="mes">
 				<div class="mes-cap"><button type="button" class="boto-suau" data-mes-cal="-1" aria-label="Mes anterior">‹</button><b>${nomMes}</b><button type="button" class="boto-suau" data-mes-cal="1" aria-label="Mes següent">›</button></div>
-				<div class="llegenda">${mostra('plans', '🗓️ Plans')}${mostra('info', '📍 Qui és a Reus')}<span class="claus"><span><i style="--c:var(--arnau)"></i>Arnau</span><span><i style="--c:var(--nuria)"></i>Núria</span><span>⚽ partit</span><span>🍽 menú</span></span></div>
+				<div class="llegenda">${mostra('plans', `${icona('menu', 13)} Plans`)}${mostra('info', `${icona('pin', 13)} Qui és a Reus`)}<span class="claus"><span><i style="--c:var(--arnau)"></i>Arnau</span><span><i style="--c:var(--nuria)"></i>Núria</span><span>⚽ partit</span><span>${icona('plat', 11)} menú</span></span></div>
 				<div class="graella-mes">${DIES_SETMANA.map((d, i) => `<small class="${i > 4 ? 'finde' : ''}">${d}</small>`).join('')}${'<span></span>'.repeat(buits)}${[...Array(nDies)].map((_, i) => cel(i + 1)).join('')}</div>
 			</section>
 			${errors.length ? `<p class="error-cal">${icona('sense', 14)} ${errors.map((c) => `${esc(c.nom)}: ${esc(estat.cal[c.id].error)}`).join(' · ')}</p>` : ''}
 		</div>
 		<div class="cal-dre">
 			<section class="cal-llista">
-				<h2>📍 Qui és a Reus <small>${MESOS_LLARGS[primer.getMonth()]}</small></h2>
+				<h2>Qui és a Reus <small>${MESOS_LLARGS[primer.getMonth()]}</small></h2>
 				${persones.length ? persones.map((e) => `<button type="button" class="persona-fila" style="--c:${e.color}" data-dia-cal="${diaDe(e.inici < primer ? primer : e.inici)}"><i></i><b>${esc(e.nom)}</b><span>${franja(e)}</span></button>`).join('') : '<p class="buit-petit">Ningú aquest mes.</p>'}
 			</section>
 			<section class="cal-llista">
-				<h2>🗓️ Plans <small>${MESOS_LLARGS[primer.getMonth()]}</small></h2>
+				<h2>Plans <small>${MESOS_LLARGS[primer.getMonth()]}</small></h2>
 				${plans.length ? plans.map((e) => `<button type="button" class="pla-fila${diaDe(e.inici) < avui ? ' passat' : ''}" style="--c:${e.color}" data-dia-cal="${diaDe(e.inici)}"><span class="pla-dia"><b>${e.inici.getDate()}</b><small>${DIES_SETMANA[(e.inici.getDay() + 6) % 7]}</small></span><span class="pla-text"><b>${esc(e.titol)}</b><small>${e.totDia ? 'Tot el dia' : horaDe(e.inici)}${e.lloc ? ` · ${esc(e.lloc)}` : ''}</small></span>${av(e.qui)}</button>`).join('') : '<p class="buit-petit">Cap pla aquest mes.</p>'}
 			</section>
 			<section class="findes"><h2>Els propers caps de setmana</h2>${findes
@@ -1132,8 +1138,8 @@ function fullDia(dia) {
 	const d = new Date(`${dia}T12:00`);
 	const plats = totes('apat').filter((a) => a.dia === dia);
 	return `<h2>${NOMS_DIES[d.getDay()]} ${d.getDate()} ${deMes(d.getMonth())}</h2>
-	<div class="dia-bloc"><h3>🗓️ Plans</h3>${plans.length ? `<ul class="events">${plans.map((e) => filaEvent(e, dia)).join('')}</ul>` : '<p class="buit-petit">Cap pla.</p>'}</div>
-	${info.length ? `<div class="dia-bloc"><h3>📍 A Reus</h3><ul class="events">${info.map((e) => filaEvent(e, dia)).join('')}</ul></div>` : ''}
+	<div class="dia-bloc"><h3>Plans</h3>${plans.length ? `<ul class="events">${plans.map((e) => filaEvent(e, dia)).join('')}</ul>` : '<p class="buit-petit">Cap pla.</p>'}</div>
+	${info.length ? `<div class="dia-bloc"><h3>A Reus</h3><ul class="events">${info.map((e) => filaEvent(e, dia)).join('')}</ul></div>` : ''}
 	${notaApats(evs, dia)}
 	<div class="dia-menu"><h3>${icona('plat', 14)} Menú</h3>
 		${plats.map((a) => `<div class="plat">${av(a.qui)}<span>${esc(a.nom)}</span><button type="button" data-treure-apat="${a.id}" aria-label="Treure ${esc(a.nom)}">${icona('tancar', 15)}</button></div>`).join('')}
@@ -1203,12 +1209,12 @@ function seccioCalendaris() {
 	const altres = calendaris().filter((c) => c.qui !== estat.qui);
 	return `<div class="cals">
 		<b>Calendaris</b>
-		${[...meus, ...altres].map((c) => `<div class="cal-fila"><span class="cal-tipus">${c.tipus === 'info' ? '📍' : '🗓️'}</span><span><b>${esc(c.nom)}</b><small>${c.qui === estat.qui ? 'teu' : `de ${articleDe(c.qui)}${esc(c.qui)}`}${estat.cal[c.id]?.error ? ` · ${esc(estat.cal[c.id].error)}` : estat.cal[c.id] ? ` · ${estat.cal[c.id].events.length} coses` : ''}</small></span>${c.qui === estat.qui ? `<button type="button" class="cal-treure" data-treure-cal="${c.id}" aria-label="Treure ${esc(c.nom)}">${icona('tancar', 15)}</button>` : ''}</div>`).join('')}
+		${[...meus, ...altres].map((c) => `<div class="cal-fila"><span class="cal-tipus">${c.tipus === 'info' ? icona('pin', 18) : icona('menu', 18)}</span><span><b>${esc(c.nom)}</b><small>${c.qui === estat.qui ? 'teu' : `de ${articleDe(c.qui)}${esc(c.qui)}`}${estat.cal[c.id]?.error ? ` · ${esc(estat.cal[c.id].error)}` : estat.cal[c.id] ? ` · ${estat.cal[c.id].events.length} coses` : ''}</small></span>${c.qui === estat.qui ? `<button type="button" class="cal-treure" data-treure-cal="${c.id}" aria-label="Treure ${esc(c.nom)}">${icona('tancar', 15)}</button>` : ''}</div>`).join('')}
 		<form id="form-cal" class="form-cal">
 			<input name="url" required autocomplete="off" inputmode="url" placeholder="Enllaç secret iCal del teu Google Calendar">
 			<div><input name="nom" required autocomplete="off" placeholder="Nom (p. ex. El meu, A Reus)"><select name="tipus"><option value="plans">Plans</option><option value="info">Informació (qui és a Reus…)</option></select></div>
 			<button type="submit" class="boto-suau">Afegir el calendari</button>
-			<small>A Google Calendar (al web): ⚙️ Configuració → el teu calendari → «Integrar el calendari» → «Adreça secreta en format iCal».</small>
+			<small>A Google Calendar (al web): Configuració → el teu calendari → «Integrar el calendari» → «Adreça secreta en format iCal».</small>
 		</form>
 	</div>`;
 }
@@ -1324,7 +1330,7 @@ function filaIngredient(i, n) {
 			<button type="button" class="ing-pas" data-ing-pas="${n}" data-sentit="1" aria-label="Més">+</button>
 		</div>
 		<select class="ing-u" id="ing-u-${n}" data-camp="u" data-i="${n}" aria-label="Unitat">${unitats}</select>
-		<button type="button" class="ing-tipus" data-ing-rebost="${n}" title="Passar-lo al rebost: el teniu sempre i no va a la llista"><span>🧂</span></button>
+		<button type="button" class="ing-tipus" data-ing-rebost="${n}" title="Passar-lo al rebost: el teniu sempre i no va a la llista"><span>${icona('casa', 15)}</span></button>
 		</div>
 	</div>`;
 }
@@ -1338,7 +1344,7 @@ function fullRecepta(id) {
 	const html = `<h2>${r ? 'La recepta' : 'Una recepta nova'}</h2>
 	<form id="form-recepta" class="form-recepta" data-id="${id ?? ''}">
 		<label>Nom del plat<input id="rec-nom" name="nom" value="${esc(esb.nom)}" placeholder="Espaguetis a la carbonara" required autocomplete="off"></label>
-		<button type="button" class="rapida-tria${esb.rapida ? ' actiu' : ''}" data-rapida aria-pressed="${!!esb.rapida}">⚡ ${esb.rapida ? 'És ràpida: surt a «Si fa pal cuinar»' : 'Marcar-la com a ràpida (per si fa pal cuinar)'}</button>
+		<button type="button" class="rapida-tria${esb.rapida ? ' actiu' : ''}" data-rapida aria-pressed="${!!esb.rapida}">${icona('llamp', 14)} ${esb.rapida ? 'És ràpida: surt a «Si fa pal cuinar»' : 'Marcar-la com a ràpida (per si fa pal cuinar)'}</button>
 		<div class="ings">
 			<div class="ings-cap"><b>Ingredients</b><small>per a vosaltres dos</small></div>
 			<div class="ing-nou">
@@ -1347,8 +1353,8 @@ function fullRecepta(id) {
 			</div>
 			<div class="ing-sug" id="ing-sug" hidden></div>
 			<p class="pista">Escriu i tria’l de la llista: ja hi posa la quantitat de sempre, que pots canviar amb − i +. També pots enganxar-ne uns quants, separats per comes o en línies.</p>
-			${compra.length ? `<h3 class="ings-sub">🛒 Per comprar <small>${compra.length}</small></h3>${compra.map(([i, n]) => filaIngredient(i, n)).join('')}` : ''}
-			<h3 class="ings-sub">🧂 Del rebost <small>no va a la llista</small></h3>
+			${compra.length ? `<h3 class="ings-sub">Per comprar <small>${compra.length}</small></h3>${compra.map(([i, n]) => filaIngredient(i, n)).join('')}` : ''}
+			<h3 class="ings-sub">Del rebost <small>no va a la llista</small></h3>
 			<div class="rebost-xips">
 				${rebost.map(([i, n]) => `<span class="ing-xip${estat.full.flash === n ? ' flash' : ''}">${iconaDe(i.nom)} ${esc(i.nom)}<button type="button" data-ing-rebost="${n}" title="Passar-lo a «per comprar»" aria-label="Passar ${esc(i.nom)} a per comprar">🛒</button><button type="button" data-ing-treure="${n}" aria-label="Treure ${esc(i.nom)}">${icona('tancar', 13)}</button></span>`).join('')}
 				${rapids.map((n) => `<button type="button" class="ing-rapid" data-ing-rapid="${esc(n)}">${icona('mes', 12)} ${esc(n)}</button>`).join('')}
@@ -1555,7 +1561,7 @@ document.addEventListener('click', (ev) => {
 		tocar(apat, {t: 'apat', dia, moment, tipus: 'tupper', nevera: id, consumides: menja, nom: x.nom, per, qui: estat.qui});
 		estat.full = null;
 		const dd = new Date(`${dia}T12:00`);
-		avisar(`🥡 ${x.nom}: ${moment === 'dinar' ? 'dinar' : 'sopar'} ${dia === diaDe(new Date()) ? 'd’avui' : `del ${NOMS_DIES[dd.getDay()].toLowerCase()}`}`, () => {
+		avisar(`${x.nom}: ${moment === 'dinar' ? 'dinar' : 'sopar'} ${dia === diaDe(new Date()) ? 'd’avui' : `del ${NOMS_DIES[dd.getDay()].toLowerCase()}`}`, () => {
 			tocar(apat, {...f(apat), esborrat: true});
 			tocar(id, {...f(id), racions: f(id).racions + menja, acabat: false});
 		});
@@ -1576,7 +1582,7 @@ document.addEventListener('click', (ev) => {
 		const n = nous.length + sumats;
 		const rebost = delRebost(r).map((i) => i.nom.toLowerCase());
 		estat.full = null;
-		avisar(`${r.nom}: ${n ? `${n} ${n === 1 ? 'cosa' : 'coses'} a la llista` : 'no cal comprar res'}${tuppers ? ` · ${tuppers} 🥡 a la nevera` : ''}${rebost.length ? ` · mireu que tingueu ${rebost.slice(0, 2).join(', ')}` : ''}`, () => {
+		avisar(`${r.nom}: ${n ? `${n} ${n === 1 ? 'cosa' : 'coses'} a la llista` : 'no cal comprar res'}${tuppers ? ` · ${tuppers} a la nevera` : ''}${rebost.length ? ` · mireu que tingueu ${rebost.slice(0, 2).join(', ')}` : ''}`, () => {
 			treureDeLlista(apat);
 			tocar(apat, {...f(apat), esborrat: true});
 			if (neveraId) tocar(neveraId, {...f(neveraId), esborrat: true});
@@ -1725,7 +1731,7 @@ document.addEventListener('submit', async (ev) => {
 		tocar(nouId(), {t: 'nevera', nom: x.nom, racions: x.racions, des: diaDe(new Date()), qui: estat.qui, quan: ara()});
 		form.querySelector('input').value = '';
 		pintar();
-		avisar(`🥡 ${x.nom} a la nevera`);
+		avisar(`${x.nom} a la nevera`);
 	} else if (form.id === 'form-regal') {
 		const llista = trossosRegals(dades.get('text'), perRegals());
 		if (!llista.length) return;
