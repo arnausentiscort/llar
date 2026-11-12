@@ -1,6 +1,6 @@
 // Perquè s'obri sense connexió (al súper sense cobertura): primer la xarxa i, si no n'hi ha, el que es va veure
 // l'últim cop. Les crides a Supabase no passen per aquí (són d'un altre lloc).
-const CAIXA = 'llar-v14';
+const CAIXA = 'llar-v15';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));

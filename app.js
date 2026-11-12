@@ -64,6 +64,7 @@ const ICONES = {
 	tupper: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
 	pin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
 	llamp: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+	mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>',
 	estrella: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
 };
 const icona = (nom, mida = 18) =>
@@ -243,7 +244,7 @@ const estat = {
 	qui: guardat.llegir('llar-qui', null),
 	files: guardat.llegir('llar-files', {}),
 	cua: new Set(guardat.llegir('llar-cua', [])),
-	vista: 'llista',
+	vista: 'inici',
 	clau: null,
 	casa: null,
 	xarxa: SUPABASE.url ? 'mirant' : 'local', // mirant · al-dia · sense · local
@@ -602,6 +603,54 @@ function filaApat(a) {
 	const quins = per.length === PERSONES.length ? '' : per.map((q) => av(q)).join('');
 	return `<div class="plat"><span class="plat-tipus">${ICONA_TIPUS[a.tipus ?? (a.recepta ? 'recepta' : 'fet')]}</span><span class="plat-nom">${esc(a.nom)}${a.tuppers ? `<small>+${a.tuppers} 🥡 per a després</small>` : ''}</span>${quins ? `<span class="plat-per" title="Només per a ${per.join(' i ')}">${quins}</span>` : ''}<button type="button" data-treure-apat="${a.id}" aria-label="Treure ${esc(a.nom)}">${icona('tancar', 15)}</button></div>`;
 }
+// --- l'inici: el dia d'avui en una targeta, tres maneres d'apuntar, i Menjar i Casa amb el que hi ha a dins ---
+const salutacio = () => {
+	const h = new Date().getHours();
+	return h < 6 ? 'Bona nit' : h < 14 ? 'Bon dia' : h < 21 ? 'Bona tarda' : 'Bona nit';
+};
+function vistaInici() {
+	const avui = diaDe(new Date());
+	const apats = totes('apat');
+	const de = (m) => apats.filter((a) => a.dia === avui && momentDe(a) === m).map((a) => a.nom);
+	const ara = new Date();
+	const proper = totsEvents().filter((e) => e.tipus !== 'info' && e.fi > ara)[0];
+	const quan = (d) => {
+		const f = Math.round((iniciDia(diaDe(d)) - iniciDia(avui)) / 864e5);
+		return f <= 0 ? 'Avui' : f === 1 ? 'Demà' : NOMS_DIES[d.getDay()];
+	};
+	const nev = nevera();
+	const sopar = de('sopar')[0];
+	const setmana = apats.filter((a) => dies().some((d) => d.dia === a.dia)).length;
+	const regals = totes('regal').filter((g) => !g.donat).length;
+	const n = pendents().length;
+	const fila = (nom, valor) => `<div class="avui-fila"><span>${nom}</span>${valor ? `<b>${esc(valor)}</b>` : '<button type="button" class="avui-buit" data-vista="menu">Tria-ho</button>'}</div>`;
+	const tile = (vista, ic, nom, detall, focus = '') => `<button type="button" class="tile" data-vista="${vista}"${focus ? ` data-focus="${focus}"` : ''}>${icona(ic, 22)}<b>${nom}</b><small>${esc(detall)}</small></button>`;
+	return `<header class="inici-cap"><small>${NOMS_DIES[ara.getDay()]} ${ara.getDate()} ${deMes(ara.getMonth())}</small><h1>${salutacio()}, ${esc(estat.qui)}</h1></header>
+	<section class="avui-targeta">
+		<span class="avui-etiqueta">Avui</span>
+		${fila('Dinar', de('dinar').join(' · '))}
+		${fila('Sopar', de('sopar').join(' · '))}
+		${proper ? `<div class="avui-ratlla"></div><div class="avui-fila"><span>${quan(proper.inici)}${proper.totDia ? '' : ` · ${horaDe(proper.inici)}`}</span><em>${esc(proper.nom)}</em></div>` : ''}
+	</section>
+	<div class="apunta-tres">
+		<button type="button" data-vista="llista" data-focus="text-afegir">${icona('editar', 20)}<span>Escriu</span></button>
+		<button type="button" data-vista="llista" data-focus="text-afegir">${icona('mic', 20)}<span>Parla</span></button>
+		<button type="button" data-vista="menu" data-focus="text-nevera">${icona('nevera', 20)}<span>Nevera</span></button>
+	</div>
+	<h2 class="inici-sec">Menjar</h2>
+	<div class="tiles">
+		${tile('llista', 'llista', 'Llista', n ? `${n} per comprar` : 'No falta res')}
+		${tile('menu', 'plat', 'Menú', sopar ? `Sopar: ${sopar}` : setmana ? `${setmana} plats aquesta setmana` : 'Res triat encara')}
+		${tile('menu', 'nevera', 'Nevera', nev.length ? nev.slice(0, 2).map((x) => x.nom).join(', ') + (nev.length > 2 ? '…' : '') : 'Buida', 'text-nevera')}
+		${tile('receptes', 'recepta', 'Receptes', `${totes('recepta').length} receptes`)}
+	</div>
+	<h2 class="inici-sec">Casa</h2>
+	<div class="tiles">
+		${tile('calendari', 'menu', 'Calendari', proper ? `${quan(proper.inici)}: ${proper.nom}` : 'Res a la vista')}
+		${tile('regals', 'regal', 'Regals', regals ? `${regals} ${regals === 1 ? 'idea' : 'idees'}` : 'Cap idea encara')}
+	</div>`;
+}
+
 function vistaMenu() {
 	const apats = totes('apat');
 	const ds = dies();
@@ -1458,8 +1507,9 @@ function pintar() {
 		<button type="button" class="estat-xarxa ${estat.xarxa}" data-perfil title="${ESTAT_XARXA[estat.xarxa]}"><i></i>${perEnviar ? `${perEnviar} per enviar` : estat.xarxa === 'sense' ? 'Sense connexió' : ''}</button>
 		<button type="button" class="qui" data-perfil aria-label="${esc(estat.qui)}">${av(estat.qui)}</button>
 	</header>
-	<main class="pantalla">${{llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals, calendari: vistaCalendari}[estat.vista]()}</main>
+	<main class="pantalla">${{inici: vistaInici, llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals, calendari: vistaCalendari}[estat.vista]()}</main>
 	<nav class="pestanyes">
+		<button type="button" data-vista="inici" aria-pressed="${estat.vista === 'inici'}">${icona('casa', 22)}<span>Inici</span></button>
 		<button type="button" data-vista="llista" aria-pressed="${estat.vista === 'llista'}">${icona('llista', 22)}<span>Llista</span>${n ? `<i>${n}</i>` : ''}</button>
 		<button type="button" data-vista="menu" aria-pressed="${estat.vista === 'menu'}">${icona('plat', 22)}<span>Menú</span></button>
 		<button type="button" data-vista="calendari" aria-pressed="${estat.vista === 'calendari'}">${icona('menu', 22)}<span>Calendari</span></button>
@@ -1500,7 +1550,8 @@ document.addEventListener('click', (ev) => {
 		estat.vista = d.vista;
 		estat.editant = false;
 		window.scrollTo(0, 0);
-		if (['calendari', 'menu'].includes(d.vista)) carregarCalendaris();
+		if (['calendari', 'menu', 'inici'].includes(d.vista)) carregarCalendaris();
+		if (d.focus) requestAnimationFrame(() => document.getElementById(d.focus)?.focus());
 	} else if (d.fet) {
 		tocar(d.fet, {...f(d.fet), fet: true, fetQuan: ara(), perQui: estat.qui});
 		estat.ultim = d.fet;

@@ -582,3 +582,26 @@ input, select, textarea { font-size: 16px !important; }
 
 /* el logo és la icona de l'app sencera (amb el seu fons): no s'encongeix dins de la barra */
 .logo-marca { flex: none; display: block; }
+
+/* --- l'inici: la targeta d'avui, apuntar i els dos blocs (Menjar, Casa) --- */
+.inici-cap { padding: 4px 4px 14px; }
+.inici-cap small { font-size: 13px; color: var(--text-3); }
+.inici-cap h1 { margin: 2px 0 0; font-size: 30px; font-weight: 700; letter-spacing: -0.03em; }
+.avui-targeta { display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 24px; color: #fff6ea; background: linear-gradient(160deg, #3a2219, #1a0f0b); box-shadow: 0 14px 30px rgba(58, 34, 25, 0.28); }
+.avui-etiqueta { font-size: 13px; font-weight: 600; color: #c9b29c; }
+.avui-fila { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 15px; }
+.avui-fila span { flex: none; color: #e6d6c4; }
+.avui-fila b { font-size: 17px; font-weight: 700; text-align: right; }
+.avui-fila em { font-style: normal; font-weight: 700; text-align: right; color: #e0b25a; }
+.avui-buit { padding: 4px 12px; border: 0; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 700; color: #fff6ea; background: rgba(255, 255, 255, 0.12); }
+.avui-ratlla { height: 1px; background: rgba(255, 255, 255, 0.1); }
+.apunta-tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 6px; }
+.apunta-tres button { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 72px; padding: 12px 0; border: 0; border-radius: 18px; font: inherit; font-size: 13.5px; font-weight: 700; color: var(--accent); background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora); }
+.apunta-tres span { color: var(--text); }
+.inici-sec { margin: 18px 0 8px 4px; font-size: 14px; font-weight: 700; color: var(--text-3); }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-height: 104px; padding: 14px; border: 0; border-radius: 20px; text-align: left; font: inherit; color: var(--accent); background: var(--panell); box-shadow: inset 0 0 0 1px var(--vora); transition: transform 0.15s ease-out; }
+.tile:active, .apunta-tres button:active { transform: scale(0.97); }
+.tile b { margin-top: auto; font-size: 16px; color: var(--text); }
+.tile small { margin-top: -6px; font-size: 13px; line-height: 1.35; color: var(--text-3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .tile, .apunta-tres button { transition: none; } }
