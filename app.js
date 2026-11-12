@@ -139,10 +139,24 @@ const colorCat = (cat) => COLOR_CAT[cat] ?? COLOR_CAT.altres;
 function trossos(text) {
 	return String(text ?? '')
 		.split(/\r?\n/)
-		.map((l) => l.replace(/^\[[^\]]*\]\s*[^:]{1,30}:\s*/, '').replace(/^\d{1,2}[/:.]\d{1,2}.{0,20}? - [^:]{1,30}:\s*/, ''))
+		.map((l) =>
+			l
+				.replace(/\[[^\]]*\]/g, ' ') // [12/11 10:32]
+				.replace(/^\d{1,2}[/:.]\d{1,2}.{0,20}? - [^:]{1,30}:\s*/, '')
+				.replace(/^\s*[A-ZÀ-Úa-zà-ú][\wÀ-ú ]{0,20}:\s+/, '') // "Núria: "
+				.replace(/\d{1,2}:\d{2}/g, ' '),
+		)
 		.join(',')
 		.split(/,|;|\s+i\s+|\s+y\s+|\s+\+\s+/)
-		.map((t) => t.replace(/^[\s\-*•·]+/, '').replace(/[.\s]+$/, '').trim())
+		.map((t) =>
+			t
+				.replace(/^[\s\-*•·]+/, '')
+				// el que es diu abans de la cosa: "compra llet", "falta una mica de pa", "hay que comprar huevos"
+				.replace(/^(?:(?:hi ha que|hay que|cal|has de|pots|puedes|podries|recorda(?:'t)? de|acuerdate de)\s+)?(?:compra(?:r|'m)?|agafa(?:r)?|porta(?:r)?|pilla(?:r)?|coge(?:r)?|trae(?:r)?|falta(?:n|en)?|necessitem|necesitamos|ens falta|nos falta)\s+/i, '')
+				.replace(/^(?:una mica de|un poco de|algo de|unes|uns|una|un|unas|unos|el|la|les|els|los|las|de|d')\s*/i, '')
+				.replace(/[.!?\s]+$/, '')
+				.trim(),
+		)
 		.filter((t) => t.length > 1)
 		.map(majuscula);
 }
@@ -526,7 +540,8 @@ function vistaLlista() {
 	const total = p.length + carro.length;
 	return `${avisInstal·lar()}
 	<form class="afegir" id="form-afegir">
-		<textarea id="text-afegir" name="text" rows="1" placeholder="Què falta?" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>
+		<textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>
+		${ESCOLTA ? `<button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button>` : ''}
 		<button type="submit" aria-label="Afegir">${icona('mes', 22)}</button>
 	</form>
 	<div class="suggeriments" id="suggeriments" hidden></div>
@@ -603,6 +618,45 @@ function filaApat(a) {
 	const quins = per.length === PERSONES.length ? '' : per.map((q) => av(q)).join('');
 	return `<div class="plat"><span class="plat-tipus">${ICONA_TIPUS[a.tipus ?? (a.recepta ? 'recepta' : 'fet')]}</span><span class="plat-nom">${esc(a.nom)}${a.tuppers ? `<small>+${a.tuppers} 🥡 per a després</small>` : ''}</span>${quins ? `<span class="plat-per" title="Només per a ${per.join(' i ')}">${quins}</span>` : ''}<button type="button" data-treure-apat="${a.id}" aria-label="Treure ${esc(a.nom)}">${icona('tancar', 15)}</button></div>`;
 }
+// --- dictar a la llista: el reconeixement de veu del mateix navegador (gratis, sense enviar res a ningú més que al
+// servei de veu del sistema). El que es diu s'escriu a la caixa i s'afegeix sol, i "i" fa de coma ("llet, ous i pa")
+const ESCOLTA = window.SpeechRecognition || window.webkitSpeechRecognition;
+let escolta = null;
+function escoltar() {
+	if (!ESCOLTA) return;
+	if (escolta) {
+		escolta.stop();
+		return;
+	}
+	escolta = new ESCOLTA();
+	escolta.lang = 'ca-ES';
+	escolta.interimResults = true;
+	escolta.continuous = false;
+	let text = '';
+	escolta.onresult = (e) => {
+		text = [...e.results].map((r) => r[0].transcript).join(' ');
+		const t = document.getElementById('text-afegir');
+		if (t) t.value = text;
+	};
+	escolta.onerror = (e) => {
+		if (e.error === 'not-allowed') avisar('Cal deixar fer servir el micro (o fes servir el del teclat)');
+	};
+	escolta.onend = () => {
+		escolta = null;
+		estat.escoltant = false;
+		const net = text.replace(/\s+i\s+/gi, ', ').trim();
+		pintar();
+		const t = document.getElementById('text-afegir');
+		if (net && t) {
+			t.value = net;
+			document.getElementById('form-afegir')?.requestSubmit();
+		}
+	};
+	estat.escoltant = true;
+	pintar();
+	escolta.start();
+}
+
 // --- l'inici: el dia d'avui en una targeta, tres maneres d'apuntar, i Menjar i Casa amb el que hi ha a dins ---
 const salutacio = () => {
 	const h = new Date().getHours();
@@ -634,8 +688,7 @@ function vistaInici() {
 	</section>
 	<div class="apunta-tres">
 		<button type="button" data-vista="llista" data-focus="text-afegir">${icona('editar', 20)}<span>Escriu</span></button>
-		<button type="button" data-vista="llista" data-focus="text-afegir">${icona('mic', 20)}<span>Parla</span></button>
-		<button type="button" data-vista="menu" data-focus="text-nevera">${icona('nevera', 20)}<span>Nevera</span></button>
+		<button type="button" data-vista="llista" ${ESCOLTA ? 'data-mic' : 'data-focus="text-afegir"'}>${icona('mic', 20)}<span>Parla</span></button>
 	</div>
 	<h2 class="inici-sec">Menjar</h2>
 	<div class="tiles">
@@ -651,44 +704,69 @@ function vistaInici() {
 	</div>`;
 }
 
+// de què és un plat (carn, peix, pasta...), mirant el nom i els ingredients de la recepta: només per orientar-se
+const TIPUS_PLAT = [
+	['peix', 'Peix', /salm[oo]|tonyina|bacall|lluc|llu[cc]|gambes|calamar|sipia|sepia|musclo|peix|anxov|sardin|rap\b/],
+	['carn', 'Carn', /bistec|filet|entrecot|pollastre|vedella|porc|xai|conill|carn|hamburgues|mandonguill|pernil|botifarr|llom|gall dindi|salsitx|chorizo|bacon|cansalada/],
+	['pasta', 'Pasta', /pasta|macarron|espaguet|tallarin|fideu|lasany|canelons|gnocchi|ravioli|pizza/],
+	['arros', 'Arròs', /arr[oo]s|paella|risotto/],
+	['llegums', 'Llegums', /llenti|cigron|monget|fesol|pesol|pesol|hummus|soja/],
+	['ous', 'Ous', /truita|\bous?\b|ou ferrat|remenat/],
+	['verdura', 'Verdura', /amanida|crema|verdur|carbass|broquil|broquil|espinac|patata|carbasso|alberg|sopa|bledes|porro|tomaquet/],
+];
+function tipusPlat(a) {
+	const r = a.recepta && estat.files[a.recepta]?.o;
+	const text = normal(`${a.nom} ${r ? ingredientsDe(r).map((i) => i.nom).join(' ') : ''}`);
+	const nomSol = normal(a.nom);
+	// primer el nom, i mana el que surt abans ("arròs amb pollastre" és arròs; "lasanya de carn", pasta); si no diu res, els ingredients
+	const delNom = TIPUS_PLAT.map((x) => [x, nomSol.search(x[2])]).filter(([, i]) => i >= 0).sort((p, q) => p[1] - q[1])[0];
+	return delNom?.[0] ?? TIPUS_PLAT.find(([, , re]) => re.test(text)) ?? null;
+}
+const DIES_CURTS = ['dg', 'dl', 'dt', 'dc', 'dj', 'dv', 'ds'];
+// el menú: una fila per dia (els pròxims set), amb el dinar i el sopar al costat. Tranquil: el tipus de plat en text petit,
+// i la persona només quan és per a un sol
 function vistaMenu() {
 	const apats = totes('apat');
 	const ds = dies();
 	const n = apats.filter((a) => ds.some((d) => d.dia === a.dia)).length;
 	const evs = totsEvents();
 	const nev = nevera();
-	return `<header class="titol"><h1>Menú</h1><p>${n ? `${n} ${n === 1 ? 'plat' : 'plats'} aquesta setmana. ` : ''}Tria què menjareu i els ingredients van sols a la llista.</p></header>
-	<section class="nevera">
-		<h2>A la nevera <small>${nev.length ? `${nev.reduce((t, x) => t + x.racions, 0)} racions` : 'buida'}</small></h2>
-		${nev.length ? `<div class="nevera-xips">${nev.map((x) => `<button type="button" class="nevera-xip" data-nevera="${x.id}">${icona('tupper', 14)} ${esc(x.nom)} <small>${x.racions === 1 ? '1 ració' : `${xifra(x.racions)} racions`}</small></button>`).join('')}</div>` : ''}
-		<form id="form-nevera" class="nevera-afegir"><input name="text" id="text-nevera" placeholder="Hi ha: 2 tuppers de llenties, mig pollastre…" autocomplete="off" enterkeyhint="done"><button type="submit" aria-label="Afegir a la nevera">${icona('mes', 18)}</button></form>
-	</section>
-	${ds
+	const cela = (d, m) => {
+		const seus = apats.filter((a) => a.dia === d.dia && momentDe(a) === m);
+		const fora = foraDeCasa(evs, d.dia).filter((x) => x.apat === m);
+		const ningu = fora.length === PERSONES.length;
+		if (!seus.length) {
+			const tupper = !ningu && nev.find((x) => (x.des ?? '') <= d.dia);
+			if (ningu) return `<div class="mc mc-buit fora"><span>Fora de casa</span></div>`;
+			return `<div class="mc mc-buit"><button type="button" data-obrir-dia="${d.dia}" data-moment="${m}">${icona('mes', 14)} Afegir</button>${tupper ? `<button type="button" class="mc-tupper" data-de-nevera="${tupper.id}" data-dia="${d.dia}" data-moment="${m}">${esc(tupper.nom)}?</button>` : ''}${fora.length ? `<small>${esc(fora[0].qui)} fora</small>` : ''}</div>`;
+		}
+		const a = seus[0];
+		const tip = tipusPlat(a);
+		const per = perDe(a);
+		return `<button type="button" class="mc" data-dia-cal="${d.dia}">
+			<small>${tip ? tip[1] : a.tipus === 'tupper' ? 'Tupper' : '&nbsp;'}${per.length === 1 ? ` · ${esc(per[0])}` : ''}</small>
+			<b>${esc(a.nom)}</b>${seus.length > 1 ? `<em>+${seus.length - 1}</em>` : ''}
+		</button>`;
+	};
+	const primer = new Date(`${ds[0].dia}T12:00`);
+	const ultim = new Date(`${ds[ds.length - 1].dia}T12:00`);
+	return `<header class="titol"><h1>Menú</h1><p>${primer.getDate()} ${deMes(primer.getMonth())} – ${ultim.getDate()} ${deMes(ultim.getMonth())}${n ? ` · ${n} ${n === 1 ? 'plat' : 'plats'}` : ''}</p></header>
+	<div class="menu-cap"><span></span><span>Dinar</span><span>Sopar</span></div>
+	<div class="menu-dies">${ds
 		.map((d) => {
-			const plans = delDia(evs, d.dia).filter((e) => e.tipus !== 'info');
-			return `<section class="dia${d.avui ? ' avui' : ''}">
-				<div class="dia-data"><b>${d.num}</b><span>${d.mes}</span></div>
-				<div class="dia-cos"><h2>${d.nom}</h2>
-					${plans.length ? `<p class="dia-plans">${plans.slice(0, 3).map((e) => `<span style="--c:${e.color}">${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}</span>`).join('')}</p>` : ''}
-					${MOMENTS.map(([m, ic, nom]) => {
-						const seus = apats.filter((a) => a.dia === d.dia && momentDe(a) === m);
-						const fora = foraDeCasa(evs, d.dia).filter((x) => x.apat === m);
-						const nota = fora.length === PERSONES.length ? 'No sou cap a casa' : fora.length ? `${articleDe(fora[0].qui)}${fora[0].qui} no hi és (${fora[0].e.partit ? '⚽ ' : ''}${horaDe(fora[0].e.inici)})` : '';
-						// si no hi ha res i a la nevera hi ha un tupper, se suggereix
-						const tupper = !seus.length && nev.find((x) => (x.des ?? '') <= d.dia);
-						return `<div class="moment">
-							<h3>${ic} ${nom}${nota ? `<small>${esc(majuscula(nota))}</small>` : ''}</h3>
-							${seus.map(filaApat).join('')}
-							<div class="moment-botons">
-								<button type="button" class="afegir-plat" data-obrir-dia="${d.dia}" data-moment="${m}">${icona('mes', 15)} ${seus.length ? 'Un altre' : 'Afegir'}</button>
-								${tupper ? `<button type="button" class="suggeriment-tupper" data-de-nevera="${tupper.id}" data-dia="${d.dia}" data-moment="${m}">${icona('tupper', 14)} ${esc(tupper.nom)}?</button>` : ''}
-							</div>
-						</div>`;
-					}).join('')}
-				</div>
-			</section>`;
+			const dt = new Date(`${d.dia}T12:00`);
+			const finde = [0, 6].includes(dt.getDay());
+			return `<div class="md${d.avui ? ' avui' : ''}${finde ? ' finde' : ''}">
+				<div class="md-dia"><span>${d.avui ? 'avui' : DIES_CURTS[dt.getDay()]}</span><b>${d.num}</b></div>
+				${cela(d, 'dinar')}${cela(d, 'sopar')}
+			</div>`;
 		})
-		.join('')}`;
+		.join('')}</div>
+	<section class="menu-nevera">
+		<h2>A la nevera <small>${nev.length ? `${nev.reduce((t, x) => t + x.racions, 0)} racions` : 'buida'}</small></h2>
+		${nev.length ? `<div class="nevera-xips">${nev.map((x) => `<button type="button" class="nevera-xip" data-nevera="${x.id}">${esc(x.nom)} <small>${xifra(x.racions)}</small></button>`).join('')}</div>` : ''}
+		<form id="form-nevera" class="nevera-afegir"><input name="text" id="text-nevera" placeholder="Hi ha: 2 tuppers de llenties, mig pollastre…" autocomplete="off" enterkeyhint="done"><button type="submit" aria-label="Afegir a la nevera">${icona('mes', 18)}</button></form>
+	</section>`;
 }
 // triar què es menja: per a qui, quants tuppers, i d'on surt (la nevera, una cosa ràpida, una recepta o un plat fet)
 function fullPlat(full) {
@@ -761,7 +839,7 @@ function vistaReceptes() {
 	<ul class="receptes">${rs
 		.map(
 			(r) =>
-				`<li data-nom="${esc(normal(`${r.nom} ${ingredientsDe(r).map((i) => i.nom).join(' ')}`))}"><button type="button" class="recepta" data-recepta="${r.id}"><span class="recepta-icona">${icona('plat', 18)}</span><span class="recepta-text"><b>${esc(r.nom)}</b><small>${esc(resumIngredients(r))}</small><span class="recepta-icones">${iconesRecepta(r)}</span></span>${icona('seguent', 18)}</button></li>`,
+				`<li data-nom="${esc(normal(`${r.nom} ${ingredientsDe(r).map((i) => i.nom).join(' ')}`))}"><button type="button" class="recepta" data-recepta="${r.id}"><span class="recepta-tipus">${tipusPlat({nom: r.nom, recepta: r.id})?.[1] ?? 'Altres'}</span><span class="recepta-text"><b>${esc(r.nom)}</b><small>${esc(resumIngredients(r))}</small></span><span class="recepta-icones">${iconesRecepta(r)}</span></button></li>`,
 		)
 		.join('')}</ul>
 	<p class="buit-cerca" hidden>Cap recepta amb aquest nom.</p>`;
@@ -1061,6 +1139,13 @@ function totsEvents() {
 				color: c.tipus === 'info' ? colorDeNom(e.titol) : partit ? '#e0524f' : c.qui === 'Núria' ? 'var(--nuria)' : 'var(--arnau)'});
 		}
 	}
+	// la nostra agenda: el que s'apunta a la Llar (ho veuen tots dos al moment, sense passar per Google)
+	for (const p of totes('pla')) {
+		const inici = new Date(`${p.dia}T${p.hora ?? '00:00'}:00`);
+		const fi = p.hora ? new Date(inici) : new Date(inici.getTime() + 864e5); // amb hora: només l'inici (no sabem quan s'acaba)
+		fora.push({titol: p.titol, nom: p.titol, inici, fi, totDia: !p.hora, qui: p.qui, tipus: 'plans', partit: false, pla: p.id,
+			color: p.qui === 'Núria' ? 'var(--nuria)' : 'var(--arnau)'});
+	}
 	return fora.sort((a, b) => a.inici - b.inici);
 }
 const iniciDia = (dia) => new Date(`${dia}T00:00:00`);
@@ -1094,7 +1179,7 @@ function notaApats(evs, dia) {
 const filaEvent = (e, dia) => {
 	const quan = e.totDia ? 'Tot el dia' : `${horaDe(e.inici)}${e.fi - e.inici > 0 && e.fi.toDateString() === e.inici.toDateString() ? `–${horaDe(e.fi)}` : ''}`;
 	const multi = e.totDia && e.fi - e.inici > 864e5 ? ` <small>${dia === diaDe(e.inici) ? 'arriba' : diaDe(new Date(e.fi.getTime() - 864e5)) === dia ? 'marxa' : 'hi és'}</small>` : '';
-	return `<li class="event${e.tipus === 'info' ? ' info' : ''}" style="--c:${e.color}"><span class="event-hora">${quan}</span><span class="event-text"><b>${esc(e.titol)}</b>${multi}${e.lloc ? `<small>${esc(e.lloc)}</small>` : ''}</span>${e.tipus === 'info' ? '' : av(e.qui)}</li>`;
+	return `<li class="event${e.tipus === 'info' ? ' info' : ''}" style="--c:${e.color}"><span class="event-hora">${quan}</span><span class="event-text"><b>${esc(e.titol)}</b>${multi}${e.lloc ? `<small>${esc(e.lloc)}</small>` : ''}</span>${e.tipus === 'info' ? '' : av(e.qui)}${e.pla ? `<button type="button" class="event-treure" data-treure-pla="${e.pla}" aria-label="Treure ${esc(e.titol)}">${icona('tancar', 14)}</button>` : ''}</li>`;
 };
 // el resum d'avui (i de demà, si avui ja s'ha acabat)
 function resumAvui(evs) {
@@ -1155,7 +1240,7 @@ function vistaCalendari() {
 	}
 	const nomMes = `${majuscula(MESOS_LLARGS[primer.getMonth()])}${primer.getFullYear() !== ara.getFullYear() ? ` ${primer.getFullYear()}` : ''}`;
 	const mostra = (que, text) => `<button type="button" class="mostra${ocult.has(que) ? '' : ' actiu'}" data-cal-mostra="${que}" aria-pressed="${!ocult.has(que)}">${text}</button>`;
-	return `<header class="titol titol-amb-boto"><h1>Calendari</h1>${calendaris().length ? `<button type="button" class="boto-suau" data-apunta="">${icona('mes', 16)} Apuntar</button>` : ''}</header>
+	return `<header class="titol titol-amb-boto"><h1>Calendari</h1><button type="button" class="boto-suau" data-apunta="">${icona('mes', 16)} Apuntar</button></header>
 	<div class="cal-graella">
 		<div class="cal-esq">
 			${calendaris().length ? resumAvui(evs) : `<div class="connecta-cal"><b>Connecta els vostres calendaris</b><p>Enganxa l’enllaç secret del teu Google Calendar i aquí veureu els plans de tots dos, qui és a Reus i el menú, tot junt.</p><button type="button" class="boto-suau" data-perfil>${icona('menu', 16)} Connectar el meu</button></div>`}
@@ -1203,9 +1288,10 @@ function fullDia(dia) {
 function fullApunta(dia) {
 	const d = dia ? new Date(`${dia}T12:00`) : null;
 	return `<h2>Apuntar al calendari</h2>
-	<p class="full-explica">${d ? `Per al ${NOMS_DIES[d.getDay()].toLowerCase()} ${d.getDate()} ${deMes(d.getMonth())}. ` : ''}Escriu-ho com ho diries${d ? '' : ' (amb el dia i, si cal, l’hora)'}. S’obrirà el Google Calendar ja omplert: només cal tocar «Desar».</p>
+	<p class="full-explica">${d ? `Per al ${NOMS_DIES[d.getDay()].toLowerCase()} ${d.getDate()} ${deMes(d.getMonth())}. ` : ''}Escriu-ho com ho diries${d ? '' : ' (amb el dia i, si cal, l’hora)'}. Es desa a la Llar i ho veureu tots dos al moment.</p>
 	<form class="apunta" id="form-apunta"${dia ? ` data-dia="${dia}"` : ''}><input name="text" id="text-apunta" placeholder="${d ? 'Sopar a casa la Marina 21h' : 'Sopar amb la Marina dissabte 21h'}" autocomplete="off" enterkeyhint="go"><button type="submit" aria-label="Apuntar">${icona('mes', 20)}</button></form>
-	<p class="pista">Exemples: «dentista demà a les 10:30», «cine 12/11 22h», «pàdel dilluns 19h».</p>`;
+	<p class="pista">Exemples: «dentista demà a les 10:30», «cine 12/11 22h», «pàdel dilluns 19h».</p>
+	<label class="tambe-google"><input type="checkbox" name="google" form="form-apunta"> També al meu Google Calendar</label>`;
 }
 // "sopar amb la Marina dissabte 21h" → {titol, dia, hora}. Entén avui, demà, demà passat, els dies de la setmana i 6/12
 function llegirApunt(text, diaFix) {
@@ -1546,6 +1632,14 @@ document.addEventListener('click', (ev) => {
 	if (!b) return;
 	const d = b.dataset;
 	const f = (id) => estat.files[id]?.o;
+	if (d.mic !== undefined) {
+		if (estat.vista !== 'llista') {
+			estat.vista = 'llista';
+			pintar();
+		}
+		escoltar();
+		return;
+	}
 	if (d.vista) {
 		estat.vista = d.vista;
 		estat.editant = false;
@@ -1706,7 +1800,11 @@ document.addEventListener('click', (ev) => {
 		o.has(d.calMostra) ? o.delete(d.calMostra) : o.add(d.calMostra);
 	}
 	else if (d.mesCal) estat.mesCal += Number(d.mesCal);
-	else if (d.treureCal) {
+	else if (d.treurePla) {
+		const id = d.treurePla;
+		tocar(id, {...f(id), esborrat: true});
+		avisar(`«${f(id).titol}» fora del calendari`, () => tocar(id, {...f(id), esborrat: false}));
+	} else if (d.treureCal) {
 		const id = d.treureCal;
 		tocar(id, {...f(id), esborrat: true});
 		delete estat.cal[id];
@@ -1818,13 +1916,14 @@ document.addEventListener('submit', async (ev) => {
 		const text = String(dades.get('text') ?? '').trim();
 		if (text.length < 2) return;
 		const a = llegirApunt(text, form.dataset.dia);
-		window.open(enllacGoogle(a), '_blank', 'noopener');
+		const id = nouId();
+		tocar(id, {t: 'pla', titol: majuscula(a.titol), dia: a.dia, hora: a.hora ?? null, qui: estat.qui, quan: ara()});
+		if (dades.get('google')) window.open(enllacGoogle(a), '_blank', 'noopener');
 		form.querySelector('input').value = '';
 		const d = new Date(`${a.dia}T12:00`);
 		estat.full = null;
 		pintar();
-		avisar(`${a.titol} · ${NOMS_DIES[d.getDay()].toLowerCase()} ${d.getDate()}${a.hora ? ` a les ${a.hora}` : ''}: toca «Desar» a Google`);
-		setTimeout(() => carregarCalendaris(true), 60e3); // quan torni, que ja hi surti
+		avisar(`${majuscula(a.titol)} · ${NOMS_DIES[d.getDay()].toLowerCase()} ${d.getDate()}${a.hora ? ` a les ${a.hora}` : ''}`, () => tocar(id, {...estat.files[id].o, esborrat: true}));
 	} else if (form.id === 'form-portar') {
 		const boto = form.querySelector('button');
 		boto.disabled = true;
