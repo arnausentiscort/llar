@@ -173,7 +173,7 @@ export function crearRecords(c) {
 			cos = `<section class="rec-mon">
 				<div id="rec-mapa" class="rec-mapa"></div>
 				<div class="rec-xifres"><div><b>${meus.length}</b><span>${meus.length === 1 ? 'viatge' : 'viatges'}</span></div><div><b>${llocs.size}</b><span>llocs</span></div><div><b>${fora}</b><span>dies fora</span></div><div><b>${fotos}</b><span>fotos</span></div></div>
-				<div class="rec-viatges">${meus.map((r) => `<button type="button" class="rec-viatge" data-rec="${r.id}">${foto(r.fotos?.[r.portada ?? 0], 'p')}<span><b>${esc(r.titol)}</b><small>${esc(mesAny(r.des))}${dies(r) > 1 ? ` · ${dies(r)} dies` : ''}</small></span></button>`).join('')}</div>
+				<div class="rec-viatges">${meus.map((r) => `<button type="button" class="rec-viatge" data-rec="${r.id}">${foto(r.fotos?.[r.portada ?? 0], 'g')}<span><b>${esc(r.titol)}</b><small>${esc(mesAny(r.des))}${dies(r) > 1 ? ` · ${dies(r)} dies` : ''}</small></span></button>`).join('')}</div>
 			</section>`;
 		}
 		const buit = !rs.length
