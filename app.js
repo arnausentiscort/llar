@@ -259,7 +259,7 @@ const estat = {
 	qui: guardat.llegir('llar-qui', null),
 	files: guardat.llegir('llar-files', {}),
 	cua: new Set(guardat.llegir('llar-cua', [])),
-	vista: 'inici',
+	vista: 'nosaltres',
 	clau: null,
 	casa: null,
 	xarxa: SUPABASE.url ? 'mirant' : 'local', // mirant · al-dia · sense · local
@@ -663,6 +663,83 @@ const salutacio = () => {
 	const h = new Date().getHours();
 	return h < 6 ? 'Bona nit' : h < 14 ? 'Bon dia' : h < 21 ? 'Bona tarda' : 'Bona nit';
 };
+// --- els dos mons de la Llar: Nosaltres (records, calendari, regals, plans a fer) i Menjar (llista, menú, receptes, nevera).
+// A baix només hi ha aquests dos botons; cada pantalla de dins porta una fletxa per tornar a la seva portada.
+const MON_DE = {llista: 'menjar', menu: 'menjar', receptes: 'menjar', calendari: 'nosaltres', regals: 'nosaltres', records: 'nosaltres', plans: 'nosaltres'};
+const NOM_MON = {nosaltres: 'Nosaltres', menjar: 'Menjar'};
+const dataLlarga = () => {
+	const ara = new Date();
+	return `${NOMS_DIES[ara.getDay()]} ${ara.getDate()} ${deMes(ara.getMonth())}`;
+};
+function vistaNosaltres() {
+	const ara = new Date();
+	const evs = totsEvents().filter((e) => e.tipus !== 'info' && e.fi > ara);
+	const u = REC.ultim();
+	const f = u?.fotos?.[u.portada ?? 0];
+	const regals = totes('regal').filter((g) => !g.donat).length;
+	const plans = totes('idea-pla').filter((p) => !p.fet);
+	// els pròxims set dies, amb un punt si hi ha alguna cosa
+	const set = [...Array(7)].map((_, i) => new Date(ara.getFullYear(), ara.getMonth(), ara.getDate() + i));
+	const tira = set
+		.map((d) => {
+			const ds = diaDe(d);
+			const n = delDia(evs, ds).length;
+			return `<button type="button" class="ns-dia${ds === diaDe(ara) ? ' avui' : ''}" data-dia-cal="${ds}"><small>${DIES_CURTS[d.getDay()]}</small><b>${d.getDate()}</b><i>${n ? '<em></em>'.repeat(Math.min(n, 3)) : ''}</i></button>`;
+		})
+		.join('');
+	const quan = (d) => {
+		const fd = Math.round((iniciDia(diaDe(d)) - iniciDia(diaDe(ara))) / 864e5);
+		return fd <= 0 ? 'Avui' : fd === 1 ? 'Demà' : NOMS_DIES[d.getDay()];
+	};
+	const porta = (attrs, ic, nom, detall) => `<button type="button" class="ns-porta" ${attrs}>${icona(ic, 20)}<b>${nom}</b><small>${esc(detall)}</small></button>`;
+	const nRec = (e) => totes('record').filter((r) => r.espai === e).length;
+	return `<header class="mon-cap"><small>${dataLlarga()}</small><h1>Nosaltres</h1></header>
+	<button type="button" class="ns-hero" ${u ? `data-rec="${u.id}"` : 'data-anar-rec="tot"'}>${f ? `<img class="rec-img" data-foto="${f.id}" data-mida="g" alt="">` : ''}<span><small>${u ? 'Últim record' : 'Records'}</small><b>${u ? esc(u.titol) : 'Penja el primer record'}</b></span></button>
+	<section class="ns-cal">
+		<div class="ns-cal-cap"><b>Aquesta setmana</b><button type="button" class="enllac" data-vista="calendari">Calendari</button></div>
+		<div class="ns-tira">${tira}</div>
+		${evs.slice(0, 3).map((e) => `<div class="ns-ev" style="--c:${e.color}"><span>${quan(e.inici)}${e.totDia ? '' : ` · ${horaDe(e.inici)}`}</span><b>${esc(e.titol)}</b></div>`).join('') || '<p class="ns-res">Res apuntat aquests dies.</p>'}
+		<button type="button" class="ns-apuntar" data-apunta="">${icona('mes', 15)} Apuntar un pla</button>
+	</section>
+	<div class="ns-portes">
+		${porta('data-anar-rec="viatges"', 'pin', 'Viatges', `${nRec('viatges')} ${nRec('viatges') === 1 ? 'viatge' : 'viatges'} al mapa`)}
+		${porta('data-anar-rec="tot"', 'estrella', 'Records', `${totes('record').length} records`)}
+		${porta('data-vista="plans"', 'llista', 'Plans a fer', plans.length ? `${plans.length} apuntats` : 'Apunteu-hi idees')}
+		${porta('data-vista="regals"', 'regal', 'Regals', regals ? `${regals} ${regals === 1 ? 'idea' : 'idees'}` : 'Cap idea encara')}
+	</div>`;
+}
+// els plans que voleu fer algun dia: una llista dels dos. Quan se'n fa un, es pot convertir en record amb fotos
+function vistaPlans() {
+	const ps = totes('idea-pla');
+	const per = ps.filter((p) => !p.fet).sort((a, b) => (b.quan ?? '').localeCompare(a.quan ?? ''));
+	const fets = ps.filter((p) => p.fet).sort((a, b) => (b.fetQuan ?? '').localeCompare(a.fetQuan ?? ''));
+	const fila = (p) => `<li class="pla-fila${p.fet ? ' fet' : ''}"><button type="button" class="pla-check" data-pla-fet="${p.id}" aria-label="${p.fet ? 'Encara no' : 'Fet'}">${p.fet ? icona('fet', 14) : ''}</button><span><b>${esc(p.text)}</b><small>${av(p.qui)}${p.fet ? 'fet' : 'idea'} ${p.qui === estat.qui ? 'teva' : `de ${articleDe(p.qui)}${esc(p.qui)}`}</small></span>${p.fet ? `<button type="button" class="boto-suau pla-rec" data-pla-record="${p.id}">Fotos</button>` : `<button type="button" class="pla-treure" data-pla-treure="${p.id}" aria-label="Treure">${icona('tancar', 14)}</button>`}</li>`;
+	return `<header class="titol"><h1>Plans a fer</h1><p>El que voleu fer algun dia: una escapada, un restaurant, una excursió. Quan el feu, marqueu-lo i penjeu-ne les fotos.</p></header>
+	<form class="afegir" id="form-pla"><textarea id="text-pla" name="text" rows="1" placeholder="Un pla: anar a veure les aurores, el ramen de Gràcia…" enterkeyhint="done" autocomplete="off"></textarea><button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>
+	${per.length ? `<ul class="plans-llista">${per.map(fila).join('')}</ul>` : '<p class="ns-res">Encara no n’hi ha cap. Apunteu el primer!</p>'}
+	${fets.length ? `<h2 class="inici-sec">Fets</h2><ul class="plans-llista">${fets.map(fila).join('')}</ul>` : ''}`;
+}
+// la portada de Menjar: el dia d'avui, el micro per apuntar i la resta en una llista neta
+function vistaMenjar() {
+	const avui = diaDe(new Date());
+	const apats = totes('apat');
+	const de = (m) => apats.filter((a) => a.dia === avui && momentDe(a) === m).map((a) => a.nom);
+	const fila = (nom, valor) => `<div class="avui-fila"><span>${nom}</span>${valor ? `<b>${esc(valor)}</b>` : '<button type="button" class="avui-buit" data-vista="menu">Tria-ho</button>'}</div>`;
+	const n = pendents().length;
+	const setmana = apats.filter((a) => dies().some((d) => d.dia === a.dia)).length;
+	const nev = nevera();
+	const fila2 = (attrs, ic, nom, detall) => `<button type="button" class="mj-fila" ${attrs}>${icona(ic, 19)}<b>${nom}</b><small>${esc(detall)}</small>${icona('seguent', 16)}</button>`;
+	return `<header class="mon-cap"><small>${dataLlarga()}</small><h1>Menjar</h1></header>
+	<section class="avui-targeta"><span class="avui-etiqueta">Avui</span>${fila('Dinar', de('dinar').join(' · '))}${fila('Sopar', de('sopar').join(' · '))}</section>
+	<form class="afegir mj-afegir" id="form-afegir"><textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>${ESCOLTA ? `<button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="Dictar">${icona('mic', 22)}</button>` : ''}<button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>
+	<div class="mj-llista">
+		${fila2('data-vista="llista"', 'llista', 'Llista', n ? `${n} per comprar` : 'No falta res')}
+		${fila2('data-vista="menu"', 'plat', 'Menú de la setmana', setmana ? `${setmana} plats` : 'Res triat')}
+		${fila2('data-vista="receptes"', 'recepta', 'Receptes', `${totes('recepta').length}`)}
+		${fila2('data-vista="menu" data-focus="text-nevera"', 'nevera', 'Nevera', nev.length ? `${nev.length} coses` : 'buida')}
+	</div>`;
+}
+
 function vistaInici() {
 	const avui = diaDe(new Date());
 	const apats = totes('apat');
@@ -1599,14 +1676,10 @@ function pintar() {
 		<button type="button" class="estat-xarxa ${estat.xarxa}" data-perfil title="${ESTAT_XARXA[estat.xarxa]}"><i></i>${perEnviar ? `${perEnviar} per enviar` : estat.xarxa === 'sense' ? 'Sense connexió' : ''}</button>
 		<button type="button" class="qui" data-perfil aria-label="${esc(estat.qui)}">${av(estat.qui)}</button>
 	</header>
-	<main class="pantalla">${{inici: vistaInici, records: REC.vista, llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals, calendari: vistaCalendari}[estat.vista]()}</main>
+	<main class="pantalla">${MON_DE[estat.vista] ? `<button type="button" class="tornar" data-vista="${MON_DE[estat.vista]}">‹ ${NOM_MON[MON_DE[estat.vista]]}</button>` : ''}${{nosaltres: vistaNosaltres, menjar: vistaMenjar, plans: vistaPlans, inici: vistaInici, records: REC.vista, llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals, calendari: vistaCalendari}[estat.vista]()}</main>
 	<nav class="pestanyes">
-		<button type="button" data-vista="inici" aria-pressed="${estat.vista === 'inici'}">${icona('casa', 22)}<span>Inici</span></button>
-		<button type="button" data-vista="llista" aria-pressed="${estat.vista === 'llista'}">${icona('llista', 22)}<span>Llista</span>${n ? `<i>${n}</i>` : ''}</button>
-		<button type="button" data-vista="menu" aria-pressed="${estat.vista === 'menu'}">${icona('plat', 22)}<span>Menú</span></button>
-		<button type="button" data-vista="calendari" aria-pressed="${estat.vista === 'calendari'}">${icona('menu', 22)}<span>Calendari</span></button>
-		<button type="button" data-vista="receptes" aria-pressed="${estat.vista === 'receptes'}">${icona('recepta', 22)}<span>Receptes</span></button>
-		<button type="button" data-vista="regals" aria-pressed="${estat.vista === 'regals'}">${icona('regal', 22)}<span>Regals</span></button>
+		<button type="button" class="mon" data-vista="nosaltres" aria-pressed="${(MON_DE[estat.vista] ?? estat.vista) === 'nosaltres'}">Nosaltres</button>
+		<button type="button" class="mon" data-vista="menjar" aria-pressed="${(MON_DE[estat.vista] ?? estat.vista) === 'menjar'}">Menjar${n ? `<i>${n}</i>` : ''}</button>
 	</nav>
 	${
 		full
@@ -1642,6 +1715,30 @@ document.addEventListener('click', (ev) => {
 	if (!b) return;
 	const d = b.dataset;
 	const f = (id) => estat.files[id]?.o;
+	if (d.anarRec) {
+		estat.vista = 'records';
+		estat.recEspai = d.anarRec;
+		window.scrollTo(0, 0);
+		return pintar();
+	}
+	if (d.plaFet) {
+		const p = f(d.plaFet);
+		tocar(d.plaFet, {...p, fet: !p.fet, fetQuan: p.fet ? null : ara()});
+		if (!p.fet) avisar('Fet! Toca «Fotos» per penjar-ne el record');
+		return pintar();
+	}
+	if (d.plaTreure) {
+		const id = d.plaTreure;
+		tocar(id, {...f(id), esborrat: true});
+		avisar(`«${f(id).text}» fora`, () => tocar(id, {...f(id), esborrat: false}));
+		return pintar();
+	}
+	if (d.plaRecord) {
+		const p = f(d.plaRecord);
+		estat.vista = 'records';
+		estat.full = {t: 'recnou', espai: 'plans', titol: p.text};
+		return pintar();
+	}
 	if (REC.clic(d)) return pintar();
 	if (d.mic !== undefined) {
 		if (estat.vista !== 'llista') {
@@ -1655,7 +1752,7 @@ document.addEventListener('click', (ev) => {
 		estat.vista = d.vista;
 		estat.editant = false;
 		window.scrollTo(0, 0);
-		if (['calendari', 'menu', 'inici'].includes(d.vista)) carregarCalendaris();
+		if (['calendari', 'menu', 'inici', 'nosaltres'].includes(d.vista)) carregarCalendaris();
 		if (d.focus) requestAnimationFrame(() => document.getElementById(d.focus)?.focus());
 	} else if (d.fet) {
 		tocar(d.fet, {...f(d.fet), fet: true, fetQuan: ara(), perQui: estat.qui});
@@ -1856,6 +1953,14 @@ document.addEventListener('submit', async (ev) => {
 	const form = ev.target;
 	const dades = new FormData(form);
 	if (await REC.form(form, dades)) return;
+	if (form.id === 'form-pla') {
+		const text = String(dades.get('text') ?? '').trim();
+		if (!text) return;
+		tocar(nouId(), {t: 'idea-pla', text: majuscula(text), qui: estat.qui, quan: ara(), fet: false});
+		form.reset();
+		pintar();
+		return;
+	}
 	if (form.id === 'form-afegir') {
 		const noms = trossos(dades.get('text'));
 		if (!noms.length) return;
