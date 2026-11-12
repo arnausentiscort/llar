@@ -3,6 +3,7 @@
 // primer al mòbil i, si hi ha Supabase (config.js), s'hi puja i se'n baixa el que ha posat l'altre. Sense connexió,
 // tot es queda al mòbil i s'envia quan torna.
 import {SUPABASE} from './config.js';
+import {crearRecords} from './records.js';
 
 const PERSONES = ['Arnau', 'Núria'];
 const ITERACIONS = 150000;
@@ -701,7 +702,12 @@ function vistaInici() {
 	<div class="tiles">
 		${tile('calendari', 'menu', 'Calendari', proper ? `${quan(proper.inici)}: ${proper.nom}` : 'Res a la vista')}
 		${tile('regals', 'regal', 'Regals', regals ? `${regals} ${regals === 1 ? 'idea' : 'idees'}` : 'Cap idea encara')}
-	</div>`;
+	</div>
+	<button type="button" class="tile-records" data-vista="records">${(() => {
+		const u = REC.ultim();
+		const f = u?.fotos?.[u.portada ?? 0];
+		return `${f ? `<img class="rec-img" data-foto="${f.id}" data-mida="p" alt="">` : ''}<span><small>Records</small><b>${u ? esc(u.titol) : 'Els vostres viatges i plans, amb fotos'}</b></span>${icona('seguent', 18)}`;
+	})()}</button>`;
 }
 
 // de què és un plat (carn, peix, pasta...), mirant el nom i els ingredients de la recepta: només per orientar-se
@@ -1593,7 +1599,7 @@ function pintar() {
 		<button type="button" class="estat-xarxa ${estat.xarxa}" data-perfil title="${ESTAT_XARXA[estat.xarxa]}"><i></i>${perEnviar ? `${perEnviar} per enviar` : estat.xarxa === 'sense' ? 'Sense connexió' : ''}</button>
 		<button type="button" class="qui" data-perfil aria-label="${esc(estat.qui)}">${av(estat.qui)}</button>
 	</header>
-	<main class="pantalla">${{inici: vistaInici, llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals, calendari: vistaCalendari}[estat.vista]()}</main>
+	<main class="pantalla">${{inici: vistaInici, records: REC.vista, llista: vistaLlista, menu: vistaMenu, receptes: vistaReceptes, regals: vistaRegals, calendari: vistaCalendari}[estat.vista]()}</main>
 	<nav class="pestanyes">
 		<button type="button" data-vista="inici" aria-pressed="${estat.vista === 'inici'}">${icona('casa', 22)}<span>Inici</span></button>
 		<button type="button" data-vista="llista" aria-pressed="${estat.vista === 'llista'}">${icona('llista', 22)}<span>Llista</span>${n ? `<i>${n}</i>` : ''}</button>
@@ -1605,7 +1611,7 @@ function pintar() {
 	${
 		full
 			? `<div class="vel${quiet ? ' quiet' : ''}" data-tancar-full></div><section class="full${quiet ? ' quiet' : ''}" data-t="${full.t}" role="dialog" aria-modal="true"><div class="full-nansa"></div><button type="button" class="full-tancar" data-tancar-full aria-label="Tancar">${icona('tancar', 18)}</button>${
-					{plat: () => fullPlat(full), nevera: () => fullNevera(full.id), recepta: () => fullRecepta(full.id), perfil: fullPerfil, rapid: fullRapid, regal: () => fullRegal(full.id), dia: () => fullDia(full.dia), apunta: () => fullApunta(full.dia)}[full.t]()
+					{rec: () => REC.full(full), recnou: () => REC.full(full), recfoto: () => REC.full(full), plat: () => fullPlat(full), nevera: () => fullNevera(full.id), recepta: () => fullRecepta(full.id), perfil: fullPerfil, rapid: fullRapid, regal: () => fullRegal(full.id), dia: () => fullDia(full.dia), apunta: () => fullApunta(full.dia)}[full.t]()
 				}</section>`
 			: ''
 	}`;
@@ -1620,9 +1626,13 @@ function pintar() {
 		}
 	}
 	estat.ultim = null;
+	REC.despres();
 }
 
 // --- el que es toca ---
+// Records (records.js): el mur, el mapa dels viatges i el diari de cada record
+const REC = crearRecords({estat, totes, tocar, nouId, ara, esc, icona, avisar, pintar: () => pintar(), av, SUPABASE, capcals, NOMS_DIES, deMes, majuscula});
+
 document.addEventListener('click', (ev) => {
 	if (ev.target.closest('.vel')) {
 		estat.full = null;
@@ -1632,6 +1642,7 @@ document.addEventListener('click', (ev) => {
 	if (!b) return;
 	const d = b.dataset;
 	const f = (id) => estat.files[id]?.o;
+	if (REC.clic(d)) return pintar();
 	if (d.mic !== undefined) {
 		if (estat.vista !== 'llista') {
 			estat.vista = 'llista';
@@ -1844,6 +1855,7 @@ document.addEventListener('submit', async (ev) => {
 	ev.preventDefault();
 	const form = ev.target;
 	const dades = new FormData(form);
+	if (await REC.form(form, dades)) return;
 	if (form.id === 'form-afegir') {
 		const noms = trossos(dades.get('text'));
 		if (!noms.length) return;
