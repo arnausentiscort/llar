@@ -158,8 +158,30 @@ function trossos(text) {
 				.replace(/[.!?\s]+$/, '')
 				.trim(),
 		)
+		.flatMap(partirDictat)
 		.filter((t) => t.length > 1)
 		.map(majuscula);
+}
+// el que es dicta arriba sense comes ("llet ous pa de motlle tomàquets"): si totes les paraules són productes coneguts
+// (amb la quantitat davant, "dos litres de llet"), es parteix en un tros per producte; si no, es deixa com està
+const PARAULES_NUM = new Set(['un', 'una', 'uno', 'dos', 'dues', 'tres', 'quatre', 'cuatro', 'cinc', 'cinco', 'sis', 'seis', 'mig', 'mitja', 'medio', 'media', 'de', 'd', 'del', 'kg', 'quilo', 'quilos', 'kilo', 'kilos', 'litre', 'litres', 'litro', 'litros', 'paquet', 'paquets', 'paquete', 'pot', 'pots', 'bossa', 'bosses', 'llauna', 'llaunes', 'grams', 'gramos', 'g']);
+const FARCIT = /^(?:i|y|també|tambe|també)$/;
+function partirDictat(tros) {
+	const w = tros.split(/\s+/).filter((x) => !FARCIT.test(normal(x)));
+	if (w.length < 2) return [w.join(' ')];
+	const conegut = (s) => !!BONIC_DE[normal(s)] || formesDe(normal(s)).some((x) => BONIC_DE[x]);
+	const sortida = [];
+	let i = 0;
+	while (i < w.length) {
+		let j = i;
+		while (j < w.length && (PARAULES_NUM.has(normal(w[j]).replace(/['’]/g, '')) || /^\d+([.,]\d+)?$/.test(w[j]))) j++;
+		let fi = 0;
+		for (let k = Math.min(w.length, j + 4); k > j; k--) if (conegut(w.slice(j, k).join(' '))) { fi = k; break; }
+		if (!fi) return [tros]; // hi ha alguna cosa que no coneixem: millor no partir-ho malament
+		sortida.push(w.slice(i, fi).join(' '));
+		i = fi;
+	}
+	return sortida.length > 1 ? sortida : [tros];
 }
 
 // --- els ingredients de les receptes: cada un és un producte amb quantitat i unitat, no un text ---
@@ -542,7 +564,7 @@ function vistaLlista() {
 	return `${avisInstal·lar()}
 	<form class="afegir" id="form-afegir">
 		<textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>
-		${ESCOLTA ? `<button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button>` : ''}
+		<button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button>
 		<button type="submit" aria-label="Afegir">${icona('mes', 22)}</button>
 	</form>
 	<div class="suggeriments" id="suggeriments" hidden></div>
@@ -623,39 +645,80 @@ function filaApat(a) {
 // servei de veu del sistema). El que es diu s'escriu a la caixa i s'afegeix sol, i "i" fa de coma ("llet, ous i pa")
 const ESCOLTA = window.SpeechRecognition || window.webkitSpeechRecognition;
 let escolta = null;
-function escoltar() {
-	if (!ESCOLTA) return;
+// si el navegador no deixa dictar (l'app instal·lada a l'iPhone, sobretot), el micro del teclat fa el mateix
+function dictarAmbTeclat(motiu) {
+	const t = document.getElementById('text-afegir');
+	t?.focus();
+	avisar(motiu ?? 'Toca el micro del teclat i digues el que falta');
+}
+function escoltar(idioma = 'ca-ES') {
+	if (!ESCOLTA) return dictarAmbTeclat();
 	if (escolta) {
 		escolta.stop();
 		return;
 	}
-	escolta = new ESCOLTA();
-	escolta.lang = 'ca-ES';
-	escolta.interimResults = true;
-	escolta.continuous = false;
+	const r = new ESCOLTA();
+	escolta = r;
+	r.lang = idioma;
+	r.interimResults = true;
+	r.continuous = true; // deixa fer pauses entre cosa i cosa; s'atura sol després d'un silenci
+	r.maxAlternatives = 1;
 	let text = '';
-	escolta.onresult = (e) => {
-		text = [...e.results].map((r) => r[0].transcript).join(' ');
-		const t = document.getElementById('text-afegir');
-		if (t) t.value = text;
+	let silenci = null;
+	let error = null;
+	const calla = () => {
+		clearTimeout(silenci);
+		silenci = setTimeout(() => r.stop(), text ? 2200 : 7000);
 	};
-	escolta.onerror = (e) => {
-		if (e.error === 'not-allowed') avisar('Cal deixar fer servir el micro (o fes servir el del teclat)');
-	};
-	escolta.onend = () => {
+	// si el navegador no torna mai (passa en alguns mòbils), es tanca igualment i es passa al teclat
+	const tope = setTimeout(() => {
+		if (escolta !== r || text) return; // si ja s'ha sentit alguna cosa, el navegador va bé
+		r.onend = null;
+		try { r.abort(); } catch {}
 		escolta = null;
 		estat.escoltant = false;
-		const net = text.replace(/\s+i\s+/gi, ', ').trim();
 		pintar();
 		const t = document.getElementById('text-afegir');
-		if (net && t) {
+		if (text.trim() && t) {
+			t.value = text.replace(/\s+(i|y)\s+/gi, ', ').trim();
+			document.getElementById('form-afegir')?.requestSubmit();
+		} else dictarAmbTeclat();
+	}, 10000);
+	r.onresult = (e) => {
+		text = [...e.results].map((x) => x[0].transcript.trim()).join(', ');
+		const t = document.getElementById('text-afegir');
+		if (t) t.value = text;
+		calla();
+	};
+	r.onerror = (e) => (error = e.error);
+	r.onend = () => {
+		clearTimeout(silenci);
+		clearTimeout(tope);
+		escolta = null;
+		estat.escoltant = false;
+		pintar();
+		if (error === 'language-not-supported' && idioma !== 'es-ES') return escoltar('es-ES');
+		if (error === 'not-allowed') return dictarAmbTeclat('Cal deixar fer servir el micro. Mentrestant, fes servir el del teclat');
+		if (['service-not-allowed', 'network', 'audio-capture'].includes(error)) return dictarAmbTeclat();
+		const t = document.getElementById('text-afegir');
+		const net = text.replace(/\s+(i|y)\s+/gi, ', ').trim();
+		if (!net) return avisar(error === 'no-speech' ? 'No t’he sentit. Torna-ho a provar' : 'No he entès res');
+		if (t) {
 			t.value = net;
 			document.getElementById('form-afegir')?.requestSubmit();
 		}
 	};
 	estat.escoltant = true;
 	pintar();
-	escolta.start();
+	try {
+		r.start();
+		calla();
+	} catch {
+		escolta = null;
+		estat.escoltant = false;
+		pintar();
+		dictarAmbTeclat();
+	}
 }
 
 // --- l'inici: el dia d'avui en una targeta, tres maneres d'apuntar, i Menjar i Casa amb el que hi ha a dins ---
@@ -731,7 +794,7 @@ function vistaMenjar() {
 	const fila2 = (attrs, ic, nom, detall) => `<button type="button" class="mj-fila" ${attrs}>${icona(ic, 19)}<b>${nom}</b><small>${esc(detall)}</small>${icona('seguent', 16)}</button>`;
 	return `<header class="mon-cap"><small>${dataLlarga()}</small><h1>Menjar</h1></header>
 	<section class="avui-targeta"><span class="avui-etiqueta">Avui</span>${fila('Dinar', de('dinar').join(' · '))}${fila('Sopar', de('sopar').join(' · '))}</section>
-	<form class="afegir mj-afegir" id="form-afegir"><textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>${ESCOLTA ? `<button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="Dictar">${icona('mic', 22)}</button>` : ''}<button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>
+	<form class="afegir mj-afegir" id="form-afegir"><textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea><button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button><button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>
 	<div class="mj-llista">
 		${fila2('data-vista="llista"', 'llista', 'Llista', n ? `${n} per comprar` : 'No falta res')}
 		${fila2('data-vista="menu"', 'plat', 'Menú de la setmana', setmana ? `${setmana} plats` : 'Res triat')}
@@ -766,7 +829,7 @@ function vistaInici() {
 	</section>
 	<div class="apunta-tres">
 		<button type="button" data-vista="llista" data-focus="text-afegir">${icona('editar', 20)}<span>Escriu</span></button>
-		<button type="button" data-vista="llista" ${ESCOLTA ? 'data-mic' : 'data-focus="text-afegir"'}>${icona('mic', 20)}<span>Parla</span></button>
+		<button type="button" data-vista="llista" data-mic>${icona('mic', 20)}<span>Parla</span></button>
 	</div>
 	<h2 class="inici-sec">Menjar</h2>
 	<div class="tiles">
@@ -1741,7 +1804,7 @@ document.addEventListener('click', (ev) => {
 	}
 	if (REC.clic(d)) return pintar();
 	if (d.mic !== undefined) {
-		if (estat.vista !== 'llista') {
+		if (!document.getElementById('text-afegir')) {
 			estat.vista = 'llista';
 			pintar();
 		}
