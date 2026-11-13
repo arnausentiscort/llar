@@ -736,6 +736,9 @@ const dataLlarga = () => {
 	const ara = new Date();
 	return `${NOMS_DIES[ara.getDay()]} ${ara.getDate()} ${deMes(ara.getMonth())}`;
 };
+// la caixa per apuntar qualsevol cosa, escrivint o amb el micro: la IA ho reparteix (compra, calendari, regals, menú)
+const caixaApuntar = (placeholder) =>
+	`<form class="afegir mj-afegir" id="form-afegir"><textarea id="text-afegir" name="text" rows="1" placeholder="${placeholder}" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea><button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button><button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>`;
 function vistaNosaltres() {
 	const ara = new Date();
 	const evs = totsEvents().filter((e) => e.tipus !== 'info' && e.fi > ara);
@@ -759,6 +762,7 @@ function vistaNosaltres() {
 	const porta = (attrs, ic, nom, detall) => `<button type="button" class="ns-porta" ${attrs}>${icona(ic, 20)}<b>${nom}</b><small>${esc(detall)}</small></button>`;
 	const nRec = (e) => totes('record').filter((r) => r.espai === e).length;
 	return `<header class="mon-cap"><small>${dataLlarga()}</small><h1>Nosaltres</h1></header>
+	${caixaApuntar('Què apuntem? Escriu o parla')}
 	<button type="button" class="ns-hero" ${u ? `data-rec="${u.id}"` : 'data-anar-rec="tot"'}>${f ? `<img class="rec-img" data-foto="${f.id}" data-mida="g" alt="">` : ''}<span><small>${u ? 'Últim record' : 'Records'}</small><b>${u ? esc(u.titol) : 'Penja el primer record'}</b></span></button>
 	<section class="ns-cal">
 		<div class="ns-cal-cap"><b>Aquesta setmana</b><button type="button" class="enllac" data-vista="calendari">Calendari</button></div>
@@ -796,7 +800,7 @@ function vistaMenjar() {
 	const fila2 = (attrs, ic, nom, detall) => `<button type="button" class="mj-fila" ${attrs}>${icona(ic, 19)}<b>${nom}</b><small>${esc(detall)}</small>${icona('seguent', 16)}</button>`;
 	return `<header class="mon-cap"><small>${dataLlarga()}</small><h1>Menjar</h1></header>
 	<section class="avui-targeta"><span class="avui-etiqueta">Avui</span>${fila('Dinar', de('dinar').join(' · '))}${fila('Sopar', de('sopar').join(' · '))}</section>
-	<form class="afegir mj-afegir" id="form-afegir"><textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Un pla, un regal… Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea><button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button><button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>
+	${caixaApuntar('Què falta? Un pla, un regal… Escriu o parla')}
 	<div class="mj-llista">
 		${fila2('data-vista="llista"', 'llista', 'Llista', n ? `${n} per comprar` : 'No falta res')}
 		${fila2('data-vista="menu"', 'plat', 'Menú de la setmana', setmana ? `${setmana} plats` : 'Res triat')}
