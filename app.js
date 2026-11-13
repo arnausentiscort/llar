@@ -26,6 +26,8 @@ const guardat = {
 	},
 };
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
+// les franges d'un pla sense hora ("pel matí")
+const FRANGES = {mati: 'pel matí', tarda: 'a la tarda', nit: 'a la nit'};
 const nouId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 const ara = () => new Date().toISOString();
 const normal = (s) =>
@@ -1287,10 +1289,13 @@ function totsEvents() {
 	}
 	// la nostra agenda: el que s'apunta a la Llar (ho veuen tots dos al moment, sense passar per Google)
 	for (const p of totes('pla')) {
+		const pers = p.persones ?? [p.qui];
+		const qui = pers.length > 1 ? JUNTS : pers[0];
+		const titol = `${p.titol}${FRANGES[p.franja] ? ` · ${FRANGES[p.franja]}` : ''}${pers.length === 1 && pers[0] !== estat.qui ? ` · ${pers[0]}` : ''}`;
 		const inici = new Date(`${p.dia}T${p.hora ?? '00:00'}:00`);
 		const fi = p.hora ? new Date(inici) : new Date(inici.getTime() + 864e5); // amb hora: només l'inici (no sabem quan s'acaba)
-		fora.push({titol: p.titol, nom: p.titol, inici, fi, totDia: !p.hora, qui: p.qui, tipus: 'plans', partit: false, pla: p.id,
-			color: p.qui === 'Núria' ? 'var(--nuria)' : 'var(--arnau)'});
+		fora.push({titol, nom: p.titol, inici, fi, totDia: !p.hora, qui, tipus: 'plans', partit: false, pla: p.id,
+			color: qui === JUNTS ? 'var(--accent)' : qui === 'Núria' ? 'var(--nuria)' : 'var(--arnau)'});
 	}
 	return fora.sort((a, b) => a.inici - b.inici);
 }
@@ -2256,6 +2261,7 @@ async function entendre(text) {
 		method: 'POST',
 		headers: capcals(),
 		body: JSON.stringify({text, avui: `${diaDe(avui)} (${NOMS_DIES[avui.getDay()].toLowerCase()})`, qui: estat.qui}),
+		signal: AbortSignal.timeout(35000), // si no, es fa sense IA
 	});
 	const d = await r.json();
 	if (!r.ok || d.error) throw new Error(d.error ?? 'error');
@@ -2273,10 +2279,16 @@ function aplicarIA(d) {
 	for (const pl of d.plans ?? []) {
 		if (!dataBona(pl.data)) continue;
 		const id = nouId();
-		tocar(id, {t: 'pla', titol: majuscula(pl.titol), dia: pl.data, hora: /^\d{2}:\d{2}$/.test(pl.hora ?? '') ? pl.hora : null, qui: estat.qui, quan: ara()});
+		const persones = PERSONES.filter((q) => (pl.persones ?? []).some((x) => normal(x) === normal(q)));
+		const hora = /^\d{2}:\d{2}$/.test(pl.hora ?? '') ? pl.hora : null;
+		tocar(id, {t: 'pla', titol: majuscula(pl.titol) + (pl.lloc && !normal(pl.titol).includes(normal(pl.lloc).replace(/^(a|al|a la|en|el|la) /, '')) ? ` ${/^(a|al|en|des de|per) /i.test(pl.lloc) ? pl.lloc : `a ${pl.lloc}`}` : ''), dia: pl.data, hora, franja: hora ? null : FRANGES[pl.franja] ? pl.franja : null, persones: persones.length ? persones : [estat.qui], qui: estat.qui, quan: ara()});
 		ids.push(id);
 	}
-	if (d.plans?.length) parts.push(d.plans.length === 1 ? `${majuscula(d.plans[0].titol)} al calendari` : `${d.plans.length} plans`);
+	if (d.plans?.length) {
+		const p0 = d.plans[0];
+		const qui = (p0.persones ?? []).length > 1 ? 'tots dos' : normal(p0.persones?.[0] ?? '') === normal(estat.qui) ? 'tu' : p0.persones?.[0];
+		parts.push(d.plans.length === 1 ? `${majuscula(p0.titol)}${FRANGES[p0.franja] ? ` ${FRANGES[p0.franja]}` : ''}${qui ? ` (${qui})` : ''} al calendari` : `${d.plans.length} plans`);
+	}
 	for (const g of d.regals ?? []) {
 		const per = PERSONES.find((q) => normal(q) === normal(g.per ?? '')) ?? JUNTS;
 		const id = nouId();
