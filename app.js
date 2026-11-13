@@ -563,7 +563,7 @@ function vistaLlista() {
 	const total = p.length + carro.length;
 	return `${avisInstal·lar()}
 	<form class="afegir" id="form-afegir">
-		<textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>
+		<textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Un pla, un regal… Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea>
 		<button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button>
 		<button type="submit" aria-label="Afegir">${icona('mes', 22)}</button>
 	</form>
@@ -794,7 +794,7 @@ function vistaMenjar() {
 	const fila2 = (attrs, ic, nom, detall) => `<button type="button" class="mj-fila" ${attrs}>${icona(ic, 19)}<b>${nom}</b><small>${esc(detall)}</small>${icona('seguent', 16)}</button>`;
 	return `<header class="mon-cap"><small>${dataLlarga()}</small><h1>Menjar</h1></header>
 	<section class="avui-targeta"><span class="avui-etiqueta">Avui</span>${fila('Dinar', de('dinar').join(' · '))}${fila('Sopar', de('sopar').join(' · '))}</section>
-	<form class="afegir mj-afegir" id="form-afegir"><textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea><button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button><button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>
+	<form class="afegir mj-afegir" id="form-afegir"><textarea id="text-afegir" name="text" rows="1" placeholder="Què falta? Un pla, un regal… Escriu o parla" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea><button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button><button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>
 	<div class="mj-llista">
 		${fila2('data-vista="llista"', 'llista', 'Llista', n ? `${n} per comprar` : 'No falta res')}
 		${fila2('data-vista="menu"', 'plat', 'Menú de la setmana', setmana ? `${setmana} plats` : 'Res triat')}
@@ -2024,6 +2024,23 @@ document.addEventListener('submit', async (ev) => {
 		pintar();
 		return;
 	}
+	if (form.id === 'form-afegir' && calIA(String(dades.get('text') ?? ''))) {
+		const text = String(dades.get('text')).trim();
+		const caixa = form.querySelector('textarea');
+		caixa.value = '';
+		form.classList.add('pensant');
+		avisar('Entenent-ho…');
+		entendre(text)
+			.then(aplicarIA)
+			.catch(() => {
+				// sense IA (sense xarxa o Google ple): es fa com sempre, una cosa per tros
+				const {nous} = posarALlista(trossos(text).map((n) => ({...llegirIngredient(n), rebost: false})));
+				pintar();
+				avisar(nous.length ? `${nous.length} a la llista (sense IA)` : 'No ho he pogut entendre');
+			})
+			.finally(() => document.getElementById('form-afegir')?.classList.remove('pensant'));
+		return;
+	}
 	if (form.id === 'form-afegir') {
 		const noms = trossos(dades.get('text'));
 		if (!noms.length) return;
@@ -2226,6 +2243,59 @@ function avisar(text, desfer) {
 		amagarAvis();
 		desferAvis = null;
 	}, desfer ? 5000 : 2400);
+}
+
+// --- entendre amb IA: el que es dicta o s'enganxa va a la funció de Supabase (Gemini, gratis), que ho reparteix en
+// compra, plans, regals i menú. Només hi va el text d'aquell missatge; la resta de la Llar segueix xifrada.
+const FUNCIO_IA = 'quick-task';
+// una llista curta de productes ("llet", "ous i pa") no cal enviar-la enlloc: es fa aquí, al moment
+const calIA = (text) => SUPABASE.url && navigator.onLine && (text.trim().split(/\s+/).length > 4 || /\d|demà|dema|mañana|dissabte|diumenge|dilluns|dimarts|dimecres|dijous|divendres|sabado|domingo|lunes|martes|miercoles|jueves|viernes|regal|sopar|dinar|cena|comida|cumple|aniversari/i.test(text));
+async function entendre(text) {
+	const avui = new Date();
+	const r = await fetch(`${SUPABASE.url}/functions/v1/${FUNCIO_IA}`, {
+		method: 'POST',
+		headers: capcals(),
+		body: JSON.stringify({text, avui: `${diaDe(avui)} (${NOMS_DIES[avui.getDay()].toLowerCase()})`, qui: estat.qui}),
+	});
+	const d = await r.json();
+	if (!r.ok || d.error) throw new Error(d.error ?? 'error');
+	return d;
+}
+function aplicarIA(d) {
+	const ids = [];
+	const parts = [];
+	if (d.llista?.length) {
+		const {nous, sumats} = posarALlista(d.llista.map((x) => ({nom: nomProducte(x.nom), q: x.q ?? null, u: UNITATS[x.u] ? x.u : 'u', rebost: false})));
+		ids.push(...nous);
+		if (nous.length || sumats) parts.push(`${nous.length + (sumats || 0)} a la llista`);
+	}
+	const dataBona = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s ?? '');
+	for (const pl of d.plans ?? []) {
+		if (!dataBona(pl.data)) continue;
+		const id = nouId();
+		tocar(id, {t: 'pla', titol: majuscula(pl.titol), dia: pl.data, hora: /^\d{2}:\d{2}$/.test(pl.hora ?? '') ? pl.hora : null, qui: estat.qui, quan: ara()});
+		ids.push(id);
+	}
+	if (d.plans?.length) parts.push(d.plans.length === 1 ? `${majuscula(d.plans[0].titol)} al calendari` : `${d.plans.length} plans`);
+	for (const g of d.regals ?? []) {
+		const per = PERSONES.find((q) => normal(q) === normal(g.per ?? '')) ?? JUNTS;
+		const id = nouId();
+		tocar(id, {t: 'regal', per, nom: majuscula(g.nom), nota: '', enllac: '', secret: per !== estat.qui && per !== JUNTS, qui: estat.qui, quan: ara(), comprat: null, donat: false});
+		ids.push(id);
+	}
+	if (d.regals?.length) parts.push(d.regals.length === 1 ? 'un regal' : `${d.regals.length} regals`);
+	for (const m of d.menu ?? []) {
+		if (!dataBona(m.data)) continue;
+		const moment = m.apat === 'dinar' ? 'dinar' : 'sopar';
+		const rec = totes('recepta').find((x) => !x.esborrat && normal(x.nom) === normal(m.plat));
+		const id = nouId();
+		tocar(id, {t: 'apat', dia: m.data, moment, tipus: rec ? 'recepta' : 'fet', recepta: rec?.id ?? null, nom: rec?.nom ?? majuscula(m.plat), per: [...PERSONES], qui: estat.qui});
+		ids.push(id);
+	}
+	if (d.menu?.length) parts.push(d.menu.length === 1 ? `${majuscula(d.menu[0].plat)} al menú` : `${d.menu.length} plats al menú`);
+	pintar();
+	const desfer = ids.length ? () => ids.forEach((id) => estat.files[id] && tocar(id, {...estat.files[id].o, esborrat: true})) : null;
+	avisar(parts.length ? parts.join(' · ') : d.dubte || 'No hi he trobat res per apuntar', desfer);
 }
 
 async function entrar(codi, qui) {

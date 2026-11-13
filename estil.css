@@ -838,3 +838,6 @@ input, select, textarea { font-size: 16px !important; }
 	.rec-mon, .rec-mapa { background: #0b0b0b; }
 	.pestanyes .mon[aria-pressed='true'] i { color: #f5ede0 !important; background: #000 !important; }
 }
+
+/* mentre la IA ho entén */
+#form-afegir.pensant { opacity: 0.6; pointer-events: none; }
