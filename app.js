@@ -393,7 +393,16 @@ const RECEPTES = [
 // i ningú ha tocat, es passen a ingredients amb quantitat. Les que s'hagin esborrat no tornen.
 function sembrarReceptes() {
 	// només amb el que hi ha al núvol a la mà: si no, tornarien les que algú ha esborrat
-	if (guardat.llegir('llar-sembrat-3', false) || (SUPABASE.url && estat.xarxa !== 'al-dia')) return;
+	if (SUPABASE.url && estat.xarxa !== 'al-dia') return;
+	if (!guardat.llegir('llar-sembrat-3', false)) sembrarRecepta();
+	// el 14/11/2026 l'Arnau va demanar deixar només el bocata de steak tartar i la carbonara: la resta, esborrades (es poden
+	// recuperar, no es perden). Un sol cop per mòbil; les que es creen o es toquen després (porten "creada") no es toquen
+	if (!guardat.llegir('llar-neteja-receptes-1', false)) {
+		for (const r of totes('recepta')) if (r.id !== 'r-bocata-tartar' && !/carbonara/.test(normal(r.nom)) && !r.creada) tocar(r.id, {...estat.files[r.id].o, esborrat: true});
+		guardat.posar('llar-neteja-receptes-1', true);
+	}
+}
+function sembrarRecepta() {
 	for (const [id, nom, ing] of RECEPTES) {
 		const ja = estat.files[`r-${id}`]?.o;
 		const ingredients = ing.split(', ').map(llegirIngredient);
@@ -2068,7 +2077,7 @@ document.addEventListener('submit', async (ev) => {
 		if (!nom) return;
 		if (!ingredients.length) return avisar('Posa-hi algun ingredient');
 		const id = form.dataset.id || nouId();
-		tocar(id, {...(estat.files[id]?.o ?? {qui: estat.qui}), t: 'recepta', nom, ingredients, rapida: !!esb.rapida});
+		tocar(id, {...(estat.files[id]?.o ?? {qui: estat.qui}), t: 'recepta', nom, ingredients, rapida: !!esb.rapida, creada: estat.files[id]?.o?.creada ?? ara()});
 		estat.full = null;
 		pintar();
 		avisar(form.dataset.id ? 'Recepta desada' : 'Recepta nova desada');
