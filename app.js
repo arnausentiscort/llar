@@ -357,6 +357,7 @@ window.addEventListener('online', sincronitzar);
 // --- el receptari per començar (Reshi n'omple uns quants; els ids fixos fan que no es repeteixin) ---
 // Les quantitats són per a dos; la pasta, un paquet per àpat (com feu vosaltres). El que és del rebost no va a la llista.
 const RECEPTES = [
+	['bocata-tartar', 'Bocata de steak tartar', '200 g de steak tartar marinat, 1 burrata, 1 pot de salsa de tòfona, 1 bossa de patates fregides, 1 pa'],
 	['llenties', 'Llenties estofades', '1 pot de llenties, 1 ceba, 2 pastanagues, 1 patata, 100 g de xoriço, all, pebre vermell, oli, sal'],
 	['macarrons', 'Macarrons a la bolonyesa', '1 paquet de macarrons, 300 g de carn picada, 1 ceba, 1 pot de tomàquet fregit, formatge ratllat, oli, sal'],
 	['truita', 'Truita de patates', '5 ous, 4 patates, 1 ceba, oli, sal'],
@@ -392,14 +393,14 @@ const RECEPTES = [
 // i ningú ha tocat, es passen a ingredients amb quantitat. Les que s'hagin esborrat no tornen.
 function sembrarReceptes() {
 	// només amb el que hi ha al núvol a la mà: si no, tornarien les que algú ha esborrat
-	if (guardat.llegir('llar-sembrat-2', false) || (SUPABASE.url && estat.xarxa !== 'al-dia')) return;
+	if (guardat.llegir('llar-sembrat-3', false) || (SUPABASE.url && estat.xarxa !== 'al-dia')) return;
 	for (const [id, nom, ing] of RECEPTES) {
 		const ja = estat.files[`r-${id}`]?.o;
 		const ingredients = ing.split(', ').map(llegirIngredient);
 		if (!ja) tocar(`r-${id}`, {t: 'recepta', nom, ingredients, qui: 'Reshi'});
 		else if (!ja.esborrat && ja.qui === 'Reshi' && ja.ingredients?.every((x) => typeof x === 'string')) tocar(`r-${id}`, {...ja, nom, ingredients});
 	}
-	guardat.posar('llar-sembrat-2', true);
+	guardat.posar('llar-sembrat-3', true);
 }
 
 // --- el logo: la mateixa icona de l'app (la casa amb la porta encesa i la ratlleta daurada de la família, fer_icones) ---
