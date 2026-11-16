@@ -886,3 +886,8 @@ input, select, textarea { font-size: 16px !important; }
 	.cel { min-height: max(64px, calc((100svh - 330px) / 6)); }
 	.cel-ev { font-size: 10.5px; }
 }
+
+/* --- calendari (v7): findes i dies de festa, el mateix fons càlid; sense text --- */
+.cel.finde { background: color-mix(in srgb, var(--accent) 11%, transparent); }
+.cel.finde.triat { background: color-mix(in srgb, var(--accent) 18%, var(--panell-2)); }
+.dt-festa { margin: -2px 0 2px; font-size: 13px; color: var(--accent); }

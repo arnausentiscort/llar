@@ -405,11 +405,18 @@ function sembrarReceptes() {
 	const PLANS_DEMANATS = [
 		['p-cumple-lluis-2026', {titol: 'Aniversari del Lluís (germà de la Núria)', dia: '2026-11-21', persones: ['Núria']}],
 		['p-eleccions-2026-11', {titol: 'Eleccions', dia: '2026-11-29', persones: [...PERSONES]}],
-		['p-festa-nadal-2026', {titol: 'Dies de festa', dia: '2026-12-24', fins: '2027-01-03', persones: ['Arnau']}],
-		['p-festa-reis-2027', {titol: 'Dies de festa', dia: '2027-01-05', fins: '2027-01-06', persones: ['Arnau']}],
-		['p-jorda-reus-2026-11', {titol: 'El Jordà és a Reus', dia: '2026-11-28', persones: [...PERSONES]}],
+		// els dies de festa ("festa": es pinten com els findes, sense text)
+		['p-festa-nadal-2026', {titol: 'Festa', dia: '2026-12-24', fins: '2027-01-03', persones: ['Arnau'], festa: true}],
+		['p-festa-reis-2027', {titol: 'Festa', dia: '2027-01-05', fins: '2027-01-06', persones: ['Arnau'], festa: true}],
+		['p-festa-nuria-nadal-2026', {titol: 'Festa', dia: '2026-12-28', fins: '2026-12-31', persones: ['Núria'], festa: true}],
 	];
-	for (const [id, p] of PLANS_DEMANATS) if (!estat.files[id]) tocar(id, {t: 'pla', ...p, hora: null, franja: null, qui: 'Arnau', quan: ara()});
+	for (const [id, p] of PLANS_DEMANATS) {
+		const ja = estat.files[id]?.o;
+		if (!ja || (p.festa && !ja.festa && !ja.esborrat)) tocar(id, {t: 'pla', ...p, hora: null, franja: null, qui: 'Arnau', quan: ja?.quan ?? ara()});
+	}
+	// el Jordà ja era al calendari de qui és a Reus: el que vaig apuntar jo sobra
+	const jorda = estat.files['p-jorda-reus-2026-11']?.o;
+	if (jorda && !jorda.esborrat) tocar('p-jorda-reus-2026-11', {...jorda, esborrat: true});
 }
 function sembrarRecepta() {
 	for (const [id, nom, ing] of RECEPTES) {
@@ -760,7 +767,7 @@ const caixaApuntar = (placeholder) =>
 	`<form class="afegir mj-afegir" id="form-afegir"><textarea id="text-afegir" name="text" rows="1" placeholder="${placeholder}" enterkeyhint="done" autocomplete="off" autocorrect="on"></textarea><button type="button" class="boto-mic${estat.escoltant ? ' actiu' : ''}" data-mic aria-label="${estat.escoltant ? 'Parar' : 'Dictar'}">${icona('mic', 22)}</button><button type="submit" aria-label="Afegir">${icona('mes', 22)}</button></form>`;
 function vistaNosaltres() {
 	const ara = new Date();
-	const evs = totsEvents().filter((e) => e.tipus !== 'info' && e.fi > ara);
+	const evs = totsEvents().filter((e) => e.tipus !== 'info' && !e.festa && e.fi > ara);
 	const u = REC.ultim();
 	const f = u?.fotos?.[u.portada ?? 0];
 	const regals = totes('regal').filter((g) => !g.donat).length;
@@ -1320,7 +1327,7 @@ function totsEvents() {
 		const titol = `${p.titol}${FRANGES[p.franja] ? ` · ${FRANGES[p.franja]}` : ''}${pers.length === 1 && pers[0] !== estat.qui ? ` · ${pers[0]}` : ''}`;
 		const inici = new Date(`${p.dia}T${p.hora ?? '00:00'}:00`);
 		const fi = p.hora ? new Date(inici) : new Date(iniciDia(p.fins ?? p.dia).getTime() + 864e5); // "fins": plans de diversos dies // amb hora: només l'inici (no sabem quan s'acaba)
-		fora.push({titol, nom: p.titol, inici, fi, totDia: !p.hora, qui, tipus: 'plans', partit: false, pla: p.id,
+		fora.push({titol, nom: p.titol, inici, fi, totDia: !p.hora, qui, tipus: 'plans', partit: false, pla: p.id, festa: !!p.festa, persones: pers,
 			color: qui === JUNTS ? 'var(--accent)' : /barça|barca/i.test(p.titol) ? COLOR_BARCA : /real tiesada/i.test(p.titol) ? COLOR_REAL : 'var(--text-2)'});
 	}
 	return fora.sort((a, b) => a.inici - b.inici);
@@ -1414,12 +1421,28 @@ function agrupaEtiquetes(evs, dia) {
 	}
 	return [...grups.values()];
 }
+// els festius oficials de Catalunya i els locals de Reus (cada any sols; Pasqua es calcula)
+function festiusOficials(any) {
+	const a = any % 19, b = Math.floor(any / 100), c = any % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+	const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+	const mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1;
+	const pasqua = new Date(any, mes - 1, dia);
+	const mou = (n) => diaDe(new Date(pasqua.getFullYear(), pasqua.getMonth(), pasqua.getDate() + n));
+	const fix = {'01-01': 'Cap d’Any', '01-06': 'Reis', '05-01': 'Festa del Treball', '06-24': 'Sant Joan', '06-29': 'Sant Pere (Reus)', '08-15': 'L’Assumpció', '09-11': 'La Diada', '09-25': 'La Misericòrdia (Reus)', '10-12': 'El Pilar', '11-01': 'Tots Sants', '12-06': 'La Constitució', '12-08': 'La Immaculada', '12-25': 'Nadal', '12-26': 'Sant Esteve'};
+	return {...Object.fromEntries(Object.entries(fix).map(([md, nom]) => [`${any}-${md}`, nom])), [mou(-2)]: 'Divendres Sant', [mou(1)]: 'Dilluns de Pasqua'};
+}
+// qui fa festa un dia: ["Festiu: Nadal"] o ["Arnau", "Núria"]
+function festaDe(evs, dia) {
+	const oficial = festiusOficials(Number(dia.slice(0, 4)))[dia];
+	const qui = [...new Set(delDia(evs, dia).filter((e) => e.festa).flatMap((e) => e.persones ?? []))];
+	return [...(oficial ? [`Festiu: ${oficial}`] : []), ...qui];
+}
 // qui hi va, en paraules: " · tots dos", " · la Núria"
 const quiVa = (e) => (e.tipus === 'info' || !e.qui ? '' : e.qui === JUNTS ? ' · tots dos' : ` · ${articleDe(e.qui)}${e.qui}`);
 // el dia triat al mes: què hi ha, escrit, i un botó per apuntar-hi
 function diaTriat(evs, dia, avui) {
 	const d = new Date(`${dia}T12:00`);
-	const seus = delDia(evs, dia);
+	const seus = delDia(evs, dia).filter((e) => !e.festa);
 	const plans = seus.filter((e) => e.tipus !== 'info');
 	const info = seus.filter((e) => e.tipus === 'info');
 	const que = (e) => [e.partit ? 'Partit del Real' : e.barca ? 'Partit del Barça' : e.tipus === 'info' ? 'És a Reus' : '', e.lloc ? esc(e.lloc) : '', quiVa(e).replace(/^ · /, '')].filter(Boolean).join(' · ');
@@ -1427,6 +1450,7 @@ function diaTriat(evs, dia, avui) {
 	const nom = NOMS_DIES[d.getDay()];
 	return `<section class="dia-triat">
 		<h2>${dia === avui ? `Avui, ${nom.toLowerCase()}` : nom} ${d.getDate()} ${deMes(d.getMonth())}</h2>
+		${festaDe(evs, dia).length ? `<p class="dt-festa">${esc(((f) => [...f.filter((x) => x.startsWith('Festiu')), ...((q) => (q.length > 1 ? ['Tots dos feu festa'] : q.map((x) => `${articleDe(x)}${x} fa festa`)))(f.filter((x) => !x.startsWith('Festiu')))].map(majuscula).join(' · '))(festaDe(evs, dia)))}</p>` : ''}
 		${seus.length ? `<ul>${[...plans, ...info].map(fila).join('')}</ul>` : '<p class="buit-petit">Res apuntat.</p>'}
 		<button type="button" class="enllac" data-apunta="${dia}">${icona('mes', 15)} Apuntar alguna cosa aquest dia</button>
 	</section>`;
@@ -1444,13 +1468,15 @@ function vistaCalendari() {
 	const ocult = (estat.calOcult ??= new Set()); // el que s'ha amagat del mes: 'plans' o 'info'
 	const delMes = evs.filter((e) => e.inici < seguent && e.fi > primer);
 	const persones = delMes.filter((e) => e.tipus === 'info');
-	const plans = delMes.filter((e) => e.tipus !== 'info');
+	const plans = delMes.filter((e) => e.tipus !== 'info' && !e.festa);
 	const cel = (n) => {
 		const d = diaDe(new Date(primer.getFullYear(), primer.getMonth(), n));
 		const seus = delDia(evs, d);
 		const info = ocult.has('info') ? [] : seus.filter((e) => e.tipus === 'info');
-		const ps = ocult.has('plans') ? [] : seus.filter((e) => e.tipus !== 'info');
-		const finde = [0, 6].includes(new Date(`${d}T12:00`).getDay());
+		// un pla que ja surt a qui és a Reus (el mateix nom el mateix dia) no es repeteix
+		const aReus = seus.filter((e) => e.tipus === 'info').map((e) => normal(e.nom.split(' ')[0]));
+		const ps = ocult.has('plans') ? [] : seus.filter((e) => e.tipus !== 'info' && !e.festa && !aReus.some((n) => n.length > 2 && normal(e.titol).includes(n)));
+		const finde = [0, 6].includes(new Date(`${d}T12:00`).getDay()) || festaDe(evs, d).length > 0;
 		return `<button type="button" class="cel${finde ? ' finde' : ''}${d === avui ? ' avui' : ''}${d < avui ? ' passat' : ''}${d === sel ? ' triat' : ''}" data-sel-dia="${d}" aria-pressed="${d === sel}">
 			<b>${n}</b>
 			<span class="cel-plans">${ps.slice(0, 3).map((e) => (e.partit ? '<i class="partit">⚽</i>' : `<i style="--c:${e.color}"></i>`)).join('')}${ps.length > 3 ? '<em>+</em>' : ''}</span>
