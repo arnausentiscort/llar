@@ -1374,6 +1374,23 @@ function franja(e) {
 	const a = `${e.inici.getDate()}${e.inici.getMonth() !== fi.getMonth() ? ` ${MESOS[e.inici.getMonth()]}` : ''}`;
 	return diaDe(e.inici) === diaDe(fi) ? `${e.inici.getDate()} ${MESOS[e.inici.getMonth()]}` : `${a} → ${fi.getDate()} ${MESOS[fi.getMonth()]}`;
 }
+// qui hi va, en paraules: " · tots dos", " · la Núria"
+const quiVa = (e) => (e.tipus === 'info' || !e.qui ? '' : e.qui === JUNTS ? ' · tots dos' : ` · ${articleDe(e.qui)}${e.qui}`);
+// el dia triat al mes: què hi ha, escrit, i un botó per apuntar-hi
+function diaTriat(evs, dia, avui) {
+	const d = new Date(`${dia}T12:00`);
+	const seus = delDia(evs, dia);
+	const plans = seus.filter((e) => e.tipus !== 'info');
+	const info = seus.filter((e) => e.tipus === 'info');
+	const que = (e) => [e.partit ? 'Partit del Real' : e.barca ? 'Partit del Barça' : e.tipus === 'info' ? 'És a Reus' : '', e.lloc ? esc(e.lloc) : '', quiVa(e).replace(/^ · /, '')].filter(Boolean).join(' · ');
+	const fila = (e) => `<li class="dt-ev" style="--c:${e.color}"><span class="dt-hora">${e.totDia ? 'Tot el dia' : horaDe(e.inici)}</span><span class="dt-text"><b>${esc(e.partit ? e.titol.replace(/^⚽\s*/, '') : e.nom ?? e.titol)}</b>${que(e) ? `<small>${que(e)}</small>` : ''}</span>${e.pla ? `<button type="button" class="event-treure" data-treure-pla="${e.pla}" aria-label="Treure ${esc(e.nom)}">${icona('tancar', 14)}</button>` : ''}</li>`;
+	const nom = NOMS_DIES[d.getDay()];
+	return `<section class="dia-triat">
+		<h2>${dia === avui ? `Avui, ${nom.toLowerCase()}` : nom} ${d.getDate()} ${deMes(d.getMonth())}</h2>
+		${seus.length ? `<ul>${[...plans, ...info].map(fila).join('')}</ul>` : '<p class="buit-petit">Res apuntat.</p>'}
+		<button type="button" class="enllac" data-apunta="${dia}">${icona('mes', 15)} Apuntar alguna cosa aquest dia</button>
+	</section>`;
+}
 function vistaCalendari() {
 	const evs = totsEvents();
 	const ara = new Date();
@@ -1382,7 +1399,7 @@ function vistaCalendari() {
 	const nDies = new Date(primer.getFullYear(), primer.getMonth() + 1, 0).getDate();
 	const buits = (primer.getDay() + 6) % 7;
 	const avui = diaDe(ara);
-	const apats = totes('apat');
+	const sel = estat.diaSel && estat.diaSel.slice(0, 7) === diaDe(primer).slice(0, 7) ? estat.diaSel : primer.getMonth() === ara.getMonth() && primer.getFullYear() === ara.getFullYear() ? avui : diaDe(primer);
 	const errors = calendaris().filter((c) => estat.cal[c.id]?.error);
 	const ocult = (estat.calOcult ??= new Set()); // el que s'ha amagat del mes: 'plans' o 'info'
 	const delMes = evs.filter((e) => e.inici < seguent && e.fi > primer);
@@ -1394,7 +1411,7 @@ function vistaCalendari() {
 		const info = ocult.has('info') ? [] : seus.filter((e) => e.tipus === 'info');
 		const ps = ocult.has('plans') ? [] : seus.filter((e) => e.tipus !== 'info');
 		const finde = [0, 6].includes(new Date(`${d}T12:00`).getDay());
-		return `<button type="button" class="cel${finde ? ' finde' : ''}${d === avui ? ' avui' : ''}${d < avui ? ' passat' : ''}" data-dia-cal="${d}">
+		return `<button type="button" class="cel${finde ? ' finde' : ''}${d === avui ? ' avui' : ''}${d < avui ? ' passat' : ''}${d === sel ? ' triat' : ''}" data-sel-dia="${d}" aria-pressed="${d === sel}">
 			<b>${n}</b>
 			<span class="cel-plans">${ps.slice(0, 3).map((e) => (e.partit ? '<i class="partit">⚽</i>' : `<i style="--c:${e.color}"></i>`)).join('')}${ps.length > 3 ? '<em>+</em>' : ''}</span>
 			<span class="cel-textos">${ps.slice(0, 2).map((e) => `<span class="cel-ev" style="--c:${e.color}" title="${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}">${e.partit ? 'Real Tiesada' : e.barca ? 'Barça' : esc(e.nom)}</span>`).join('')}${ps.length > 2 ? `<em>+${ps.length - 2}</em>` : ''}</span>
@@ -1415,12 +1432,13 @@ function vistaCalendari() {
 	return `<header class="titol titol-amb-boto"><h1>Calendari</h1><button type="button" class="boto-suau" data-apunta="">${icona('mes', 16)} Apuntar</button></header>
 	<div class="cal-graella">
 		<div class="cal-esq">
-			${calendaris().length ? resumAvui(evs) : `<div class="connecta-cal"><b>Connecta els vostres calendaris</b><p>Enganxa l’enllaç secret del teu Google Calendar i aquí veureu els plans de tots dos, qui és a Reus i el menú, tot junt.</p><button type="button" class="boto-suau" data-perfil>${icona('menu', 16)} Connectar el meu</button></div>`}
+			${calendaris().length || totes('pla').length ? '' : `<div class="connecta-cal"><b>Connecta els vostres calendaris</b><p>Enganxa l’enllaç secret del teu Google Calendar i aquí veureu els plans de tots dos i qui és a Reus, tot junt.</p><button type="button" class="boto-suau" data-perfil>${icona('menu', 16)} Connectar el meu</button></div>`}
 			<section class="mes">
 				<div class="mes-cap"><button type="button" class="boto-suau" data-mes-cal="-1" aria-label="Mes anterior">‹</button><b>${nomMes}</b><button type="button" class="boto-suau" data-mes-cal="1" aria-label="Mes següent">›</button></div>
 				<div class="llegenda">${mostra('plans', `${icona('menu', 13)} Plans`)}${mostra('info', `${icona('pin', 13)} Qui és a Reus`)}<span class="claus"><span><i style="--c:var(--accent)"></i>Tots dos</span><span><i style="--c:${COLOR_REAL}"></i>Real Tiesada</span><span><i style="--c:${COLOR_BARCA}"></i>Barça</span></span></div>
 				<div class="graella-mes">${DIES_SETMANA.map((d, i) => `<small class="${i > 4 ? 'finde' : ''}">${d}</small>`).join('')}${'<span></span>'.repeat(buits)}${[...Array(nDies)].map((_, i) => cel(i + 1)).join('')}</div>
 			</section>
+			${diaTriat(evs, sel, avui)}
 			${errors.length ? `<p class="error-cal">${icona('sense', 14)} ${errors.map((c) => `${esc(c.nom)}: ${esc(estat.cal[c.id].error)}`).join(' · ')}</p>` : ''}
 		</div>
 		<div class="cal-dre">
@@ -1430,7 +1448,7 @@ function vistaCalendari() {
 			</section>
 			<section class="cal-llista">
 				<h2>Plans <small>${MESOS_LLARGS[primer.getMonth()]}</small></h2>
-				${plans.length ? plans.map((e) => `<button type="button" class="pla-fila${diaDe(e.inici) < avui ? ' passat' : ''}" style="--c:${e.color}" data-dia-cal="${diaDe(e.inici)}"><span class="pla-dia"><b>${e.inici.getDate()}</b><small>${DIES_SETMANA[(e.inici.getDay() + 6) % 7]}</small></span><span class="pla-text"><b>${esc(e.titol)}</b><small>${e.totDia ? 'Tot el dia' : horaDe(e.inici)}${e.lloc ? ` · ${esc(e.lloc)}` : ''}</small></span>${av(e.qui)}</button>`).join('') : '<p class="buit-petit">Cap pla aquest mes.</p>'}
+				${plans.length ? plans.map((e) => `<button type="button" class="pla-fila${diaDe(e.inici) < avui ? ' passat' : ''}" style="--c:${e.color}" data-dia-cal="${diaDe(e.inici)}"><span class="pla-dia"><b>${e.inici.getDate()}</b><small>${DIES_SETMANA[(e.inici.getDay() + 6) % 7]}</small></span><span class="pla-text"><b>${esc(e.titol)}</b><small>${e.totDia ? 'Tot el dia' : horaDe(e.inici)}${e.lloc ? ` · ${esc(e.lloc)}` : ''}${quiVa(e)}</small></span></button>`).join('') : '<p class="buit-petit">Cap pla aquest mes.</p>'}
 			</section>
 			<section class="findes"><h2>Els propers caps de setmana</h2>${findes
 				.map((f) => `<button type="button" class="finde-fila" data-dia-cal="${f.ds}"><span class="finde-data"><small>ds</small><b>${f.d.getDate()}</b><small>${MESOS[f.d.getMonth()]}</small></span><span class="finde-coses">${f.seus.length ? f.seus.slice(0, 4).map((e) => `<span style="--c:${e.color}">${esc(e.titol)}</span>`).join('') : '<small>Lliure</small>'}</span></button>`)
@@ -1984,7 +2002,8 @@ document.addEventListener('click', (ev) => {
 		tocar(id, {...f(id), esborrat: true});
 		estat.full = null;
 		avisar(`«${f(id).nom}» esborrada`, () => tocar(id, {...f(id), esborrat: false}));
-	} else if (d.diaCal) estat.full = {t: 'dia', dia: d.diaCal};
+	} else if (d.selDia) estat.diaSel = d.selDia;
+	else if (d.diaCal) estat.full = {t: 'dia', dia: d.diaCal};
 	else if (d.apunta !== undefined) {
 		estat.full = {t: 'apunta', dia: d.apunta || null};
 		setTimeout(() => document.getElementById('text-apunta')?.focus(), 250);
