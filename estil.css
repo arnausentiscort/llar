@@ -841,3 +841,14 @@ input, select, textarea { font-size: 16px !important; }
 
 /* mentre la IA ho entén */
 #form-afegir.pensant { opacity: 0.6; pointer-events: none; }
+
+/* --- calendari (v3, 16/11/2026): com els calendaris de parella, el nom de cada pla dins del dia, també al mòbil.
+   El color diu què és (neutre, daurat si hi aneu tots dos, el Real, el Barça); el menú va a part --- */
+.cel { height: 66px; align-items: stretch; padding: 3px 2px; }
+.cel b { align-self: center; }
+.cel-plans { display: none; }
+.cel-textos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cel-ev { overflow: hidden; padding: 1px 3px; border-radius: 4px; font-size: 9.5px; font-weight: 600; line-height: 1.3; white-space: nowrap; text-overflow: clip; text-align: left; color: color-mix(in srgb, var(--c) 55%, var(--text)); background: color-mix(in srgb, var(--c) 20%, transparent); }
+.cel-textos em { font-size: 9px; font-style: normal; font-weight: 700; color: var(--text-3); text-align: left; padding-left: 3px; }
+.cel.finde { background: none; }
+.claus { margin-left: 0; }

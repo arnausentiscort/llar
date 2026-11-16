@@ -401,6 +401,13 @@ function sembrarReceptes() {
 		for (const r of totes('recepta')) if (r.id !== 'r-bocata-tartar' && !/carbonara/.test(normal(r.nom)) && !r.creada) tocar(r.id, {...estat.files[r.id].o, esborrat: true});
 		guardat.posar('llar-neteja-receptes-1', true);
 	}
+	// plans que l'Arnau va demanar apuntar el 16/11/2026 (id fix: no es dupliquen entre mòbils)
+	const PLANS_DEMANATS = [
+		['p-cumple-lluis-2026', {titol: 'Aniversari del Lluís (germà de la Núria)', dia: '2026-11-21', persones: ['Núria']}],
+		['p-eleccions-2026-11', {titol: 'Eleccions', dia: '2026-11-29', persones: [...PERSONES]}],
+		['p-jorda-reus-2026-11', {titol: 'El Jordà és a Reus', dia: '2026-11-28', persones: [...PERSONES]}],
+	];
+	for (const [id, p] of PLANS_DEMANATS) if (!estat.files[id]) tocar(id, {t: 'pla', ...p, hora: null, franja: null, qui: 'Arnau', quan: ara()});
 }
 function sembrarRecepta() {
 	for (const [id, nom, ing] of RECEPTES) {
@@ -1287,6 +1294,8 @@ async function carregarCalendaris(forca) {
 // tots els esdeveniments, amb de qui són i de quina mena: [{titol, inici: Date, fi: Date, totDia, qui, tipus, color, partit}]
 // cada persona d'"A Reus" amb un color diferent de les altres (per ordre alfabètic; la família, sempre en rosa)
 const PALETA_INFO = ['#3d8bd9', '#43a047', '#e8833a', '#8c68d6', '#1fa9b8', '#d99a2b', '#7a5c3e', '#5b6abf'];
+// el color de cada cosa al calendari: neutre, daurat si hi aneu tots dos, i el del Real i el del Barça
+const COLOR_REAL = '#b8323f', COLOR_BARCA = '#3b6fd1';
 function totsEvents() {
 	const fora = [];
 	const noms = [...new Set(calendaris().filter((c) => c.tipus === 'info').flatMap((c) => (estat.cal[c.id]?.events ?? []).map((e) => e.titol.replace(/ a Reus$/i, ''))))]
@@ -1296,9 +1305,10 @@ function totsEvents() {
 	for (const c of calendaris()) {
 		for (const e of estat.cal[c.id]?.events ?? []) {
 			const partit = /⚽|real tiesada/i.test(e.titol);
+			const barca = /barça|barca|fcb/i.test(e.titol);
 			const nom = e.titol.replace(/ a Reus$/i, '');
 			fora.push({...e, inici: new Date(e.inici), fi: new Date(e.fi), qui: c.qui, tipus: c.tipus, partit, nom,
-				color: c.tipus === 'info' ? colorDeNom(e.titol) : partit ? '#e0524f' : c.qui === 'Núria' ? 'var(--nuria)' : 'var(--arnau)'});
+				barca, color: c.tipus === 'info' ? colorDeNom(e.titol) : partit ? COLOR_REAL : barca ? COLOR_BARCA : 'var(--text-2)'});
 		}
 	}
 	// la nostra agenda: el que s'apunta a la Llar (ho veuen tots dos al moment, sense passar per Google)
@@ -1309,7 +1319,7 @@ function totsEvents() {
 		const inici = new Date(`${p.dia}T${p.hora ?? '00:00'}:00`);
 		const fi = p.hora ? new Date(inici) : new Date(inici.getTime() + 864e5); // amb hora: només l'inici (no sabem quan s'acaba)
 		fora.push({titol, nom: p.titol, inici, fi, totDia: !p.hora, qui, tipus: 'plans', partit: false, pla: p.id,
-			color: qui === JUNTS ? 'var(--accent)' : qui === 'Núria' ? 'var(--nuria)' : 'var(--arnau)'});
+			color: qui === JUNTS ? 'var(--accent)' : /barça|barca/i.test(p.titol) ? COLOR_BARCA : /real tiesada/i.test(p.titol) ? COLOR_REAL : 'var(--text-2)'});
 	}
 	return fora.sort((a, b) => a.inici - b.inici);
 }
@@ -1355,8 +1365,6 @@ function resumAvui(evs) {
 	return `<section class="avui-cal">
 		<h2>Avui <small>${NOMS_DIES[new Date().getDay()].toLowerCase()} ${new Date().getDate()} ${deMes(new Date().getMonth())}</small></h2>
 		${plans.length ? `<ul class="events">${plans.map((e) => filaEvent(e, avui)).join('')}</ul>` : '<p class="buit-petit">Cap pla per avui.</p>'}
-		${notaApats(evs, avui)}
-		${plats.length ? `<p class="avui-plat">${icona('plat', 14)} ${plats.map((a) => esc(a.nom)).join(' · ')}</p>` : `<button type="button" class="enllac" data-obrir-dia="${avui}">Què menjareu avui?</button>`}
 		${info.length ? `<div class="avui-info">${info.map((e) => `<span style="--c:${e.color}">${esc(e.nom)}</span>`).join('')} <small>a Reus</small></div>` : ''}
 	</section>`;
 }
@@ -1386,11 +1394,10 @@ function vistaCalendari() {
 		const info = ocult.has('info') ? [] : seus.filter((e) => e.tipus === 'info');
 		const ps = ocult.has('plans') ? [] : seus.filter((e) => e.tipus !== 'info');
 		const finde = [0, 6].includes(new Date(`${d}T12:00`).getDay());
-		const plat = apats.some((a) => a.dia === d);
 		return `<button type="button" class="cel${finde ? ' finde' : ''}${d === avui ? ' avui' : ''}${d < avui ? ' passat' : ''}" data-dia-cal="${d}">
-			<b>${n}${plat ? `<i class="plat" title="Hi ha plat al menú">${icona('plat', 11)}</i>` : ''}</b>
+			<b>${n}</b>
 			<span class="cel-plans">${ps.slice(0, 3).map((e) => (e.partit ? '<i class="partit">⚽</i>' : `<i style="--c:${e.color}"></i>`)).join('')}${ps.length > 3 ? '<em>+</em>' : ''}</span>
-			<span class="cel-textos">${ps.slice(0, 2).map((e) => `<span class="cel-ev" style="--c:${e.color}" title="${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}">${e.partit ? `⚽ ${esc(e.titol.replace(/^⚽\s*/, '').replace(/Real Tiesada\s*[–-]\s*|\s*[–-]\s*Real Tiesada/i, ''))}` : esc(e.titol)}</span>`).join('')}${ps.length > 2 ? `<em>+${ps.length - 2}</em>` : ''}</span>
+			<span class="cel-textos">${ps.slice(0, 2).map((e) => `<span class="cel-ev" style="--c:${e.color}" title="${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}">${e.partit ? 'Real Tiesada' : e.barca ? 'Barça' : esc(e.nom)}</span>`).join('')}${ps.length > 2 ? `<em>+${ps.length - 2}</em>` : ''}</span>
 			<span class="cel-info">${info.slice(0, 3).map((e) => `<i style="--c:${e.color}" title="${esc(e.titol)}"><span>${esc(e.nom)}</span></i>`).join('')}</span>
 		</button>`;
 	};
@@ -1411,7 +1418,7 @@ function vistaCalendari() {
 			${calendaris().length ? resumAvui(evs) : `<div class="connecta-cal"><b>Connecta els vostres calendaris</b><p>Enganxa l’enllaç secret del teu Google Calendar i aquí veureu els plans de tots dos, qui és a Reus i el menú, tot junt.</p><button type="button" class="boto-suau" data-perfil>${icona('menu', 16)} Connectar el meu</button></div>`}
 			<section class="mes">
 				<div class="mes-cap"><button type="button" class="boto-suau" data-mes-cal="-1" aria-label="Mes anterior">‹</button><b>${nomMes}</b><button type="button" class="boto-suau" data-mes-cal="1" aria-label="Mes següent">›</button></div>
-				<div class="llegenda">${mostra('plans', `${icona('menu', 13)} Plans`)}${mostra('info', `${icona('pin', 13)} Qui és a Reus`)}<span class="claus"><span><i style="--c:var(--arnau)"></i>Arnau</span><span><i style="--c:var(--nuria)"></i>Núria</span><span>⚽ partit</span><span>${icona('plat', 11)} menú</span></span></div>
+				<div class="llegenda">${mostra('plans', `${icona('menu', 13)} Plans`)}${mostra('info', `${icona('pin', 13)} Qui és a Reus`)}<span class="claus"><span><i style="--c:var(--accent)"></i>Tots dos</span><span><i style="--c:${COLOR_REAL}"></i>Real Tiesada</span><span><i style="--c:${COLOR_BARCA}"></i>Barça</span></span></div>
 				<div class="graella-mes">${DIES_SETMANA.map((d, i) => `<small class="${i > 4 ? 'finde' : ''}">${d}</small>`).join('')}${'<span></span>'.repeat(buits)}${[...Array(nDies)].map((_, i) => cel(i + 1)).join('')}</div>
 			</section>
 			${errors.length ? `<p class="error-cal">${icona('sense', 14)} ${errors.map((c) => `${esc(c.nom)}: ${esc(estat.cal[c.id].error)}`).join(' · ')}</p>` : ''}
@@ -1443,10 +1450,6 @@ function fullDia(dia) {
 	<div class="dia-bloc"><h3>Plans</h3>${plans.length ? `<ul class="events">${plans.map((e) => filaEvent(e, dia)).join('')}</ul>` : '<p class="buit-petit">Cap pla.</p>'}</div>
 	${info.length ? `<div class="dia-bloc"><h3>A Reus</h3><ul class="events">${info.map((e) => filaEvent(e, dia)).join('')}</ul></div>` : ''}
 	${notaApats(evs, dia)}
-	<div class="dia-menu"><h3>${icona('plat', 14)} Menú</h3>
-		${plats.map((a) => `<div class="plat">${av(a.qui)}<span>${esc(a.nom)}</span><button type="button" data-treure-apat="${a.id}" aria-label="Treure ${esc(a.nom)}">${icona('tancar', 15)}</button></div>`).join('')}
-		<button type="button" class="afegir-plat" data-obrir-dia="${dia}">${icona('mes', 15)} ${plats.length ? 'Un altre plat' : 'Afegir un plat'}</button>
-	</div>
 	<button type="button" class="boto-suau ample" data-apunta="${dia}">${icona('mes', 16)} Apuntar alguna cosa aquest dia</button>`;
 }
 // apuntar al Google Calendar: s'escriu com es diria i s'obre Google ja omplert
