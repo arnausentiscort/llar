@@ -871,3 +871,18 @@ input, select, textarea { font-size: 16px !important; }
 .dt-text b { font-size: 16px; font-weight: 600; }
 .dt-text small { font-size: 13px; color: var(--text-3); }
 .dia-triat .enllac { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
+
+/* --- calendari (v5): emoji + una paraula dins del dia --- */
+.cel-ev { display: flex; align-items: center; gap: 2px; -webkit-line-clamp: unset; white-space: nowrap; overflow: hidden; }
+.cel-emo { flex: none; font-style: normal; font-size: 11px; line-height: 1; }
+.cel-rombe { display: inline-block; width: 7px; height: 7px; margin: 0 2px; transform: rotate(45deg); border-radius: 1.5px; background: var(--accent); }
+@media (max-width: 899px) { .cel-ev { padding: 2px 2px; font-size: 10px; } }
+.graella-mes { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.cel, .cel-textos { min-width: 0; overflow: hidden; }
+
+/* --- calendari (v6): el mes omple gairebé tota la pantalla; qui és a Reus, un sol 🏠 amb els noms --- */
+.cel-reus { --c: var(--text-3); margin-top: auto; }
+@media (max-width: 899px) {
+	.cel { min-height: max(64px, calc((100svh - 330px) / 6)); }
+	.cel-ev { font-size: 10.5px; }
+}

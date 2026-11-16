@@ -405,6 +405,8 @@ function sembrarReceptes() {
 	const PLANS_DEMANATS = [
 		['p-cumple-lluis-2026', {titol: 'Aniversari del Lluís (germà de la Núria)', dia: '2026-11-21', persones: ['Núria']}],
 		['p-eleccions-2026-11', {titol: 'Eleccions', dia: '2026-11-29', persones: [...PERSONES]}],
+		['p-festa-nadal-2026', {titol: 'Dies de festa', dia: '2026-12-24', fins: '2027-01-03', persones: ['Arnau']}],
+		['p-festa-reis-2027', {titol: 'Dies de festa', dia: '2027-01-05', fins: '2027-01-06', persones: ['Arnau']}],
 		['p-jorda-reus-2026-11', {titol: 'El Jordà és a Reus', dia: '2026-11-28', persones: [...PERSONES]}],
 	];
 	for (const [id, p] of PLANS_DEMANATS) if (!estat.files[id]) tocar(id, {t: 'pla', ...p, hora: null, franja: null, qui: 'Arnau', quan: ara()});
@@ -1317,7 +1319,7 @@ function totsEvents() {
 		const qui = pers.length > 1 ? JUNTS : pers[0];
 		const titol = `${p.titol}${FRANGES[p.franja] ? ` · ${FRANGES[p.franja]}` : ''}${pers.length === 1 && pers[0] !== estat.qui ? ` · ${pers[0]}` : ''}`;
 		const inici = new Date(`${p.dia}T${p.hora ?? '00:00'}:00`);
-		const fi = p.hora ? new Date(inici) : new Date(inici.getTime() + 864e5); // amb hora: només l'inici (no sabem quan s'acaba)
+		const fi = p.hora ? new Date(inici) : new Date(iniciDia(p.fins ?? p.dia).getTime() + 864e5); // "fins": plans de diversos dies // amb hora: només l'inici (no sabem quan s'acaba)
 		fora.push({titol, nom: p.titol, inici, fi, totDia: !p.hora, qui, tipus: 'plans', partit: false, pla: p.id,
 			color: qui === JUNTS ? 'var(--accent)' : /barça|barca/i.test(p.titol) ? COLOR_BARCA : /real tiesada/i.test(p.titol) ? COLOR_REAL : 'var(--text-2)'});
 	}
@@ -1374,6 +1376,44 @@ function franja(e) {
 	const a = `${e.inici.getDate()}${e.inici.getMonth() !== fi.getMonth() ? ` ${MESOS[e.inici.getMonth()]}` : ''}`;
 	return diaDe(e.inici) === diaDe(fi) ? `${e.inici.getDate()} ${MESOS[e.inici.getMonth()]}` : `${a} → ${fi.getDate()} ${MESOS[fi.getMonth()]}`;
 }
+// cada cosa del calendari en un emoji i una paraula ("🎂 Lluís", "⚽ Real", "🗳️ Eleccions"), per saber-ho d'un cop d'ull.
+// El primer que encaixa mana; si no n'encaixa cap, el dibuix de la Llar (un rombe daurat)
+const EMOJIS_CAL = [
+	[/real tiesada|⚽/i, '⚽', 'Real'], [/barça|barca|fcb/i, '⚽', 'Barça'],
+	[/aniversari|cumple|cumpleaños|natalici/i, '🎂'], [/eleccions|elecciones|votar/i, '🗳️', 'Votar'],
+	[/és a reus|ve a reus|visita|arriba/i, '👋'], [/bolets|setas/i, '🍄', 'Bolets'],
+	[/sopar|cena|dinar|comida|restaurant|vermut/i, '🍽️'], [/metge|metgessa|médico|medico|hospital|cap\b|analítica/i, '🩺', 'Metge'],
+	[/dentista/i, '🦷', 'Dentista'], [/pàdel|padel|pádel/i, '🎾', 'Pàdel'], [/futbol|partit|gimnàs|gym|córrer|correr/i, '🏃'],
+	[/viatge|vol\b|avió|avion|vuelo|aeroport/i, '✈️'], [/tren/i, '🚆'], [/platja|playa/i, '🏖️'], [/muntanya|excursió|excursion|caminar/i, '⛰️'],
+	[/concert|festival/i, '🎵'], [/cine|cinema|pel·lícula|teatre|teatro/i, '🎬'], [/feina|reunió|reunion|trabajo/i, '💼'],
+	[/casament|boda/i, '💍'], [/vacances|vacaciones|dies de festa|festa de nadal/i, '🎄', 'Festa'], [/festa|fiesta|sopar de nadal|nadal|navidad/i, '🎉'], [/perruqueria|peluquer/i, '💇'],
+	[/compra|súper|super\b|mercadona/i, '🛒'], [/examen|classe|clase|uni\b/i, '📚'], [/cotxe|coche|itv|taller/i, '🚗'], [/veterinari|forky|gos\b|perro/i, '🐶'],
+];
+const NO_MOTS = new Set(['el', 'la', 'els', 'les', 'l', 'un', 'una', 'de', 'del', 'dels', 'a', 'al', 'amb', 'i', 'per', 'en', 'es', 'és', 'sopar', 'dinar', 'aniversari', 'cumple', 'anar', 'anem', 'buscar', 'fer', 'germà', 'germana', 'reus', 'con', 'y']);
+function etiquetaCurta(e) {
+	const t = e.partit ? 'Real Tiesada' : String(e.nom ?? e.titol);
+	const r = EMOJIS_CAL.find(([re]) => re.test(t) || re.test(e.titol));
+	const mots = t.replace(/\(.*?\)/g, ' ').split(/[\s·,–\-]+/).map((m) => m.replace(/^[ld]['’]/i, '')).filter((m) => m && !NO_MOTS.has(m.toLowerCase()));
+	// el primer nom propi (en majúscula) si n'hi ha, que sol ser el que importa: "Lluís", "Marina", "Jordà"
+	const propi = mots.find((m, i) => i > 0 && /^\p{Lu}/u.test(m)) ?? mots.find((m) => /^\p{Lu}/u.test(m) && !EMOJIS_CAL.some(([re]) => re.test(m)));
+	const mot = r?.[2] ?? propi ?? mots[0] ?? t;
+	return [r?.[1] ?? '<b class="cel-rombe"></b>', majuscula(mot)];
+}
+// les coses d'un dia amb el mateix emoji i color, en una sola etiqueta: "👋 Jordà, Marina"
+// els de diversos dies només diuen la paraula el primer dia i cada dilluns; la resta, l'emoji sol
+function agrupaEtiquetes(evs, dia) {
+	const grups = new Map();
+	for (const e of evs) {
+		let [emo, mot] = etiquetaCurta(e);
+		const llarg = e.totDia && e.fi - e.inici > 864e5;
+		if (dia && llarg && dia !== diaDe(e.inici) && new Date(`${dia}T12:00`).getDay() !== 1) mot = '';
+		const g = grups.get(emo + e.color) ?? {emo, color: e.color, mots: [], titols: []};
+		if (mot && !g.mots.includes(mot)) g.mots.push(mot);
+		g.titols.push(e.titol);
+		grups.set(emo + e.color, g);
+	}
+	return [...grups.values()];
+}
 // qui hi va, en paraules: " · tots dos", " · la Núria"
 const quiVa = (e) => (e.tipus === 'info' || !e.qui ? '' : e.qui === JUNTS ? ' · tots dos' : ` · ${articleDe(e.qui)}${e.qui}`);
 // el dia triat al mes: què hi ha, escrit, i un botó per apuntar-hi
@@ -1414,8 +1454,8 @@ function vistaCalendari() {
 		return `<button type="button" class="cel${finde ? ' finde' : ''}${d === avui ? ' avui' : ''}${d < avui ? ' passat' : ''}${d === sel ? ' triat' : ''}" data-sel-dia="${d}" aria-pressed="${d === sel}">
 			<b>${n}</b>
 			<span class="cel-plans">${ps.slice(0, 3).map((e) => (e.partit ? '<i class="partit">⚽</i>' : `<i style="--c:${e.color}"></i>`)).join('')}${ps.length > 3 ? '<em>+</em>' : ''}</span>
-			<span class="cel-textos">${ps.slice(0, 2).map((e) => `<span class="cel-ev" style="--c:${e.color}" title="${e.totDia ? '' : `${horaDe(e.inici)} `}${esc(e.titol)}">${e.partit ? 'Real Tiesada' : e.barca ? 'Barça' : esc(e.nom)}</span>`).join('')}${ps.length > 2 ? `<em>+${ps.length - 2}</em>` : ''}</span>
-			<span class="cel-info">${info.slice(0, 3).map((e) => `<i style="--c:${e.color}" title="${esc(e.titol)}"><span>${esc(e.nom)}</span></i>`).join('')}</span>
+			<span class="cel-textos">${agrupaEtiquetes(ps, d).slice(0, 3).map((g) => `<span class="cel-ev" style="--c:${g.color}" title="${esc(g.titols.join(' · '))}"><i class="cel-emo">${g.emo}</i>${esc(g.mots.join(', '))}</span>`).join('')}${agrupaEtiquetes(ps, d).length > 3 ? `<em>+${agrupaEtiquetes(ps, d).length - 3}</em>` : ''}</span>
+			${info.length ? `<span class="cel-ev cel-reus" title="${esc(info.map((e) => e.nom).join(', '))} a Reus"><i class="cel-emo">🏠</i>${esc(info.map((e) => e.nom.split(' ')[0]).join(', '))}</span>` : ''}
 		</button>`;
 	};
 	// els propers caps de setmana, que és el que més es mira
