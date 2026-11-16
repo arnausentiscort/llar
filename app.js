@@ -100,7 +100,7 @@ function categoria(nom) {
 const COLOR_CAT = {fruita: '#43a047', carn: '#e0524f', lactics: '#3d8bd9', embotit: '#d9628f', forn: '#d99a2b', rebost: '#a8743f', begudes: '#1fa9b8', congelats: '#5b9fe0', neteja: '#8c68d6', higiene: '#1e9e8f', altres: '#8a8079'};
 // [tipus, [nom, icona, altres maneres de dir-ho (castellà, singular...)]]
 const PRODUCTES = [
-	['fruita', [['Plàtans', '🍌', 'platan, platano, banana'], ['Pomes', '🍎', 'poma, manzana'], ['Taronges', '🍊', 'taronja, naranja'], ['Mandarines', '🍊', 'mandarina'], ['Llimones', '🍋', 'llimona, limon'], ['Maduixes', '🍓', 'maduixa, fresa'], ['Raïm', '🍇', 'uva'], ['Préssecs', '🍑', 'preseg, melocoton'], ['Síndria', '🍉', 'sandia'], ['Meló', '🍈', 'melo, melon'], ['Tomàquets', '🍅', 'tomaquet, tomate'], ['Enciam', '🥬', 'lechuga'], ['Espinacs', '🥬', 'espinac, espinacas'], ['Cebes', '🧅', 'ceba, cebolla'], ['Alls', '🧄', 'all, ajo, gra d all, dent d all'], ['Patates', '🥔', 'patata'], ['Pastanagues', '🥕', 'pastanaga, zanahoria'], ['Pebrots', '🫑', 'pebrot, pimiento, pebrot vermell, pebrot verd'], ['Cogombre', '🥒', 'pepino'], ['Carbassó', '🥒', 'carbasso, calabacin'], ['Carbassa', '🎃', 'calabaza'], ['Porros', '🥬', 'porro, puerro'], ['Bròquil', '🥦', 'brocoli'], ['Coliflor', '🥦', ''], ['Alvocat', '🥑', 'aguacate'], ['Bolets', '🍄', 'bolet, champinon, champinones, xampinyons'], ['Blat de moro', '🌽', 'maiz'], ['Alberginia', '🍆', 'alberginies, berenjena']]],
+	['fruita', [['Plàtans', '🍌', 'platan, platano, banana'], ['Pomes', '🍎', 'poma, manzana'], ['Taronges', '🍊', 'taronja, naranja'], ['Mandarines', '🍊', 'mandarina'], ['Llimones', '🍋', 'llimona, limon'], ['Maduixes', '🍓', 'maduixa, fresa'], ['Raïm', '🍇', 'uva'], ['Préssecs', '🍑', 'preseg, melocoton'], ['Síndria', '🍉', 'sandia'], ['Meló', '🍈', 'melo, melon'], ['Tomàquets', '🍅', 'tomaquet, tomate'], ['Enciam', '🥬', 'lechuga'], ['Espinacs', '🥬', 'espinac, espinacas'], ['Cebes', '🧅', 'ceba, cebolla'], ['Alls', '🧄', 'all, ajo, gra d all, dent d all'], ['Patates', '🥔', 'patata'], ['Pastanagues', '🥕', 'pastanaga, zanahoria'], ['Pebrots', '🫑', 'pebrot, pimiento, pebrot vermell, pebrot verd'], ['Cogombre', '🥒', 'pepino'], ['Carbassó', '🥒', 'carbasso, calabacin'], ['Carbassa', '🎃', 'calabaza'], ['Porros', '🥬', 'porro, puerro'], ['Bròquil', '🥦', 'brocoli'], ['Coliflor', '🥦', ''], ['Alvocat', '🥑', 'aguacate'], ['Bolets', '🍄', 'bolet, champinon, champinones, xampinyons'], ['Blat de moro', '🌽', 'maiz'], ['Albergínia', '🍆', 'alberginies, berenjena']]],
 	['carn', [['Pollastre', '🍗', 'pollo, pit de pollastre, pechuga, cuixes de pollastre'], ['Carn picada', '🥩', 'carne picada'], ['Bistecs', '🥩', 'bistec, filet, filete'], ['Llom', '🥩', 'lomo, llom de porc'], ['Hamburgueses', '🍔', 'hamburguesa'], ['Salsitxes', '🌭', 'salsitxa, salchicha'], ['Botifarra', '🌭', 'botifarres, butifarra'], ['Salmó', '🐟', 'salmon'], ['Lluç', '🐟', 'lluc, merluza'], ['Bacallà', '🐟', 'bacalla, bacalao'], ['Gambes', '🦐', 'gamba, gambas, llagostins'], ['Calamars', '🦑', 'calamar, sepia']]],
 	['lactics', [['Llet', '🥛', 'leche'], ['Ous', '🥚', 'ou, huevo, huevos'], ['Iogurts', '🍦', 'iogurt, yogur, yogures'], ['Formatge', '🧀', 'queso'], ['Formatge ratllat', '🧀', 'queso rallado, parmesa, parmesano'], ['Mozzarella', '🧀', 'mozarella'], ['Mantega', '🧈', 'mantequilla'], ['Nata', '🥛', 'nata per cuinar'], ['Beixamel', '🥛', 'bechamel']]],
 	['embotit', [['Pernil salat', '🍖', 'pernil, jamon, jamon serrano'], ['Pernil dolç', '🍖', 'jamon york, jamon cocido'], ['Fuet', '🥓', 'llonganissa, salchichon'], ['Xoriço', '🌭', 'xorico, chorizo'], ['Gall dindi', '🦃', 'pavo'], ['Bacon', '🥓', 'baco, beicon']]],
@@ -413,6 +413,30 @@ function sembrarReceptes() {
 	for (const [id, p] of PLANS_DEMANATS) {
 		const ja = estat.files[id]?.o;
 		if (!ja || (p.festa && !ja.festa && !ja.esborrat)) tocar(id, {t: 'pla', ...p, hora: null, franja: null, qui: 'Arnau', quan: ja?.quan ?? ara()});
+	}
+	// el 16/11/2026 l'Arnau va passar la compra i els plats de la setmana: s'esborra la llista que hi havia i s'hi posa la
+	// seva, amb les receptes i un regal. La marca es desa al núvol (no al mòbil): es fa un sol cop per a tots dos
+	if (!estat.files['m-compra-2026-11-16']) {
+		for (const c of pendents()) tocar(c.id, {...estat.files[c.id].o, esborrat: true});
+		const COMPRA = ['llenties', 'xoriço', 'ceba', 'pastanaga', '1 carbassó', 'porro', 'hamburguesa', 'carn picada', '2 albergínies', 'tomàquet fregit',
+			'formatge ratllat (mozzarella)', 'tomàquet', 'burrata', 'gyozas', 'ous (mirar si en queden)', 'caldo (pack de dos)', 'pernilet', 'grana padano o parmigiano reggiano'];
+		COMPRA.forEach((text, i) => {
+			const it = llegirIngredient(text);
+			const nom = /\(/.test(text) || / o /.test(text) ? majuscula(text) : nomProducte(it.nom);
+			tocar(`c-1611-${i}`, {t: 'cosa', nom, cat: catDe(nomProducte(it.nom)), qui: 'Arnau', quan: ara(), fet: false, quant: it.q != null && !/\(/.test(text) ? {[it.u]: it.q} : {}, manual: true});
+		});
+		const PLATS = [
+			['llenties-xorico', 'Llenties amb xoriço', 'llenties, xoriço, 1 ceba, 2 pastanagues'],
+			['pure-hamburguesa', 'Puré de carbassó i porro amb hamburguesa', '1 carbassó, 1 porro, 2 hamburgueses'],
+			['alberginia-farcida', 'Albergínia farcida', '2 albergínies, carn picada, tomàquet fregit, formatge ratllat'],
+			['burrata', 'Burrata amb tomàquet', '1 burrata, 2 tomàquets'],
+			['sopa-fideus', 'Sopa de fideus amb pernilet', 'caldo, fideus, pernilet'],
+			['gyozas', 'Gyozas', 'gyozas'],
+		];
+		for (const [id, nom, ing] of PLATS) if (!estat.files[`r-${id}`]) tocar(`r-${id}`, {t: 'recepta', nom, ingredients: ing.split(', ').map(llegirIngredient), qui: 'Arnau', creada: ara()});
+		if (!estat.files['g-so101-2026'])
+			tocar('g-so101-2026', {t: 'regal', per: 'Arnau', nom: 'Motors d’un braç robot SO-101 (el «follower») per a LeRobot', nota: 'Sense peces impreses: els 6 servos Feetech STS3215, la placa que els controla i la font d’alimentació. Uns 110-130 €. Seeed Studio, OpenELAB o AliExpress (Black Friday).', enllac: '', secret: false, qui: 'Arnau', quan: ara(), comprat: null, donat: false});
+		tocar('m-compra-2026-11-16', {t: 'marca', quan: ara()});
 	}
 	// el Jordà ja era al calendari de qui és a Reus: el que vaig apuntar jo sobra
 	const jorda = estat.files['p-jorda-reus-2026-11']?.o;
