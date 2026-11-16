@@ -1506,8 +1506,8 @@ function vistaCalendari() {
 		return `<button type="button" class="cel${finde ? ' finde' : ''}${d === avui ? ' avui' : ''}${d < avui ? ' passat' : ''}${d === sel ? ' triat' : ''}" data-sel-dia="${d}" aria-pressed="${d === sel}">
 			<b>${n}</b>
 			<span class="cel-plans">${ps.slice(0, 3).map((e) => (e.partit ? '<i class="partit">⚽</i>' : `<i style="--c:${e.color}"></i>`)).join('')}${ps.length > 3 ? '<em>+</em>' : ''}</span>
-			<span class="cel-textos">${agrupaEtiquetes(ps, d).slice(0, 3).map((g) => `<span class="cel-ev" style="--c:${g.color}" title="${esc(g.titols.join(' · '))}"><i class="cel-emo">${g.emo}</i>${esc(g.mots.join(', '))}</span>`).join('')}${agrupaEtiquetes(ps, d).length > 3 ? `<em>+${agrupaEtiquetes(ps, d).length - 3}</em>` : ''}</span>
-			${info.length ? `<span class="cel-ev cel-reus" title="${esc(info.map((e) => e.nom).join(', '))} a Reus"><i class="cel-emo">🏠</i>${esc(info.map((e) => e.nom.split(' ')[0]).join(', '))}</span>` : ''}
+			<span class="cel-textos">${agrupaEtiquetes(ps, d).slice(0, 3).map((g) => `<span class="cel-ev" style="--c:${g.color}" title="${esc(g.titols.join(' · '))}"><i class="cel-emo">${g.emo}</i><span class="cel-mot">${esc(g.mots.join(', '))}</span></span>`).join('')}${agrupaEtiquetes(ps, d).length > 3 ? `<em>+${agrupaEtiquetes(ps, d).length - 3}</em>` : ''}</span>
+			${info.length ? `<span class="cel-ev cel-reus" title="${esc(info.map((e) => e.nom).join(', '))} a Reus"><i class="cel-emo">🏠</i><span class="cel-mot">${esc(info.map((e) => e.nom.split(' ')[0]).join(', '))}</span></span>` : ''}
 		</button>`;
 	};
 	// els propers caps de setmana, que és el que més es mira
@@ -2094,7 +2094,10 @@ document.addEventListener('click', (ev) => {
 		tocar(id, {...f(id), esborrat: true});
 		estat.full = null;
 		avisar(`«${f(id).nom}» esborrada`, () => tocar(id, {...f(id), esborrat: false}));
-	} else if (d.selDia) estat.diaSel = d.selDia;
+	} else if (d.selDia) {
+		estat.diaSel = d.selDia;
+		if (innerWidth < 900) setTimeout(() => document.querySelector('.dia-triat')?.scrollIntoView({block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}), 0);
+	}
 	else if (d.diaCal) estat.full = {t: 'dia', dia: d.diaCal};
 	else if (d.apunta !== undefined) {
 		estat.full = {t: 'apunta', dia: d.apunta || null};
