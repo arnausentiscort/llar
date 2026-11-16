@@ -774,7 +774,7 @@ function vistaNosaltres() {
 		.join('');
 	const quan = (d) => {
 		const fd = Math.round((iniciDia(diaDe(d)) - iniciDia(diaDe(ara))) / 864e5);
-		return fd <= 0 ? 'Avui' : fd === 1 ? 'Demà' : NOMS_DIES[d.getDay()];
+		return fd <= 0 ? 'Avui' : fd === 1 ? 'Demà' : fd < 7 ? NOMS_DIES[d.getDay()] : `${NOMS_DIES[d.getDay()].slice(0, 2).toLowerCase()} ${d.getDate()} ${MESOS[d.getMonth()]}`;
 	};
 	const porta = (attrs, ic, nom, detall) => `<button type="button" class="ns-porta" ${attrs}>${icona(ic, 20)}<b>${nom}</b><small>${esc(detall)}</small></button>`;
 	const nRec = (e) => totes('record').filter((r) => r.espai === e).length;
@@ -784,7 +784,7 @@ function vistaNosaltres() {
 	<section class="ns-cal">
 		<div class="ns-cal-cap"><b>Aquesta setmana</b><button type="button" class="enllac" data-vista="calendari">Calendari</button></div>
 		<div class="ns-tira">${tira}</div>
-		${evs.slice(0, 3).map((e) => `<div class="ns-ev" style="--c:${e.color}"><span>${quan(e.inici)}${e.totDia ? '' : ` · ${horaDe(e.inici)}`}</span><b>${esc(e.titol)}</b></div>`).join('') || '<p class="ns-res">Res apuntat aquests dies.</p>'}
+		${evs.filter((e) => e.inici < set[6].getTime() + 864e5).slice(0, 3).map((e) => `<div class="ns-ev" style="--c:${e.color}"><span>${quan(e.inici)}${e.totDia ? '' : ` · ${horaDe(e.inici)}`}</span><b>${esc(e.titol)}</b></div>`).join('') || `<p class="ns-res">Res apuntat aquests dies.${evs[0] ? ` El proper: ${esc(evs[0].nom)}, ${quan(evs[0].inici)}.` : ''}</p>`}
 		<button type="button" class="ns-apuntar" data-apunta="">${icona('mes', 15)} Apuntar un pla</button>
 	</section>
 	<div class="ns-portes">
