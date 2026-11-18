@@ -394,6 +394,10 @@ const RECEPTES = [
 function sembrarReceptes() {
 	// només amb el que hi ha al núvol a la mà: si no, tornarien les que algú ha esborrat
 	if (SUPABASE.url && estat.xarxa !== 'al-dia') return;
+	// el que es va posar al carro fa més de 4 hores ja està comprat, encara que ningú toqués «Ja ho hem comprat»
+	// (el 18/11/2026 la cistella era plena de coses comprades feia dies). Sense data (de les d'abans): també
+	const vell = Date.now() - 4 * 3600e3;
+	for (const c of alCarro()) if (!c.fetQuan || Date.parse(c.fetQuan) < vell) tocar(c.id, {...c, arxivat: true, arxivatSol: true});
 	if (!guardat.llegir('llar-sembrat-3', false)) sembrarRecepta();
 	// el 14/11/2026 l'Arnau va demanar deixar només el bocata de steak tartar i la carbonara: la resta, esborrades (es poden
 	// recuperar, no es perden). Un sol cop per mòbil; les que es creen o es toquen després (porten "creada") no es toquen
